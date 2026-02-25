@@ -40,6 +40,6 @@ def team_info():
             {"name": "Nama 1", "nim": "NIM1", "role": "Lead Backend"},
             {"name": "Nama 2", "nim": "NIM2", "role": "Lead Frontend"},
             {"name": "Pangeran Borneo Silaen", "nim": "10231073", "role": "Lead DevOps"},
-            {"name": "Nama 4", "nim": "NIM4", "role": "Lead QA & Docs"},
+            {"name": "Rani Ayu Dewi", "nim": "10231079", "role": "Lead QA & Docs"},
         ]
     }
