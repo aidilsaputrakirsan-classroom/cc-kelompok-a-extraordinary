@@ -59,7 +59,32 @@ Secara umum, seluruh civitas kampus yang beraktivitas di lingkungan kampus dan b
 ---
 
 ## 🏗️ Arsitektur Sistem (Week 1)
-tambahkan....... (Diagram ini akan berkembang setiap minggu)
+```
+[Client / User - Civitas Kampus]
+           │
+        (HTTPS)
+           │
+           ▼
+[React Frontend (Vite)]
+           │
+    REST API (HTTP)
+           │
+           ▼
+[Python Backend (FastAPI)]
+           │
+           ▼
+[Database (PostgreSQL)]
+```
+
+**Penjelasan Arsitektur**
+
+Client/user (civitas kampus) dapat mengakses aplikasi Temuin melalui browser menggunakan protokol HTTPS agar memastikan komunikasi aman.
+
+React Frontend (Vite) berfungsi sebagai antarmuka pengguna dengan menampilkan dashboard laporan, form input barang hilang/ditemukan, fitur pencarian, serta berkomunikasi dengan backend untuk mengambil dan mengirim data.
+
+Python Backend (FastAPI) berfungsi dalam menjalankan logika bisnis aplikasi seperti autentikasi pengguna, CRUD laporan barang, pencarian dan pencocokan barang hilang-ditemukan, serta tracking status pengembalian barang.
+
+PostgreSQL Database berfungsi untuk menyimpan data terstruktur seperti data pengguna, laporan barang hilang, laporan barang ditemukan, kategori, lokasi, dan riwayat aktivitas.
 
 ---
 
@@ -95,12 +120,11 @@ npm run dev
 ## 📌 Roadmap Milestone & Project Structure
 
 ### 📅 Roadmap Pengembangan
-contoh roadmap seperti tabel dibawah ini .....
 
 | Minggu | Target | Status |
 |--------|--------|--------|
 | 1 | Setup & Hello World | ✅ |
-| 2 | REST API + Database | ⬜ |
+| 2 | REST API + Database | ✅ |
 | 3 | React Frontend | ⬜ |
 | 4 | Full-Stack Integration | ⬜ |
 | 5–7 | Docker & Compose | ⬜ |
@@ -112,4 +136,42 @@ contoh roadmap seperti tabel dibawah ini .....
 ---
 
 ### 📁 Project Structure
-...........
+```
+cc-kelompok-a-extraordinary/
+├── backend/
+│   ├── .env
+│   ├── .env.example
+│   ├── crud.py
+│   ├── database.py
+│   ├── main.py
+│   ├── models.py
+│   ├── requirements.txt
+│   ├── schemas.py
+├── docs/
+│   ├── .gitkeep
+│   ├── member-nicholas.md
+│   ├── member-pangeran.md
+│   ├── member-raisha.md
+│   └── member-rani.md
+├── frontend/
+│   ├── node_modules/
+│   ├── public/
+│   │   ├── vite.svg
+│   ├── src/
+│   │   ├── assets/
+│   │   │    ├── react.svg
+│   │   ├── App.css
+│   │   ├── App.jsx
+│   │   ├── index.css
+│   │   └── main.jsx
+│   ├── .gitignore
+│   ├── eslint.config.js
+│   ├── index.html 
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── README.md
+│   └── vite.config.js
+├── .gitignore
+├── .python-version
+└── README.MD
+```
