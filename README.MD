@@ -64,15 +64,14 @@ tambahkan....... (Diagram ini akan berkembang setiap minggu)
 ---
 
 ## 🔌 API Endpoint (Week 1)
-Tolong dilengkapi........ tabel ini 
 
-| Method | Endpoint | Deskripsi |
+| Method | Endpoint  | Deskripsi |
 |--------|----------|-----------|
-| GET | / | Status API |
-| GET | /health | Health Check |
-| GET | /team | Informasi anggota tim |
+| GET | `/` | Menampilkan informasi dasar API (message, status running, dan versi API) |
+| GET | `/health` | Endpoint untuk health check service (mengecek apakah API dalam kondisi healthy) |
+| GET | `/team` | Menampilkan informasi tim pengembang (nama, NIM, dan peran masing-masing anggota) |
 
-Endpoint `/team` digunakan untuk memverifikasi kontribusi anggota sesuai instruksi modul.
+> Endpoint `/team` digunakan untuk memverifikasi kontribusi anggota sesuai instruksi modul.
 
 ---
 
