@@ -71,3 +71,48 @@ def delete_item(db: Session, item_id: int) -> bool:
     db.delete(db_item)
     db.commit()
     return True
+
+def get_items_stats(db: Session):
+    """
+    Hitung statistik inventory: total item, total nilai, item termahal & termurah.
+    Handle edge cases: data kosong, price/quantity null.
+    """
+    items = db.query(Item).all()
+    
+    if not items:
+        return {
+            "total_items": 0,
+            "total_value": 0.0,
+            "most_expensive": None,
+            "cheapest": None
+        }
+
+    # Filter hanya item yang price dan quantity valid (tidak None)
+    valid_items = [item for item in items if item.price is not None and item.quantity is not None]
+
+    if not valid_items:
+        return {
+            "total_items": len(items),  # tetap hitung semua item
+            "total_value": 0.0,
+            "most_expensive": None,
+            "cheapest": None
+        }
+
+    total_items = len(valid_items)
+    total_value = sum(item.price * item.quantity for item in valid_items)
+    
+    most_expensive_item = max(valid_items, key=lambda x: x.price)
+    cheapest_item = min(valid_items, key=lambda x: x.price)
+
+    return {
+        "total_items": total_items,
+        "total_value": float(total_value),
+        "most_expensive": {
+            "name": most_expensive_item.name,
+            "price": float(most_expensive_item.price)
+        },
+        "cheapest": {
+            "name": cheapest_item.name,
+            "price": float(cheapest_item.price)
+        }
+    }
