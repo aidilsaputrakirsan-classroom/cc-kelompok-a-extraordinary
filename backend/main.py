@@ -65,6 +65,13 @@ def list_items(
     """
     return crud.get_items(db=db, skip=skip, limit=limit, search=search)
 
+@app.get("/items/stats", response_model=dict)
+def items_stats(db: Session = Depends(get_db)):
+    """
+    Statistik inventory: total items, total value (sum of price × quantity), 
+    item termahal, dan item termurah.
+    """
+    return crud.get_items_stats(db=db)
 
 @app.get("/items/{item_id}", response_model=ItemResponse)
 def get_item(item_id: int, db: Session = Depends(get_db)):
@@ -94,7 +101,6 @@ def delete_item(item_id: int, db: Session = Depends(get_db)):
     if not success:
         raise HTTPException(status_code=404, detail=f"Item dengan id={item_id} tidak ditemukan")
     return None
-
 
 # ==================== TEAM INFO ====================
 
