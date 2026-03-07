@@ -207,6 +207,7 @@ Frontend tersedia di: http://localhost:5173
 
 ```
 cc-kelompok-a-extraordinary/
+│
 ├── backend/
 │   ├── main.py              ← Entry point FastAPI & semua endpoints
 │   ├── database.py          ← Koneksi PostgreSQL via SQLAlchemy
@@ -217,19 +218,33 @@ cc-kelompok-a-extraordinary/
 │   ├── setup.sh             ← Script setup otomatis environment
 │   ├── .env.example         ← Template konfigurasi (di-commit)
 │   └── .env                 ← Konfigurasi lokal (TIDAK di-commit)
+│
 ├── frontend/
 │   ├── src/
 │   │   ├── App.jsx
 │   │   └── main.jsx
 │   ├── index.html
 │   └── package.json
+│
 ├── docs/
-│   ├── member-raisha.md
-│   ├── member-nicholas.md
-│   ├── member-pangeran.md
-│   └── member-rani.md
+│   ├── api-test-results.md  ← Dokumentasi hasil testing API (Swagger)
+│   ├── member-raisha.md     ← Kontribusi Raisha
+│   ├── member-nicholas.md   ← Kontribusi Nicholas
+│   ├── member-pangeran.md   ← Kontribusi Pangeran
+│   └── member-rani.md       ← Kontribusi Rani
+│
+├── image/
+│   ├── delete-items-id.png
+│   ├── get-items-id.png
+│   ├── get-items-stats.png
+│   ├── get-items.png
+│   ├── get-team-info.png
+│   ├── gethealth.png
+│   ├── post-items.png
+│   └── put-items-id.png
+│
 ├── .gitignore
-└── README.MD
+└── README.md
 ```
 ## 📅 Roadmap
 
@@ -247,21 +262,21 @@ cc-kelompok-a-extraordinary/
 
 ---
 
-## 🔌 API Endpoints
+  ## 🔌 API Endpoints
 
-Base URL: `http://localhost:8000`  
-Dokumentasi interaktif: `http://localhost:8000/docs`
+  Base URL: `http://localhost:8000`  
+  Dokumentasi interaktif: `http://localhost:8000/docs`
 
-| Method | Endpoint | Deskripsi | Status Code |
-|--------|----------|-----------|-------------|
-| `GET` | `/health` | Health check API | 200 |
-| `GET` | `/team` | Informasi anggota tim | 200 |
-| `POST` | `/items` | Tambah item baru | 201 |
-| `GET` | `/items` | List semua item (pagination + search) | 200 |
-| `GET` | `/items/stats` | Statistik inventory | 200 |
-| `GET` | `/items/{id}` | Ambil item berdasarkan ID | 200 / 404 |
-| `PUT` | `/items/{id}` | Update item berdasarkan ID | 200 / 404 |
-| `DELETE` | `/items/{id}` | Hapus item berdasarkan ID | 204 / 404 |
+  | Method | Endpoint | Deskripsi | Status Code |
+  |--------|----------|-----------|-------------|
+  | `GET` | `/health` | Health check API | 200 |
+  | `GET` | `/team` | Informasi anggota tim | 200 |
+  | `POST` | `/items` | Tambah item baru | 201 |
+  | `GET` | `/items` | List semua item (pagination + search) | 200 |
+  | `GET` | `/items/stats` | Statistik inventory | 200 |
+  | `GET` | `/items/{id}` | Ambil item berdasarkan ID | 200 / 404 |
+  | `PUT` | `/items/{id}` | Update item berdasarkan ID | 200 / 404 |
+  | `DELETE` | `/items/{id}` | Hapus item berdasarkan ID | 204 / 404 |
 
 ### Contoh Request & Response
 
