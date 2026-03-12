@@ -252,7 +252,7 @@ cc-kelompok-a-extraordinary/
 |--------|--------|--------|
 | 1 | Setup & Hello World | ✅ |
 | 2 | REST API + Database | ✅ |
-| 3 | React Frontend | ⬜ |
+| 3 | React Frontend | ✅ |
 | 4 | Full-Stack Integration | ⬜ |
 | 5–7 | Docker & Compose | ⬜ |
 | 8 | UTS Demo | ⬜ |
