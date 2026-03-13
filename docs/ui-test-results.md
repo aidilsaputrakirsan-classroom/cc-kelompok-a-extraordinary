@@ -184,26 +184,7 @@
 
 > Tidak ditemukan bug selama sesi testing ini. Semua fitur CRUD berjalan sesuai dengan yang diharapkan.
 
-### Observasi Minor (Bukan Bug)
-- Nama file screenshot terakhir adalah `TETS10.png` (typo: seharusnya `TEST10.png`), namun tidak mempengaruhi fungsionalitas aplikasi.
-- Fitur **sorting** sudah tersedia di UI (dropdown "Urutkan berdasarkan: Nama"), menandakan fitur tambahan dari tugas terstruktur sudah terimplementasi.
+
 
 ---
 
-## Kesimpulan
-
-Seluruh **10 test case berhasil PASS** pada sesi testing tanggal 12 Maret 2026. Aplikasi frontend React berhasil:
-- ✅ Menampilkan item dari backend (Read)
-- ✅ Menambah item baru via form (Create)
-- ✅ Mengedit item yang sudah ada (Update)
-- ✅ Mencari item berdasarkan nama/deskripsi (Search)
-- ✅ Menghapus item dengan konfirmasi dialog (Delete)
-- ✅ Menampilkan empty state saat tidak ada item
-- ✅ Menampilkan status koneksi API di header
-
-Aplikasi siap untuk dilanjutkan ke Modul 4.
-
----
-
-*Dokumen ini dibuat oleh Lead QA & Docs — Kelompok A Extraordinary*  
-*Institut Teknologi Kalimantan — Komputasi Awan 2026*
