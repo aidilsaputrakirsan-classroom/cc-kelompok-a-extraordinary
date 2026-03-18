@@ -40,6 +40,13 @@ Rekomendasi layout:
 
 Dengan begitu kamu tidak perlu bolak-balik checkout branch di satu folder yang sama.
 
+### Aturan Praktis Untuk Tim
+
+- Final project selalu dikerjakan dari folder repo utama
+- Practicum selalu dibuka dari `.worktrees/practicum-master`
+- Jangan kerjakan task final project di worktree practicum
+- Jangan checkout `master` di folder utama kecuali benar-benar perlu maintenance histori
+
 ## Dokumen Terkait
 
 - [branching-strategy.md](./branching-strategy.md)
