@@ -21,6 +21,7 @@
 
 ### users
 - `id`
+- `firebase_uid`
 - `email`
 - `name`
 - `role`
@@ -50,6 +51,8 @@
 
 ## Aturan Data
 
+- `users.firebase_uid` menyimpan identitas user dari Firebase Auth
+- User internal tetap disimpan di PostgreSQL walau login memakai Google Sign-In via Firebase
 - `items.type` hanya `lost` atau `found`
 - `items.status` dan `claims.status` dipisahkan
 - `security_officer_id` wajib untuk item `found`

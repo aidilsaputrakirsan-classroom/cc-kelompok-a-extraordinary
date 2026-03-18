@@ -30,6 +30,16 @@
 - PR direkomendasikan untuk review, tapi tidak menjadi syarat mutlak status task
 - Jika behavior berubah, update dokumen aktif yang relevan
 
+## Parallel Workspace Recommendation
+
+Jika practicum dan final project berjalan bersamaan, gunakan git worktree.
+
+Rekomendasi layout:
+- folder repo utama untuk `project/temuin`
+- `.worktrees/practicum-master` untuk branch `master`
+
+Dengan begitu kamu tidak perlu bolak-balik checkout branch di satu folder yang sama.
+
 ## Dokumen Terkait
 
 - [branching-strategy.md](./branching-strategy.md)

@@ -38,6 +38,7 @@ pnpm-debug.log*
 build/
 tmp/
 temp/
+.worktrees/
 
 # Local archives
 *.zip

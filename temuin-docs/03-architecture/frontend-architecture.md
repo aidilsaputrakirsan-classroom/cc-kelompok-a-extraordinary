@@ -73,6 +73,20 @@ frontend/
 - Pada fase gateway, base URL dialihkan ke Nginx gateway
 - Auth state menyimpan user dan JWT internal
 
+## Auth Flow Frontend
+
+1. User klik login Google
+2. Firebase Auth SDK membuka popup Google
+3. Frontend menerima Firebase ID token
+4. Frontend mengirim token itu ke backend
+5. Backend memverifikasi token dan mengembalikan JWT internal aplikasi
+6. Frontend menyimpan JWT internal dan data user internal
+7. Semua request API selanjutnya memakai JWT internal, bukan token Firebase langsung
+
+Catatan:
+- Firebase dipakai untuk proses sign-in
+- PostgreSQL tetap menjadi tempat data user internal dan seluruh data domain Temuin
+
 ## Dokumen Terkait
 
 - [backend-architecture.md](./backend-architecture.md)

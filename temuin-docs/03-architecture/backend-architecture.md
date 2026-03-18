@@ -8,6 +8,29 @@
 - Pydantic
 - PostgreSQL
 
+## Auth Architecture
+
+Temuin memakai **Firebase untuk Google Sign-In** dan **PostgreSQL untuk penyimpanan data internal aplikasi**.
+
+Artinya:
+- Firebase dipakai untuk menjalankan login Google dan menghasilkan Firebase ID token
+- Backend memverifikasi token itu dengan Firebase Admin SDK
+- Setelah token valid, backend melakukan create atau sync user internal di PostgreSQL
+- Backend lalu mengeluarkan JWT internal aplikasi untuk request selanjutnya
+
+Firebase **bukan** source of truth untuk data domain Temuin. Data seperti items, claims, master data, notifications, audit log, dan role internal tetap berada di PostgreSQL.
+
+## Auth Flow Singkat
+
+1. Frontend login lewat Firebase Auth SDK
+2. Frontend menerima Firebase ID token
+3. Frontend mengirim token itu ke backend
+4. Backend memverifikasi token dengan Firebase Admin SDK
+5. Backend cek email kampus dan aturan internal
+6. Backend create atau sync record user di PostgreSQL
+7. Backend mengembalikan JWT internal ke frontend
+8. Frontend memakai JWT internal untuk semua request API berikutnya
+
 ## Struktur Monolith Awal
 
 ```text
@@ -60,6 +83,7 @@ Pada Sprint 6:
 - Business rule utama wajib mengikuti `decision-log.md`
 - Soft delete untuk item milik user
 - History dan audit log tidak dicampur ke tabel utama
+- Firebase hanya menangani external authentication, bukan penyimpanan data bisnis aplikasi
 
 ## Dokumen Terkait
 
