@@ -1,6 +1,0 @@
-fastapi==0.115.0
-uvicorn==0.30.0
-sqlalchemy==2.0.35
-psycopg[binary]==3.2.3 #psycopg2-binary==2.9.9
-python-dotenv==1.0.1
-pydantic[email]==2.9.0

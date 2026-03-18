@@ -1,1 +1,0 @@
-Nama : Rani Ayu Dewi | NIM : 10231079 | Peran : Lead QA & Docs
