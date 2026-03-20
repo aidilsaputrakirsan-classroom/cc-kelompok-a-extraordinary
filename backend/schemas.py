@@ -46,3 +46,39 @@ class ItemListResponse(BaseModel):
     """Schema untuk response list items dengan total count."""
     total: int
     items: list[ItemResponse]
+
+
+# ============================================================
+# AUTH SCHEMAS
+# ============================================================
+
+class UserCreate(BaseModel):
+    """Schema untuk registrasi user baru."""
+    email: str = Field(..., examples=["user@student.itk.ac.id"])
+    name: str = Field(..., min_length=2, max_length=100, examples=["Raisha Alika"])
+    password: str = Field(..., min_length=8, examples=["password123"])
+
+
+class UserResponse(BaseModel):
+    """Schema untuk response user (tanpa password)."""
+    id: int
+    email: str
+    name: str
+    is_active: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class LoginRequest(BaseModel):
+    """Schema untuk login request."""
+    email: str = Field(..., examples=["user@student.itk.ac.id"])
+    password: str = Field(..., examples=["password123"])
+
+
+class TokenResponse(BaseModel):
+    """Schema untuk response setelah login berhasil."""
+    access_token: str
+    token_type: str = "bearer"
+    user: UserResponse
