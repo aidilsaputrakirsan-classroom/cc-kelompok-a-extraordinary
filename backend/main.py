@@ -1,7 +1,9 @@
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi import FastAPI, Depends, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from database import engine, get_db
@@ -35,6 +37,34 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# ==================== CUSTOM EXCEPTION HANDLER ====================
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """
+    Custom handler untuk error validasi Pydantic.
+    Mengubah format error jadi lebih informatif dan ramah pengguna.
+    """
+    errors = []
+    for error in exc.errors():
+        field = " → ".join(str(loc) for loc in error["loc"] if loc != "body")
+        message = error["msg"]
+        # Bersihkan prefix 'Value error, ' dari pesan validator
+        message = message.replace("Value error, ", "")
+        errors.append({"field": field, "message": message})
+
+    # Jika hanya 1 error, gunakan format detail tunggal agar mudah dibaca
+    if len(errors) == 1:
+        detail = f"{errors[0]['field']}: {errors[0]['message']}"
+    else:
+        detail = errors
+
+    return JSONResponse(
+        status_code=422,
+        content={"detail": detail},
+    )
 
 
 # ==================== HEALTH CHECK ====================
