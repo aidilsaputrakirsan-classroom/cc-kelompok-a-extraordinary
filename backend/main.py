@@ -17,6 +17,33 @@ import crud
 
 load_dotenv()
 
+LOGIN_REQUEST_BODY = {
+    "required": True,
+    "content": {
+        "application/json": {
+            "schema": LoginRequest.model_json_schema(),
+        },
+        "application/x-www-form-urlencoded": {
+            "schema": {
+                "title": "LoginFormRequest",
+                "type": "object",
+                "required": ["username", "password"],
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "title": "Username",
+                        "description": "Isi dengan email user untuk flow OAuth2 Swagger.",
+                    },
+                    "password": {
+                        "type": "string",
+                        "title": "Password",
+                    },
+                },
+            },
+        },
+    },
+}
+
 # Buat semua tabel di database (jika belum ada)
 Base.metadata.create_all(bind=engine)
 
@@ -64,7 +91,11 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     return user
 
 
-@app.post("/auth/login", response_model=TokenResponse)
+@app.post(
+    "/auth/login",
+    response_model=TokenResponse,
+    openapi_extra={"requestBody": LOGIN_REQUEST_BODY},
+)
 async def login(request: Request, db: Session = Depends(get_db)):
     """
     Login dan dapatkan JWT token.

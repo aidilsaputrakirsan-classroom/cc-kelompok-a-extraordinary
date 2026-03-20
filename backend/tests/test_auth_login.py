@@ -76,6 +76,16 @@ class AuthLoginContractTests(unittest.TestCase):
 
         self.assertEqual(items_response.status_code, 200)
 
+    def test_login_openapi_documents_json_and_form_inputs(self):
+        response = self.client.get("/openapi.json")
+        self.assertEqual(response.status_code, 200)
+
+        login_request_body = response.json()["paths"]["/auth/login"]["post"]["requestBody"]
+        content = login_request_body["content"]
+
+        self.assertIn("application/json", content)
+        self.assertIn("application/x-www-form-urlencoded", content)
+
 
 if __name__ == "__main__":
     unittest.main()
