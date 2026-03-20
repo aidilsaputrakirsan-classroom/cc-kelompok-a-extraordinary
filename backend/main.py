@@ -1,7 +1,9 @@
 import os
+
 from dotenv import load_dotenv
-from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi import FastAPI, Depends, HTTPException, Query, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from database import engine, get_db
@@ -63,16 +65,21 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
 
 
 @app.post("/auth/login", response_model=TokenResponse)
-def login(login_data: LoginRequest, db: Session = Depends(get_db)):
+async def login(request: Request, db: Session = Depends(get_db)):
     """
     Login dan dapatkan JWT token.
 
     Token berlaku selama 60 menit (default).
     Gunakan token di header: `Authorization: Bearer <token>`
     """
+    login_data = await parse_login_request(request)
     user = crud.authenticate_user(db=db, email=login_data.email, password=login_data.password)
     if not user:
-        raise HTTPException(status_code=401, detail="Email atau password salah")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Email atau password salah",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
     token = create_access_token(data={"sub": user.id})
     return {
@@ -80,6 +87,38 @@ def login(login_data: LoginRequest, db: Session = Depends(get_db)):
         "token_type": "bearer",
         "user": user,
     }
+
+
+async def parse_login_request(request: Request) -> LoginRequest:
+    content_type = request.headers.get("content-type", "")
+
+    if "application/json" in content_type:
+        try:
+            payload = await request.json()
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail="Body JSON login tidak valid") from exc
+
+        try:
+            return LoginRequest.model_validate(payload)
+        except ValidationError as exc:
+            raise HTTPException(status_code=422, detail=exc.errors()) from exc
+
+    if "application/x-www-form-urlencoded" in content_type or "multipart/form-data" in content_type:
+        form_data = await request.form()
+        username = form_data.get("username")
+        password = form_data.get("password")
+
+        try:
+            return LoginRequest.model_validate(
+                {
+                    "email": username,
+                    "password": password,
+                }
+            )
+        except ValidationError as exc:
+            raise HTTPException(status_code=422, detail=exc.errors()) from exc
+
+    raise HTTPException(status_code=415, detail="Content-Type login tidak didukung")
 
 
 @app.get("/auth/me", response_model=UserResponse)
