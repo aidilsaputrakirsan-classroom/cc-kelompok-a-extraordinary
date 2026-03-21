@@ -1,8 +1,13 @@
 import ItemCard from "./ItemCard"
+import LoadingSpinner from "./LoadingSpinner"
 
 function ItemList({ items, onEdit, onDelete, loading }) {
   if (loading) {
-    return <p style={styles.message}>⏳ Memuat data...</p>
+    return (
+      <div style={styles.loadingContainer}>
+        <LoadingSpinner size="medium" text="Memuat data..." />
+      </div>
+    )
   }
 
   if (items.length === 0) {
@@ -37,11 +42,11 @@ const styles = {
     gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
     gap: "1rem",
   },
-  message: {
-    textAlign: "center",
-    color: "#888",
-    padding: "2rem",
-    fontSize: "1.1rem",
+  loadingContainer: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: "3rem",
   },
   empty: {
     textAlign: "center",

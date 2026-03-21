@@ -35,9 +35,9 @@ function LoginPage({ onLogin, onRegister }) {
       } else {
         await onLogin(formData.email, formData.password)
       }
+      // Form berhasil, tidak perlu setLoading(false) karena akan redirect
     } catch (err) {
       setError(err.message)
-    } finally {
       setLoading(false)
     }
   }
@@ -107,8 +107,23 @@ function LoginPage({ onLogin, onRegister }) {
             />
           </div>
 
-          <button type="submit" style={styles.btnSubmit} disabled={loading}>
-            {loading ? "⏳ Loading..." : isRegister ? "📝 Register" : "🔐 Login"}
+          <button
+            type="submit"
+            style={{
+              ...styles.btnSubmit,
+              opacity: loading ? 0.7 : 1,
+              cursor: loading ? "not-allowed" : "pointer",
+            }}
+            disabled={loading}
+          >
+            {loading ? (
+              <span style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "center" }}>
+                <span style={{ width: "18px", height: "18px", border: "2px solid white", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite", display: "inline-block" }} />
+                Loading...
+              </span>
+            ) : (
+              isRegister ? "📝 Register" : "🔐 Login"
+            )}
           </button>
         </form>
       </div>

@@ -1,25 +1,30 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
+const TOKEN_KEY = "auth_token"
 
 // ==================== TOKEN MANAGEMENT ====================
-
-let authToken = null
+// Token disimpan di localStorage agar persisten setelah refresh
 
 export function setToken(token) {
-  authToken = token
+  if (token) {
+    localStorage.setItem(TOKEN_KEY, token)
+  }
 }
 
 export function getToken() {
-  return authToken
+  return localStorage.getItem(TOKEN_KEY)
 }
 
 export function clearToken() {
-  authToken = null
+  localStorage.removeItem(TOKEN_KEY)
 }
 
 function authHeaders() {
-  const headers = {}
-  if (authToken) {
-    headers["Authorization"] = `Bearer ${authToken}`
+  const token = getToken()
+  const headers = {
+    "Content-Type": "application/json",
+  }
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`
   }
   return headers
 }

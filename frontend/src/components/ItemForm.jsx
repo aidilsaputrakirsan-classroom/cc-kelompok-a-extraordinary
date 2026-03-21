@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
+import LoadingSpinner from "./LoadingSpinner"
 
-function ItemForm({ onSubmit, editingItem, onCancelEdit }) {
+function ItemForm({ onSubmit, editingItem, onCancelEdit, loading = false }) {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -121,8 +122,23 @@ function ItemForm({ onSubmit, editingItem, onCancelEdit }) {
         </div>
 
         <div style={styles.actions}>
-          <button type="submit" style={styles.btnSubmit}>
-            {editingItem ? "💾 Update Item" : "➕ Tambah Item"}
+          <button
+            type="submit"
+            style={{
+              ...styles.btnSubmit,
+              opacity: loading ? 0.7 : 1,
+              cursor: loading ? "not-allowed" : "pointer",
+            }}
+            disabled={loading}
+          >
+            {loading ? (
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ width: "16px", height: "16px", border: "2px solid white", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} />
+                {editingItem ? "Updating..." : "Menyimpan..."}
+              </span>
+            ) : (
+              editingItem ? "💾 Update Item" : "➕ Tambah Item"
+            )}
           </button>
           {editingItem && (
             <button type="button" onClick={onCancelEdit} style={styles.btnCancel}>
