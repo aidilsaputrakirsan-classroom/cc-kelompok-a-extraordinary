@@ -209,25 +209,45 @@ Frontend tersedia di: http://localhost:5173
 cc-kelompok-a-extraordinary/
 │
 ├── backend/
-│   ├── main.py              ← Entry point FastAPI & semua endpoints
+│   ├── main.py              ← Entry point FastAPI & semua endpoints (Updated)
+│   ├── auth.py              ← JWT utilities (token, hash password)   ← BARU
 │   ├── database.py          ← Koneksi PostgreSQL via SQLAlchemy
-│   ├── models.py            ← Model tabel database
-│   ├── schemas.py           ← Pydantic schemas (validasi request/response)
-│   ├── crud.py              ← Operasi CRUD
-│   ├── requirements.txt     ← Python dependencies
+│   ├── models.py            ← Model tabel database (Item + User)     (Updated)
+│   ├── schemas.py           ← Pydantic schemas (Updated: + auth schemas)
+│   ├── crud.py              ← Operasi CRUD (Updated: + user CRUD)
+│   ├── requirements.txt     ← Python dependencies (Updated: + jose, passlib, bcrypt)
 │   ├── setup.sh             ← Script setup otomatis environment
 │   ├── .env.example         ← Template konfigurasi (di-commit)
 │   └── .env                 ← Konfigurasi lokal (TIDAK di-commit)
 │
 ├── frontend/
 │   ├── src/
-│   │   ├── App.jsx
-│   │   └── main.jsx
+│   │   ├── App.jsx                    ← Updated (auth integration)
+│   │   ├── App.css
+│   │   ├── main.jsx
+│   │   ├── index.css
+│   │   ├── assets/
+│   │   │   └── react.svg
+│   │   ├── components/
+│   │   │   ├── LoginPage.jsx          ← BARU
+│   │   │   ├── Header.jsx             ← Updated (user info + logout)
+│   │   │   ├── SearchBar.jsx
+│   │   │   ├── ItemForm.jsx
+│   │   │   ├── ItemList.jsx
+│   │   │   ├── ItemCard.jsx
+│   │   │   └── SortDropdown.jsx
+│   │   └── services/
+│   │       └── api.js                 ← Updated (auth + token management)
 │   ├── index.html
+│   ├── vite.config.js
+│   ├── eslint.config.js
+│   ├── .env.example         ← Template konfigurasi frontend (di-commit)
 │   └── package.json
 │
 ├── docs/
-│   ├── api-test-results.md  ← Dokumentasi hasil testing API (Swagger)
+│   ├── api-test-result.md   ← Hasil testing API (Swagger)
+│   ├── ui-test-results.md   ← Hasil testing UI (frontend)
+│   ├── setup-guide.md       ← Panduan setup lengkap dari clone hingga running
 │   ├── member-raisha.md     ← Kontribusi Raisha
 │   ├── member-nicholas.md   ← Kontribusi Nicholas
 │   ├── member-pangeran.md   ← Kontribusi Pangeran
@@ -236,7 +256,6 @@ cc-kelompok-a-extraordinary/
 ├── image/
 │   ├── delete-items-id.png
 │   ├── get-items-id.png
-│   ├── get-items-stats.png
 │   ├── get-items.png
 │   ├── get-team-info.png
 │   ├── gethealth.png
@@ -253,7 +272,7 @@ cc-kelompok-a-extraordinary/
 | 1 | Setup & Hello World | ✅ |
 | 2 | REST API + Database | ✅ |
 | 3 | React Frontend | ✅ |
-| 4 | Full-Stack Integration | ⬜ |
+| 4 | Full-Stack Integration | ✅ |
 | 5–7 | Docker & Compose | ⬜ |
 | 8 | UTS Demo | ⬜ |
 | 9–11 | CI/CD Pipeline | ⬜ |
@@ -262,25 +281,116 @@ cc-kelompok-a-extraordinary/
 
 ---
 
-  ## 🔌 API Endpoints
+## 🔐 Authentication
 
-  Base URL: `http://localhost:8000`  
-  Dokumentasi interaktif: `http://localhost:8000/docs`
+Aplikasi ini menggunakan **JWT (JSON Web Token)** untuk autentikasi. Semua endpoint `/items` memerlukan token JWT yang valid.
 
-  | Method | Endpoint | Deskripsi | Status Code |
-  |--------|----------|-----------|-------------|
-  | `GET` | `/health` | Health check API | 200 |
-  | `GET` | `/team` | Informasi anggota tim | 200 |
-  | `POST` | `/items` | Tambah item baru | 201 |
-  | `GET` | `/items` | List semua item (pagination + search) | 200 |
-  | `GET` | `/items/stats` | Statistik inventory | 200 |
-  | `GET` | `/items/{id}` | Ambil item berdasarkan ID | 200 / 404 |
-  | `PUT` | `/items/{id}` | Update item berdasarkan ID | 200 / 404 |
-  | `DELETE` | `/items/{id}` | Hapus item berdasarkan ID | 204 / 404 |
+### Alur Autentikasi
+
+1. **Register** — Buat akun baru via `POST /auth/register`
+2. **Login** — Login via `POST /auth/login`, simpan `access_token` dari response
+3. **Gunakan Token** — Sertakan token di setiap request protected:
+   ```
+   Authorization: Bearer <access_token>
+   ```
+4. **Token Expired** — Jika token expired (default 60 menit), login ulang
+
+### Contoh Register
+
+**POST /auth/register**
+
+Request body:
+```json
+{
+  "email": "user@student.itk.ac.id",
+  "name": "Nama Lengkap",
+  "password": "password123"
+}
+```
+
+Response `201 Created`:
+```json
+{
+  "id": 1,
+  "email": "user@student.itk.ac.id",
+  "name": "Nama Lengkap",
+  "is_active": true,
+  "created_at": "2026-03-21T07:00:00"
+}
+```
+
+### Contoh Login
+
+**POST /auth/login**
+
+Request body:
+```json
+{
+  "email": "user@student.itk.ac.id",
+  "password": "password123"
+}
+```
+
+Response `200 OK`:
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiJ9...",
+  "token_type": "bearer",
+  "user": {
+    "id": 1,
+    "email": "user@student.itk.ac.id",
+    "name": "Nama Lengkap",
+    "is_active": true,
+    "created_at": "2026-03-21T07:00:00"
+  }
+}
+```
+
+### Testing Auth via Swagger UI
+
+1. Buka `http://localhost:8000/docs`
+2. `POST /auth/register` → buat akun baru
+3. `POST /auth/login` → copy `access_token` dari response
+4. Klik tombol **🔒 Authorize** → paste token → klik Authorize
+5. Semua endpoint `/items` sekarang bisa diakses
+
+---
+
+## 🔌 API Endpoints
+
+Base URL: `http://localhost:8000`  
+Dokumentasi interaktif: `http://localhost:8000/docs`
+
+> 🔒 = Membutuhkan token JWT di header: `Authorization: Bearer <token>`
+
+### Auth Endpoints (Public)
+
+| Method | Endpoint | Deskripsi | Status Code |
+|--------|----------|-----------|-------------|
+| `POST` | `/auth/register` | Registrasi user baru | 201 / 400 |
+| `POST` | `/auth/login` | Login & dapatkan JWT token | 200 / 401 |
+| `GET` | `/auth/me` 🔒 | Ambil profil user yang sedang login | 200 / 401 |
+
+### General Endpoints
+
+| Method | Endpoint | Deskripsi | Status Code |
+|--------|----------|-----------|-------------|
+| `GET` | `/health` | Health check API | 200 |
+| `GET` | `/team` | Informasi anggota tim | 200 |
+
+### Item Endpoints (Protected 🔒)
+
+| Method | Endpoint | Deskripsi | Status Code |
+|--------|----------|-----------|-------------|
+| `POST` | `/items` 🔒 | Tambah item baru | 201 / 401 |
+| `GET` | `/items` 🔒 | List semua item (pagination + search) | 200 / 401 |
+| `GET` | `/items/{id}` 🔒 | Ambil item berdasarkan ID | 200 / 401 / 404 |
+| `PUT` | `/items/{id}` 🔒 | Update item berdasarkan ID | 200 / 401 / 404 |
+| `DELETE` | `/items/{id}` 🔒 | Hapus item berdasarkan ID | 204 / 401 / 404 |
 
 ### Contoh Request & Response
 
-**POST /items**
+**POST /items** *(Membutuhkan token)*
 
 Request body:
 ```json
@@ -305,25 +415,13 @@ Response `201 Created`:
 }
 ```
 
-**GET /items?search=laptop&skip=0&limit=20**
+**GET /items?search=laptop&skip=0&limit=20** *(Membutuhkan token)*
 
 Response `200 OK`:
 ```json
 {
   "total": 1,
   "items": [...]
-}
-```
-
-**GET /items/stats**
-
-Response `200 OK`:
-```json
-{
-  "total_items": 3,
-  "total_value": 79250000,
-  "most_expensive": { "name": "Laptop", "price": 15000000 },
-  "cheapest": { "name": "Mouse Wireless", "price": 250000 }
 }
 ```
 
@@ -339,12 +437,34 @@ Pengujian dilakukan via Swagger UI (`/docs`).
 | `POST /items` | Input valid | `201 Created` | `201 Created` | ✅ Pass |
 | `POST /items` | Harga < 0 | `422 Unprocessable Entity` | `422 Unprocessable Entity` | ✅ Pass |
 | `GET /items` | Ambil semua item | `200 OK` + list | `200 OK` + list | ✅ Pass |
-| `GET /items/stats` | Statistik inventory | `200 OK` + JSON stats | `200 OK` + JSON stats | ✅ Pass |
 | `GET /items/{id}` | ID terdaftar | `200 OK` + data item | `200 OK` + data item | ✅ Pass |
 | `GET /items/{id}` | ID tidak ada | `404 Not Found` | `404 Not Found` | ✅ Pass |
 | `PUT /items/{id}` | Update field | `200 OK` + data baru | `200 OK` + data baru | ✅ Pass |
 | `DELETE /items/{id}` | Hapus item | `204 No Content` | `204 No Content` | ✅ Pass |
 | `GET /team` | Info tim | `200 OK` + list anggota | `200 OK` + list anggota | ✅ Pass |
+
+---
+
+## 🧪 Hasil Testing API (Modul 4 — Auth & Protected Endpoints)
+
+Pengujian dilakukan via Swagger UI (`/docs`).
+
+| Endpoint | Skenario | Expected | Actual | Status |
+|----------|----------|----------|--------|--------|
+| `POST /auth/register` | Data valid | `201 Created` + user data | `201 Created` | ✅ Pass |
+| `POST /auth/register` | Email duplikat | `400 Bad Request` | `400 Bad Request` | ✅ Pass |
+| `POST /auth/register` | Password < 8 karakter | `422 Unprocessable Content` | `422 Unprocessable Content` | ✅ Pass |
+| `POST /auth/login` | Kredensial benar | `200 OK` + token | `200 OK` + token | ✅ Pass |
+| `POST /auth/login` | Password salah | `401 Unauthorized` | `401 Unauthorized` | ✅ Pass |
+| `POST /auth/login` | Email tidak terdaftar | `401 Unauthorized` | `401 Unauthorized` | ✅ Pass |
+| `GET /auth/me` | Token valid | `200 OK` + user data | `200 OK` + user data | ✅ Pass |
+| `GET /auth/me` | Tanpa token | `401 Unauthorized` | `401 Unauthorized` | ✅ Pass |
+| `GET /items` | Tanpa token | `401 Unauthorized` | `401 Unauthorized` | ✅ Pass |
+| `GET /items` | Token valid | `200 OK` + list items | `200 OK` + list items | ✅ Pass |
+| `POST /items` | Token valid + data valid | `201 Created` | `201 Created` | ✅ Pass |
+| `PUT /items/{id}` | Token valid + ID ada | `200 OK` + data baru | `200 OK` + data baru | ✅ Pass |
+| `DELETE /items/{id}` | Token valid + ID ada | `204 No Content` | `204 No Content` | ✅ Pass |
+| `GET /items/{id}` | Token expired/invalid | `401 Unauthorized` | `401 Unauthorized` | ✅ Pass |
 
 ---
 
