@@ -68,15 +68,12 @@ function App() {
     checkHealth().then(setIsConnected)
   }, [])
 
-  // Load items saat mount jika token sudah ada (setelah refresh)
-  // Saat login, loadItems dipanggil langsung di handleLogin
+  // Load items setiap kali isAuthenticated jadi true (login atau refresh)
   useEffect(() => {
-    const token = getToken()
-    if (token && !user) {
-      // Token ada tapi user belum di-set (refresh scenario)
+    if (isAuthenticated) {
       loadItems()
     }
-  }, [])
+  }, [isAuthenticated, loadItems])
 
   // ==================== AUTH HANDLERS ====================
 
@@ -86,7 +83,6 @@ function App() {
       setUser(data.user || { email })
       setIsAuthenticated(true)
       showToast("Login berhasil!", "success")
-      await loadItems()
     } catch (err) {
       showToast(err.message || "Login gagal", "error")
       throw err
