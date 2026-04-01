@@ -4,6 +4,7 @@ from fastapi import FastAPI, Depends, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from database import engine, get_db
@@ -110,6 +111,20 @@ def login(login_data: LoginRequest, db: Session = Depends(get_db)):
         "token_type": "bearer",
         "user": user,
     }
+
+
+@app.post("/auth/token", response_model=TokenResponse, include_in_schema=False)
+def login_oauth2_form(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    """
+    Endpoint OAuth2 form-based untuk Swagger UI Authorize.
+    Menerima username (= email) + password sebagai form data.
+    Tidak ditampilkan di dokumentasi API — gunakan /auth/login untuk integrasi normal.
+    """
+    user = crud.authenticate_user(db=db, email=form_data.username, password=form_data.password)
+    if not user:
+        raise HTTPException(status_code=401, detail="Email atau password salah")
+    token = create_access_token(data={"sub": str(user.id)})
+    return {"access_token": token, "token_type": "bearer", "user": user}
 
 
 @app.get("/auth/me", response_model=UserResponse)
