@@ -6,7 +6,7 @@ Dokumen ini menjelaskan skill project-level yang dipakai untuk membuat agent leb
 
 ## Lokasi Skill Workspace
 
-Untuk agent yang mengikuti konvensi Antigravity dan Gemini CLI, skill project-level hidup di:
+Untuk agent yang mendukung workspace skill (seperti Gemini CLI atau agent lain yang mengenali folder `.agents/`), skill project-level hidup di:
 
 ```text
 <workspace-root>/.agents/skills/

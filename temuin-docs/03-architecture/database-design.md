@@ -6,7 +6,7 @@
 |------|--------|
 | `users` | User internal hasil sinkronisasi login |
 | `items` | Laporan barang lost/found |
-| `item_images` | Referensi file gambar item |
+| `item_images` | Data gambar item disimpan sebagai base64 (DEC-016) |
 | `claims` | Proses klaim item found |
 | `categories` | Master kategori |
 | `buildings` | Master gedung |
@@ -47,6 +47,13 @@
 - `user_id`
 - `status`
 - `ownership_answer`
+- `created_at`
+
+### item_images
+- `id`
+- `item_id`
+- `image_data` (base64 encoded, maks 2 MB setelah kompresi)
+- `display_order`
 - `created_at`
 
 ## Aturan Data

@@ -35,31 +35,31 @@ Firebase **bukan** source of truth untuk data domain Temuin. Data seperti items,
 
 ```text
 backend/
-â””â”€â”€ app/
-    â”œâ”€â”€ main.py
-    â”œâ”€â”€ config.py
-    â”œâ”€â”€ database.py
-    â”œâ”€â”€ dependencies.py
-    â”œâ”€â”€ auth/
-    â”‚   â”œâ”€â”€ router.py
-    â”‚   â”œâ”€â”€ service.py
-    â”‚   â””â”€â”€ schemas.py
-    â”œâ”€â”€ items/
-    â”‚   â”œâ”€â”€ router.py
-    â”‚   â”œâ”€â”€ service.py
-    â”‚   â””â”€â”€ schemas.py
-    â”œâ”€â”€ claims/
-    â”‚   â”œâ”€â”€ router.py
-    â”‚   â”œâ”€â”€ service.py
-    â”‚   â””â”€â”€ schemas.py
-    â”œâ”€â”€ master_data/
-    â”‚   â”œâ”€â”€ router.py
-    â”‚   â””â”€â”€ service.py
-    â”œâ”€â”€ notifications/
-    â”‚   â”œâ”€â”€ router.py
-    â”‚   â””â”€â”€ service.py
-    â”œâ”€â”€ models/
-    â””â”€â”€ utils/
+└── app/
+    ├── main.py
+    ├── config.py
+    ├── database.py
+    ├── dependencies.py
+    ├── auth/
+    │   ├── router.py
+    │   ├── service.py
+    │   └── schemas.py
+    ├── items/
+    │   ├── router.py
+    │   ├── service.py
+    │   └── schemas.py
+    ├── claims/
+    │   ├── router.py
+    │   ├── service.py
+    │   └── schemas.py
+    ├── master_data/
+    │   ├── router.py
+    │   └── service.py
+    ├── notifications/
+    │   ├── router.py
+    │   └── service.py
+    ├── models/
+    └── utils/
 ```
 
 ## Boundary Per Modul

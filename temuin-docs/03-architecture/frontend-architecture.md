@@ -19,30 +19,30 @@ Catatan:
 
 ```text
 frontend/
-â”œâ”€â”€ components.json
-â”œâ”€â”€ package.json
-â”œâ”€â”€ vite.config.js
-â”œâ”€â”€ index.html
-â””â”€â”€ src/
-    â”œâ”€â”€ main.jsx
-    â”œâ”€â”€ App.jsx
-    â”œâ”€â”€ lib/
-    â”‚   â””â”€â”€ utils.js
-    â”œâ”€â”€ app/
-    â”‚   â”œâ”€â”€ router.jsx
-    â”‚   â””â”€â”€ providers.jsx
-    â”œâ”€â”€ config/
-    â”‚   â”œâ”€â”€ api.js
-    â”‚   â””â”€â”€ firebase.js
-    â”œâ”€â”€ components/
-    â”‚   â”œâ”€â”€ ui/
-    â”‚   â”œâ”€â”€ layout/
-    â”‚   â”œâ”€â”€ auth/
-    â”‚   â”œâ”€â”€ items/
-    â”‚   â””â”€â”€ claims/
-    â”œâ”€â”€ pages/
-    â”œâ”€â”€ hooks/
-    â””â”€â”€ styles/
+├── components.json
+├── package.json
+├── vite.config.js
+├── index.html
+└── src/
+    ├── main.jsx
+    ├── App.jsx
+    ├── lib/
+    │   └── utils.js
+    ├── app/
+    │   ├── router.jsx
+    │   └── providers.jsx
+    ├── config/
+    │   ├── api.js
+    │   └── firebase.js
+    ├── components/
+    │   ├── ui/
+    │   ├── layout/
+    │   ├── auth/
+    │   ├── items/
+    │   └── claims/
+    ├── pages/
+    ├── hooks/
+    └── styles/
 ```
 
 ## Halaman Utama

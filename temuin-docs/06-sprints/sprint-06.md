@@ -10,7 +10,7 @@ Mendeploy aplikasi ke cloud dan memulai pemecahan backend ke auth-service dan it
 |----|------|----------|----------|------------|--------|------------|-------|
 | BE-6.1 | Pisahkan auth logic ke `auth-service` | High | 5h | BE-5.3 | todo | - | - |
 | BE-6.2 | Pisahkan items, claims, dan master data ke `item-service` | High | 5h | BE-5.3 | todo | - | - |
-| BE-6.3 | Tambah komunikasi token verification antar service | High | 3h | BE-6.1, BE-6.2 | todo | - | - |
+| BE-6.3 | Tambah komunikasi token verification antar service | High | 3h | BE-6.1, BE-6.2 | todo | - | Ref: DEC-017, shared JWT secret via env vars |
 | BE-6.4 | Rapikan bug hasil split service | Medium | 2h | BE-6.3 | todo | - | - |
 
 ## Lead Frontend (@nicholasmnrng)

@@ -2,23 +2,23 @@
 
 ## Tujuan Sprint
 
-Menyelesaikan search, filter, claim flow, notifications, master data, dan mulai menyiapkan Docker.
+Menyelesaikan search, filter, claim flow, notifications, dan master data.
 
 ## Lead Backend (@disnejy)
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| BE-3.1 | Buat endpoint claim dan aturan satu claim aktif | High | 4h | BE-2.4 | todo | - | - |
+| BE-3.1 | Buat endpoint claim dan aturan satu claim aktif | High | 4h | BE-2.4 | todo | - | Ref: DEC-005, DEC-007 |
 | BE-3.2 | Sinkronkan perubahan status item dan claim + history | High | 3h | BE-3.1 | todo | - | - |
-| BE-3.3 | Tambah search, filter, dan pagination items | High | 3h | BE-2.4 | todo | - | - |
-| BE-3.4 | Tambah CRUD master data dan notification endpoints | Medium | 4h | BE-3.2 | todo | - | - |
+| BE-3.3 | Tambah search, filter, dan pagination items | High | 3h | BE-2.4 | todo | - | Include pagination query params |
+| BE-3.4 | Tambah CRUD master data dan notification endpoints | Medium | 4h | BE-3.2 | todo | - | Notif testable via API dulu, full event flow di Sprint 4 |
 
 ## Lead Frontend (@nicholasmnrng)
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
 | FE-3.1 | Buat komponen search dan filter di daftar item | High | 3h | FE-2.3, BE-3.3 | todo | - | - |
-| FE-3.2 | Buat ClaimForm dan flow submit claim | High | 3h | FE-2.3, BE-3.1 | todo | - | - |
+| FE-3.2 | Buat ClaimForm dan flow submit claim | High | 3h | FE-2.3, BE-3.1 | todo | - | API: POST /claims, Ref: DEC-005 |
 | FE-3.3 | Buat halaman MyItems, MyClaims, dan Notifications | Medium | 4h | FE-3.2, BE-3.4 | todo | - | - |
 | FE-3.4 | Buat ImageUpload dan badge status item/claim | Medium | 3h | FE-2.4, BE-3.2 | todo | - | - |
 
@@ -35,7 +35,7 @@ Menyelesaikan search, filter, claim flow, notifications, master data, dan mulai 
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| QA-3.1 | Blackbox claim flow dari pending sampai completed | High | 2h | FE-3.2, BE-3.2 | todo | - | - |
+| QA-3.1 | Blackbox claim submission (user side) dan cek status via API | High | 2h | FE-3.2, BE-3.2 | todo | - | Full UI claim flow di QA-4.1 setelah admin pages |
 | QA-3.2 | Blackbox search, filter, dan status badge | High | 2h | FE-3.1, FE-3.4, BE-3.3 | todo | - | - |
 | QA-3.3 | Blackbox notifications dan master data utama | Medium | 2h | FE-3.3, BE-3.4 | todo | - | - |
 | QA-3.4 | Simpan screenshot flow claim dan hasil search/filter | Medium | 1h | QA-3.1, QA-3.2 | todo | - | - |

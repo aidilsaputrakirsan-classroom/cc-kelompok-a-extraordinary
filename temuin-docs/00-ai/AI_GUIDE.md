@@ -11,7 +11,8 @@ temuin-docs/
 â”œâ”€â”€ 00-ai/
 â”‚   â”œâ”€â”€ AI_GUIDE.md
 â”‚   â”œâ”€â”€ ROLE_ROUTER.md
-â”‚   â””â”€â”€ DOCUMENT_INDEX.md
+â”‚   â”œâ”€â”€ DOCUMENT_INDEX.md
+â”‚   â””â”€â”€ SKILLS_SETUP.md
 â”œâ”€â”€ 01-concept/
 â”œâ”€â”€ 02-prd/
 â”œâ”€â”€ 03-architecture/

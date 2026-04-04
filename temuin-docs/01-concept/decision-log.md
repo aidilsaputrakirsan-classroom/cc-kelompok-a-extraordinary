@@ -71,8 +71,20 @@ Dokumen ini mencatat keputusan final yang tidak boleh dilanggar tanpa keputusan 
 - Frontend final project wajib memakai `React + Vite + Tailwind CSS + shadcn/ui`
 - Gunakan JavaScript/JSX agar tetap dekat dengan modul praktikum
 
+### DEC-016: Image storage
+- Gambar item disimpan sebagai base64 di kolom `image_data` pada tabel `item_images` di PostgreSQL
+- Frontend melakukan resize dan kompresi sebelum upload (sesuai DEC-010)
+- Tidak ada external storage (S3, GCS, dsb.) untuk MVP
+- Batas per foto tetap kurang dari 2 MB setelah kompresi
+
+### DEC-017: Cross-service token verification
+- Saat microservices split (Sprint 6), verifikasi JWT antar service menggunakan shared JWT secret
+- Masing-masing service memvalidasi JWT secara lokal tanpa memanggil service lain
+- Secret disimpan di env vars, bukan hardcoded
+
 ## Dokumen Terkait
 
 - [concept.md](./concept.md)
 - [../02-prd/prd-overview.md](../02-prd/prd-overview.md)
 - [../03-architecture/frontend-architecture.md](../03-architecture/frontend-architecture.md)
+- [../03-architecture/database-design.md](../03-architecture/database-design.md)

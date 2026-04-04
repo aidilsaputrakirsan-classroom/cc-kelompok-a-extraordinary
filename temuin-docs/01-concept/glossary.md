@@ -13,6 +13,7 @@
 | Master Data | Data referensi seperti kategori, gedung, lokasi, dan satpam |
 | Audit Log | Catatan aksi penting admin atau superadmin |
 | History | Riwayat perubahan status item atau claim |
+| Image Data | Data gambar item disimpan sebagai base64 di PostgreSQL (DEC-016) |
 
 ## Istilah Teknis
 
