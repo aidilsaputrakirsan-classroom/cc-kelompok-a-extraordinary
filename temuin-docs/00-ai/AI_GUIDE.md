@@ -8,19 +8,19 @@ Dokumen ini adalah peta navigasi utama untuk manusia dan AI agent di branch fina
 
 ```text
 temuin-docs/
-â”œâ”€â”€ 00-ai/
-â”‚   â”œâ”€â”€ AI_GUIDE.md
-â”‚   â”œâ”€â”€ ROLE_ROUTER.md
-â”‚   â”œâ”€â”€ DOCUMENT_INDEX.md
-â”‚   â””â”€â”€ SKILLS_SETUP.md
-â”œâ”€â”€ 01-concept/
-â”œâ”€â”€ 02-prd/
-â”œâ”€â”€ 03-architecture/
-â”œâ”€â”€ 04-implementation-plan/
-â”œâ”€â”€ 05-roles/
-â”œâ”€â”€ 06-sprints/
-â”œâ”€â”€ 07-tasks/
-â””â”€â”€ archive/
+├── 00-ai/
+│   ├── AI_GUIDE.md
+│   ├── ROLE_ROUTER.md
+│   ├── DOCUMENT_INDEX.md
+│   └── SKILLS_SETUP.md
+├── 01-concept/
+├── 02-prd/
+├── 03-architecture/
+├── 04-implementation-plan/
+├── 05-roles/
+├── 06-sprints/
+├── 07-tasks/
+└── archive/
 ```
 
 ## Read Order Yang Wajib
