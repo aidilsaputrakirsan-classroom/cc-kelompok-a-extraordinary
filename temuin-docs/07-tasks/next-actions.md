@@ -12,17 +12,17 @@
 
 Sebelum mulai kerja tim:
 
-1. Pastikan folder repo utama checkout ke `project/temuin`
+1. Pastikan folder repo utama checkout ke `master`
 2. Buat worktree practicum:
 
 ```bash
-git checkout project/temuin
-git pull origin project/temuin
-git worktree add .worktrees/practicum-master master
+git checkout master
+git pull origin master
+git worktree add .worktrees/praktikum praktikum
 ```
 
 3. Pakai folder repo utama untuk final project
-4. Pakai `.worktrees/practicum-master` hanya untuk practicum
+4. Pakai `.worktrees/praktikum` hanya untuk practicum
 
 ## Langkah Awal Sprint 01
 
@@ -44,7 +44,7 @@ git worktree add .worktrees/practicum-master master
 
 ## Reminder
 
-- Base branch selalu `project/temuin`
+- Base branch selalu `master`
 - Ubah status menjadi `in_progress` sebelum mulai
 - Ubah status menjadi `done` hanya setelah commit dan push
-- Jangan bolak-balik checkout `master` dan `project/temuin` di folder yang sama
+- Jangan bolak-balik checkout `praktikum` dan `master` di folder yang sama

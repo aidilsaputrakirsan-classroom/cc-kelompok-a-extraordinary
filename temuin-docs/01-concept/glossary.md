@@ -19,8 +19,8 @@
 
 | Istilah | Definisi |
 |--------|----------|
-| Base Branch | Branch integrasi utama project final, yaitu `project/temuin` |
-| Feature Branch | Branch kerja per task, dibuat dari `project/temuin` |
+| Base Branch | Branch integrasi utama project final, yaitu `master` |
+| Feature Branch | Branch kerja per task, dibuat dari `master` |
 | Source of Truth | Dokumen aktif yang menjadi acuan utama implementasi |
 | Active Sprint | Sprint yang menjadi prioritas auto-selection agent saat ini |
 | Branch/Ref | Nama branch remote tempat task terakhir didorong |

@@ -4,13 +4,13 @@
 
 | Branch | Fungsi |
 |-------|--------|
-| `project/temuin` | Base branch final project |
+| `master` | Base branch final project |
 
 ## Aturan Dasar
 
-- Semua feature branch dibuat dari `project/temuin`
-- Jangan commit langsung ke `project/temuin`
-- PR ke `project/temuin` direkomendasikan, tetapi status task `done` tidak bergantung pada PR merge
+- Semua feature branch dibuat dari `master`
+- Jangan commit langsung ke `master`
+- PR ke `master` direkomendasikan, tetapi status task `done` tidak bergantung pada PR merge
 
 ## Format Nama Branch
 

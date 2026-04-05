@@ -3,18 +3,18 @@
 ## Workflow Harian
 
 1. Sync base branch
-   - `git checkout project/temuin`
-   - `git pull origin project/temuin`
+   - `git checkout master`
+   - `git pull origin master`
 2. Baca `ACTIVE_SPRINT.md` dan sprint file yang relevan
 3. Tentukan task dari ID yang diberikan user atau auto-selection role
 4. Ubah status task menjadi `in_progress`
-5. Buat feature branch dari `project/temuin`
+5. Buat feature branch dari `master`
 6. Kerjakan task dan verifikasi behavior yang relevan
 7. Commit dengan format yang benar
 8. Push branch ke remote
 9. Isi kolom `Branch/Ref` di sprint file
 10. Ubah status task menjadi `done`
-11. Jika perlu kolaborasi, buat PR ke `project/temuin`
+11. Jika perlu kolaborasi, buat PR ke `master`
 
 ## Jika Blocked
 
@@ -35,17 +35,17 @@
 Jika practicum dan final project berjalan bersamaan, gunakan git worktree.
 
 Rekomendasi layout:
-- folder repo utama untuk `project/temuin`
-- `.worktrees/practicum-master` untuk branch `master`
+- folder repo utama untuk `master`
+- `.worktrees/praktikum` untuk branch `praktikum`
 
 Dengan begitu kamu tidak perlu bolak-balik checkout branch di satu folder yang sama.
 
 ### Aturan Praktis Untuk Tim
 
 - Final project selalu dikerjakan dari folder repo utama
-- Practicum selalu dibuka dari `.worktrees/practicum-master`
+- Practicum selalu dibuka dari `.worktrees/praktikum`
 - Jangan kerjakan task final project di worktree practicum
-- Jangan checkout `master` di folder utama kecuali benar-benar perlu maintenance histori
+- Jangan checkout `praktikum` di folder utama kecuali benar-benar perlu maintenance histori
 
 ## Dokumen Terkait
 

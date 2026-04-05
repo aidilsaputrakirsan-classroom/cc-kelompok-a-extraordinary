@@ -2,12 +2,12 @@
 
 ## Ringkasan
 
-Implementasi final project dimulai dari branch `project/temuin` sebagai fresh start. Praktikum lama tetap berada di histori branch lain.
+Implementasi final project dimulai dari branch `master` sebagai fresh start. Praktikum lama tetap berada di branch `praktikum`.
 
 ## Prinsip Implementasi
 
 1. Documentation-first: baca dokumen aktif sebelum coding
-2. Feature branch workflow: kerja selalu lewat branch turunan dari `project/temuin`
+2. Feature branch workflow: kerja selalu lewat branch turunan dari `master`
 3. Status tracking ketat: update sprint file saat mulai, saat blocked, dan saat selesai push
 4. Delivery bertahap: setiap sprint menghasilkan output yang bisa diverifikasi
 5. UI konsisten: frontend wajib memakai shadcn/ui

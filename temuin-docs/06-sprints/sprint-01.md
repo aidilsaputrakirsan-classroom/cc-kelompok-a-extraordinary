@@ -2,7 +2,7 @@
 
 ## Tujuan Sprint
 
-Membuat fondasi project final yang bersih di branch `project/temuin`: scaffold backend, scaffold frontend dengan shadcn/ui, data model inti, dan panduan kerja awal.
+Membuat fondasi project final yang bersih di branch `master`: scaffold backend, scaffold frontend dengan shadcn/ui, data model inti, dan panduan kerja awal.
 
 ## Lead Backend (@disnejy)
 

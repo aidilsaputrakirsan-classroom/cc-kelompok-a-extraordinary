@@ -14,8 +14,8 @@
 
 ```bash
 git fetch origin --prune
-git checkout project/temuin
-git pull origin project/temuin
+git checkout master
+git pull origin master
 ```
 
 ## Setup Workspace Yang Direkomendasikan
@@ -25,32 +25,32 @@ Gunakan repo utama untuk final project, lalu worktree terpisah untuk practicum.
 ### 1. Workspace utama = final project
 
 Folder repo utama ini harus dipakai untuk:
-- branch `project/temuin`
+- branch `master`
 - semua dokumentasi aktif di `temuin-docs/`
 - semua feature branch final project
 
 ### 2. Workspace kedua = practicum
 
-Buat worktree untuk branch `master` supaya practicum tidak campur dengan final project.
+Buat worktree untuk branch `praktikum` supaya practicum tidak campur dengan final project.
 
 ```bash
-git checkout project/temuin
-git pull origin project/temuin
-git worktree add .worktrees/practicum-master master
+git checkout master
+git pull origin master
+git worktree add .worktrees/praktikum praktikum
 ```
 
 ### 3. Cara pakai harian
 
 - Jika mau kerja final project, tetap di folder repo utama
-- Jika mau buka hasil practicum, masuk ke `.worktrees/practicum-master`
-- Jangan bolak-balik checkout `master` dan `project/temuin` di folder yang sama
+- Jika mau buka hasil practicum, masuk ke `.worktrees/praktikum`
+- Jangan bolak-balik checkout `praktikum` dan `master` di folder yang sama
 
 ### 4. Layout yang diharapkan
 
 ```text
-cc-kelompok-a-extraordinary/              -> final project (`project/temuin`)
+cc-kelompok-a-extraordinary/              -> final project (`master`)
 cc-kelompok-a-extraordinary/.worktrees/
-└── practicum-master/                     -> practicum (`master`)
+└── praktikum/                            -> practicum (`praktikum`)
 ```
 
 ## Setup Backend Awal

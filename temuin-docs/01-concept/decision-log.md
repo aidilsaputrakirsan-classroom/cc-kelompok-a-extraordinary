@@ -52,8 +52,8 @@ Dokumen ini mencatat keputusan final yang tidak boleh dilanggar tanpa keputusan 
 ## Keputusan Delivery Dan Workflow
 
 ### DEC-011: Base branch project final
-- Branch integrasi project final adalah `project/temuin`
-- `master` hanya dianggap histori practicum
+- Branch integrasi project final adalah `master`
+- `praktikum` adalah branch histori practicum
 
 ### DEC-012: Status task sprint
 - Status yang valid hanya `todo`, `in_progress`, `blocked`, `done`
