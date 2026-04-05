@@ -17,10 +17,10 @@ Membuat fondasi project final yang bersih di branch `master`: scaffold backend, 
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| FE-1.1 | Init React + Vite + Tailwind CSS di `frontend/` | High | 2h | - | todo | - | - |
-| FE-1.2 | Init shadcn/ui dan komponen dasar layout | High | 2h | FE-1.1 | todo | - | - |
-| FE-1.3 | Setup router, layout shell, dan struktur folder frontend | High | 3h | FE-1.2 | todo | - | - |
-| FE-1.4 | Setup `config/api.js` dan `config/firebase.js` placeholder | Medium | 2h | FE-1.3 | todo | - | Ref: frontend-architecture.md, backend-architecture.md auth flow |
+| FE-1.1 | Init React + Vite + Tailwind CSS di `frontend/` | High | 2h | - | done | feature/sprint1-fe-scaffold | - |
+| FE-1.2 | Init shadcn/ui dan komponen dasar layout | High | 2h | FE-1.1 | done | feature/sprint1-fe-scaffold | - |
+| FE-1.3 | Setup router, layout shell, dan struktur folder frontend | High | 3h | FE-1.2 | done | feature/sprint1-fe-scaffold | - |
+| FE-1.4 | Setup `config/api.js` dan `config/firebase.js` placeholder | Medium | 2h | FE-1.3 | done | feature/sprint1-fe-scaffold | Ref: frontend-architecture.md, backend-architecture.md auth flow |
 
 ## Lead DevOps (@PangeranSilaen)
 
