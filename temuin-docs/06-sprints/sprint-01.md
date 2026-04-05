@@ -8,10 +8,10 @@ Membuat fondasi project final yang bersih di branch `master`: scaffold backend, 
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| BE-1.1 | Buat scaffold `backend/app/` dan entrypoint FastAPI | High | 2h | - | todo | - | - |
-| BE-1.2 | Tambah `config.py`, `database.py`, dan pembacaan env vars | High | 2h | BE-1.1 | todo | - | - |
-| BE-1.3 | Buat model inti: users, items, claims, master data, notifications | High | 4h | BE-1.2 | todo | - | Ref: database-design.md |
-| BE-1.4 | Tambah endpoint `/health` dan seed awal master data | Medium | 2h | BE-1.3 | todo | - | - |
+| BE-1.1 | Buat scaffold `backend/app/` dan entrypoint FastAPI | High | 2h | - | done | master | - |
+| BE-1.2 | Tambah `config.py`, `database.py`, dan pembacaan env vars | High | 2h | BE-1.1 | done | master | - |
+| BE-1.3 | Buat model inti: users, items, claims, master data, notifications | High | 4h | BE-1.2 | done | master | Ref: database-design.md |
+| BE-1.4 | Tambah endpoint `/health` dan seed awal master data | Medium | 2h | BE-1.3 | done | master | - |
 
 ## Lead Frontend (@nicholasmnrng)
 
