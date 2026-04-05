@@ -1,0 +1,32 @@
+# Virtual environment
+venv/
+.venv/
+
+# Environment files (secrets!)
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Testing
+tests/
+*.test.py
+
+# Documentation
+*.md
+docs/
+image/
