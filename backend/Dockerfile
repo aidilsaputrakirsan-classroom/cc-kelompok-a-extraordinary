@@ -28,6 +28,10 @@ USER appuser
 # 7. Dokumentasikan port yang digunakan
 EXPOSE 8000
 
+# 8. Healthcheck container ke endpoint /health
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"
+
 # 8. Command untuk menjalankan aplikasi
 #    --host 0.0.0.0: agar bisa diakses dari luar container
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
