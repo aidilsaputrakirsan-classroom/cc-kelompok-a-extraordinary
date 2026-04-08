@@ -29,6 +29,10 @@ DB_CONTAINER="db"
 BACKEND_CONTAINER="backend"
 NETWORK_NAME="cloudnet"
 
+# Docker Hub images
+DB_IMAGE="postgres:16-alpine"
+BACKEND_IMAGE="pangeransilaen/backend-app:alpine"
+
 # Function: Print colored message
 print_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
@@ -88,7 +92,7 @@ start_containers() {
             -e POSTGRES_DB=cloudapp \
             -p 5433:5432 \
             -v pgdata:/var/lib/postgresql/data \
-            postgres:16-alpine
+            "$DB_IMAGE"
         print_success "Container '$DB_CONTAINER' created and started"
     fi
 
@@ -113,7 +117,7 @@ start_containers() {
             --network "$NETWORK_NAME" \
             --env-file .env.docker \
             -p 8000:8000 \
-            backend-app:latest
+            "$BACKEND_IMAGE"
         print_success "Container '$BACKEND_CONTAINER' created and started"
     fi
 
