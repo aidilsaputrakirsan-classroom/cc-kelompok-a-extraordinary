@@ -1,316 +1,448 @@
-# Docker Cheatsheet - Temuin
+# 🐳 Docker Cheatsheet - Praktikum CC
 
-Cheatsheet perintah Docker yang paling sering dipakai untuk proyek Temuin (FastAPI + React + PostgreSQL).
+Dokumentasi lengkap Docker commands yang sering dipakai dalam project ini. Cocok untuk development dan production setup.
 
-## Tech Stack Proyek
+---
 
-| Komponen | Teknologi | Path |
-|----------|-----------|------|
-| Backend | FastAPI + SQLAlchemy + PostgreSQL | `backend/` |
-| Frontend | React + Vite + Tailwind CSS + shadcn/ui | `frontend/` |
-| Database | PostgreSQL | - |
+## 📋 Daftar Isi
+1. [Build Images](#build-images)
+2. [Run Containers](#run-containers)
+3. [List & Monitor](#list--monitor)
+4. [Logs & Debugging](#logs--debugging)
+5. [Execute Commands](#execute-commands)
+6. [Stop & Remove](#stop--remove)
+7. [Push & Pull](#push--pull)
+8. [Quick Tips](#quick-tips)
 
-## Quick Reference
+---
 
-### 1. `docker pull` - Pull Image
+## 🏗️ Build Images
 
-Mengunduh image dari Docker Hub atau registry lain.
-
+### Build Backend Image
 ```bash
-# Pull image PostgreSQL versi 15
-docker pull postgres:15
+# Build dengan custom tag
+docker build -t backend:latest ./backend
 
-# Pull image Python (untuk backend FastAPI)
-docker pull python:3.11-slim
+# Build dengan full tag (misal untuk push ke registry)
+docker build -t username/backend:v1.0 ./backend
 
-# Pull image Node (untuk frontend React)
-docker pull node:20-alpine
+# Build dengan label metadata
+docker build --label version=1.0 --label author=team -t backend:latest ./backend
+
+# Build tanpa cache (untuk fresh install)
+docker build --no-cache -t backend:latest ./backend
 ```
 
-### 2. `docker build` - Build Image
-
-Membangun Docker image dari Dockerfile.
-
+### Build Frontend Image
+Jika ada Dockerfile di frontend folder:
 ```bash
-# Build image backend
-docker build -t temuin-backend:latest -f backend/Dockerfile .
-
-# Build image frontend
-docker build -t temuin-frontend:latest -f frontend/Dockerfile .
-
-# Build tanpa cache (fresh build)
-docker build --no-cache -t temuin-backend:latest -f backend/Dockerfile .
-
-# Build dengan tag versi
-docker build -t temuin-backend:v1.0.0 -f backend/Dockerfile .
+docker build -t frontend:latest ./frontend
 ```
 
-### 3. `docker run` - Run Container
-
-Menjalankan container dari image.
-
+### Build Multiple Services
 ```bash
-# Jalankan database PostgreSQL
-docker run -d \
-  --name temuin-db \
-  -e POSTGRES_USER=temuin_user \
-  -e POSTGRES_PASSWORD=temuin_password \
-  -e POSTGRES_DB=temuin_db \
-  -p 5432:5432 \
-  postgres:15
+# Build backend
+docker build -t backend:latest ./backend
 
-# Jalankan backend FastAPI
+# Build frontend
+docker build -t frontend:latest ./frontend
+```
+
+---
+
+## 🚀 Run Containers
+
+### Run Backend (Development)
+```bash
+# Simple run dengan port mapping (port 8000 container -> 8000 host)
+docker run -p 8000:8000 backend:latest
+
+# Run dengan environment variables
+docker run -p 8000:8000 \
+  -e DATABASE_URL=postgresql://user:pass@db:5432/dbname \
+  -e DEBUG=true \
+  backend:latest
+
+# Run dengan volume mount (hot-reload code changes)
+docker run -p 8000:8000 \
+  -v C:\path\to\backend:/app \
+  backend:latest
+
+# Run in background (detached mode)
+docker run -d -p 8000:8000 --name backend-dev backend:latest
+```
+
+### Run Backend (Production)
+```bash
+# Run dengan restart policy
 docker run -d \
-  --name temuin-backend \
-  -e DATABASE_URL=postgresql://temuin_user:temuin_password@temuin-db:5432/temuin_db \
-  -e ENVIRONMENT=development \
   -p 8000:8000 \
-  temuin-backend:latest
+  --name backend-prod \
+  --restart unless-stopped \
+  -e DEBUG=false \
+  backend:latest
 
-# Jalankan frontend React
+# Run dengan resource limits (memory & CPU)
 docker run -d \
-  --name temuin-frontend \
+  -p 8000:8000 \
+  --name backend-prod \
+  --memory=512m \
+  --cpus=1 \
+  backend:latest
+```
+
+### Run Frontend (Development with Vite)
+```bash
+# Frontend development dengan port 5173 (Vite default)
+docker run -p 5173:5173 \
+  -v C:\path\to\frontend:/app \
+  frontend:latest
+
+# Atau jika menggunakan npm dev
+docker run -p 5173:5173 frontend:latest npm run dev
+```
+
+### Run with Docker Network
+Untuk komunikasi antar container (backend & frontend bersama):
+```bash
+# Create network
+docker network create praktikum-net
+
+# Run backend di network
+docker run -d \
+  --name backend \
+  --network praktikum-net \
+  -e DATABASE_URL=postgresql://db:5432/dbname \
+  backend:latest
+
+# Run frontend di network (dapat akses backend via http://backend:8000)
+docker run -d \
+  --name frontend \
+  --network praktikum-net \
   -p 5173:5173 \
-  temuin-frontend:latest
-
-# Jalankan dengan volume mount (development mode)
-docker run -d \
-  --name temuin-backend-dev \
-  -v $(pwd)/backend:/app \
-  -p 8000:8000 \
-  temuin-backend:latest
+  frontend:latest
 ```
 
-### 4. `docker ps` - List Containers
+---
 
-Menampilkan container yang sedang berjalan.
+## 📊 List & Monitor
 
+### List Running Containers
 ```bash
-# Lihat semua container yang berjalan
+# List semua containers yang sedang running
 docker ps
 
-# Lihat semua container (termasuk yang stopped)
+# List semua containers (termasuk yang stopped)
 docker ps -a
 
-# Lihat container dengan filter nama
-docker ps --filter name=temuin
-
-# Lihat container dengan format custom
+# List dengan format custom
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+# List containers dengan label tertentu
+docker ps --filter "label=version=1.0"
 ```
 
-### 5. `docker logs` - View Container Logs
-
-Melihat output log dari container.
-
+### List Images
 ```bash
-# Lihat log backend
-docker logs temuin-backend
+# List semua images di local
+docker image ls
 
-# Lihat log dengan follow (real-time)
-docker logs -f temuin-backend
+# List images dengan specific pattern
+docker image ls | grep backend
 
-# Lihat 100 baris log terakhir
-docker logs --tail 100 temuin-backend
-
-# Lihat log dengan timestamp
-docker logs -t temuin-backend
-
-# Lihat log dari waktu tertentu
-docker logs --since 2024-01-01T10:00:00 temuin-backend
+# List dengan format detail
+docker image ls --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}"
 ```
 
-### 6. `docker exec` - Execute Command in Container
-
-Menjalankan perintah di dalam container yang sedang berjalan.
-
+### Show Container Stats (Live CPU, Memory, Network)
 ```bash
-# Masuk ke shell backend
-docker exec -it temuin-backend /bin/bash
+# Real-time statistics
+docker stats
 
-# Jalankan migrasi database
-docker exec -it temuin-backend python -m alembic upgrade head
+# Stats untuk specific container
+docker stats backend-dev
 
-# Jalankan test backend
-docker exec -it temuin-backend pytest
-
-# Masuk ke database shell
-docker exec -it temuin-db psql -U temuin_user -d temuin_db
-
-# Lihat isi container
-docker exec -it temuin-backend ls -la /app
+# Stats tanpa stream (one-time)
+docker stats --no-stream
 ```
 
-### 7. `docker stop` - Stop Container
+---
 
-Menghentikan container yang sedang berjalan.
+## 📝 Logs & Debugging
 
+### View Container Logs
 ```bash
-# Stop satu container
-docker stop temuin-backend
+# Show logs dari backend container
+docker logs backend-dev
 
-# Stop beberapa container sekaligus
-docker stop temuin-backend temuin-frontend temuin-db
+# Show logs dengan timestamp
+docker logs --timestamps backend-dev
 
-# Stop semua container dengan prefix "temuin"
-docker stop $(docker ps --filter name=temuin -q)
+# Show last 50 lines
+docker logs --tail 50 backend-dev
 
-# Stop dengan timeout tertentu (detik)
-docker stop -t 30 temuin-backend
+# Follow logs (like tail -f)
+docker logs -f backend-dev
+
+# Show logs dari 5 menit terakhir
+docker logs --since 5m backend-dev
 ```
 
-### 8. `docker rm` - Remove Container
-
-Menghapus container yang sudah stopped.
-
+### Inspect Container
 ```bash
-# Hapus container
-docker rm temuin-backend
+# Show detail informasi container
+docker inspect backend-dev
 
-# Hapus container yang sudah stopped
-docker rm $(docker ps -a -q)
+# Extract specific info (misal IP address)
+docker inspect -f '{{.NetworkSettings.IPAddress}}' backend-dev
 
-# Force remove container yang masih berjalan
-docker rm -f temuin-backend
-
-# Hapus semua container yang exit
-docker rm $(docker ps -a --filter status=exited -q)
+# Show environment variables
+docker inspect backend-dev | grep -A 10 '"Env"'
 ```
 
-### 9. `docker push` - Push Image to Registry
+---
 
-Mengunggah image ke Docker Hub atau registry lain.
+## ⚙️ Execute Commands
+
+### Execute Command di Running Container
+```bash
+# Run bash interaktif di backend container
+docker exec -it backend-dev bash
+
+# Run python command
+docker exec backend-dev python -m pytest
+
+# Run linting
+docker exec backend-dev flake8 .
+
+# Check Python version
+docker exec backend-dev python --version
+
+# Run specific Python script
+docker exec backend-dev python scripts/migrate.py
+```
+
+### Copy Files from Container
+```bash
+# Copy file dari container ke host
+docker cp backend-dev:/app/output.txt ./output.txt
+
+# Copy folder dari container ke host
+docker cp backend-dev:/app/logs ./logs
+```
+
+### Copy Files to Container
+```bash
+# Copy file dari host ke container
+docker cp ./config.env backend-dev:/app/config.env
+```
+
+---
+
+## 🛑 Stop & Remove
+
+### Stop Containers
+```bash
+# Stop container (graceful shutdown, wait 10 seconds)
+docker stop backend-dev
+
+# Stop all running containers
+docker stop $(docker ps -q)
+
+# Force stop (SIGKILL immediately)
+docker kill backend-dev
+```
+
+### Remove Containers
+```bash
+# Remove stopped container
+docker rm backend-dev
+
+# Remove all stopped containers
+docker container prune
+
+# Remove container paksa (meski sedang running)
+docker rm -f backend-dev
+```
+
+### Remove Images
+```bash
+# Remove image (jika tidak ada container yang menggunakannya)
+docker rmi backend:latest
+
+# Remove image paksa
+docker rmi -f backend:latest
+
+# Remove unused images
+docker image prune
+
+# Remove ALL images (warning: very destructive)
+docker image prune -a
+```
+
+### Clean Up Everything
+```bash
+# Remove semua stopped containers, unused networks, dangling images
+docker system prune
+
+# Include unused volumes tapi (careful!)
+docker system prune -a --volumes
+```
+
+---
+
+## 📤📥 Push & Pull
+
+### Push Image ke Docker Registry
+
+> **Note**: Sebelum push, pastikan sudah login ke Docker Hub atau registry lain.
 
 ```bash
 # Login ke Docker Hub
 docker login
 
-# Push image ke Docker Hub
-docker push username/temuin-backend:latest
+# Tag image dengan username/registry
+docker tag backend:latest myusername/backend:v1.0
 
-# Push dengan tag versi
-docker push username/temuin-backend:v1.0.0
+# Push ke Docker Hub
+docker push myusername/backend:v1.0
 
-# Push ke GitHub Container Registry
-docker tag temuin-backend:latest ghcr.io/username/temuin-backend:latest
-docker push ghcr.io/username/temuin-backend:latest
+# Push dengan multiple tags
+docker tag backend:latest myusername/backend:latest
+docker push myusername/backend:latest
 ```
 
-## Docker Compose Commands
-
-### `docker compose up` - Start Services
-
+### Pull Image dari Registry
 ```bash
-# Jalankan semua services
-docker compose up -d
+# Pull image dari Docker Hub
+docker pull myusername/backend:v1.0
 
-# Jalankan dengan rebuild
-docker compose up -d --build
+# Pull latest tag
+docker pull myusername/backend:latest
 
-# Jalankan specific service
-docker compose up -d backend
-
-# Jalankan dengan logs
-docker compose up -d && docker compose logs -f
+# Pull dan langsung run
+docker run -d -p 8000:8000 myusername/backend:v1.0
 ```
 
-### `docker compose down` - Stop Services
-
+### Logout dari Registry
 ```bash
-# Stop semua services
-docker compose down
-
-# Stop dan hapus volumes
-docker compose down -v
-
-# Stop dan hapus images
-docker compose down --rmi all
+docker logout
 ```
 
-### `docker compose ps` - List Services
+---
 
+## 💡 Quick Tips
+
+### 1. **Container Naming Best Practices**
 ```bash
-# Lihat services yang berjalan
-docker compose ps
+# ❌ Hindari
+docker run -d backend:latest
 
-# Lihat semua services
-docker compose ps -a
+# ✅ Lebih baik
+docker run -d --name backend-dev backend:latest
+docker run -d --name backend-prod backend:latest
 ```
 
-### `docker compose exec` - Execute in Service
-
+### 2. **Environment File**
 ```bash
-# Exec ke backend service
-docker compose exec backend /bin/bash
+# Buat file .env
+# DATABASE_URL=postgresql://user:pass@db:5432/dbname
+# DEBUG=false
 
-# Exec ke database
-docker compose exec db psql -U temuin_user -d temuin_db
+# Run dengan env file
+docker run -d --env-file .env backend:latest
 ```
 
-## Common Workflows
-
-### Development Setup
-
+### 3. **See Last Command**
 ```bash
-# 1. Pull dependencies
-docker compose build
-
-# 2. Jalankan semua services
-docker compose up -d
-
-# 3. Cek status
-docker compose ps
-
-# 4. Cek logs
-docker compose logs -f backend
+# Lihat command apa yang dijalankan saat container start
+docker inspect backend-dev | grep -A 5 '"Cmd"'
 ```
 
-### Database Migration
-
+### 4. **Port Already in Use?**
 ```bash
-# Jalankan migrasi via Alembic
-docker compose exec backend alembic upgrade head
+# Gunakan port berbeda
+docker run -p 8001:8000 backend:latest
 
-# Atau langsung ke database
-docker compose exec db psql -U temuin_user -d temuin_db -c "\dt"
+# Atau cek container mana yang pakai port 8000
+docker ps --format "table {{.Names}}\t{{.Ports}}"
 ```
 
-### Debugging
-
+### 5. **Memory atau Disk Space Full?**
 ```bash
-# 1. Cek container yang berjalan
-docker ps
+# Hapus semua yang tidak dipakai
+docker system prune -a
 
-# 2. Cek logs
-docker logs temuin-backend
-
-# 3. Masuk ke container
-docker exec -it temuin-backend /bin/bash
-
-# 4. Cek koneksi database
-docker exec -it temuin-db psql -U temuin_user -d temuin_db -c "SELECT 1"
+# Check disk usage
+docker system df
 ```
 
-### Cleanup
-
+### 6. **Debugging: Inspect Running Process**
 ```bash
-# 1. Stop semua containers
-docker compose down
+# Lihat top processes di container
+docker top backend-dev
 
-# 2. Hapus dangling images
-docker image prune -a
-
-# 3. Hapus volumes (jika perlu fresh start)
-docker compose down -v
+# Attach ke container (lihat output live)
+docker attach backend-dev
 ```
 
-## Tips
+### 7. **Multi-Container dengan Custom Network**
+```bash
+# Create shared network
+docker network create praktikum-network
 
-| Tip | Command |
-|-----|---------|
-| Lihat disk usage | `docker system df` |
-| Hapus semua unused | `docker system prune -a` |
-| Inspect container | `docker inspect temuin-backend` |
-| Lihat IP container | `docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' temuin-backend` |
-| Copy file ke container | `docker cp file.txt temuin-backend:/app/` |
-| Copy file dari container | `docker cp temuin-backend:/app/file.txt .` |
+# Run containers di network yang sama
+docker run -d --name db --network praktikum-network postgres:15
+docker run -d --name backend --network praktikum-network backend:latest
+docker run -d --name frontend --network praktikum-network -p 5173:5173 frontend:latest
+
+# Containers dapat akses satu sama lain via hostname
+# Misal: backend dapat akses db via "postgresql://db:5432/dbname"
+```
+
+---
+
+## 📚 Useful Docker Compose Alternative
+
+Jika manage multiple containers cukup kompleks, consider menggunakan `docker-compose.yml`:
+
+```yaml
+version: '3.9'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:pass@db:5432/dbname
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=praktikum
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+```
+
+Run semuanya:
+```bash
+docker-compose up -d
+```
+
+---
+
+## 🔗 Referensi
+- [Docker Official Docs](https://docs.docker.com/)
+- [Docker CLI Reference](https://docs.docker.com/engine/reference/commandline/cli/)
+- [Best Practices](https://docs.docker.com/develop/dev-best-practices/)
+
+**Last Updated**: April 8, 2026  
+**Author**: Frontend Team - Praktikum CC
