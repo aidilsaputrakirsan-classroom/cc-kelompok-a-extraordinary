@@ -3,12 +3,15 @@ venv/
 .venv/
 
 # Environment files (secrets!)
-.env
+.env*
+!.env.example
 
 # Python cache
 __pycache__/
 *.pyc
 *.pyo
+.pytest_cache/
+.mypy_cache/
 
 # IDE
 .vscode/
@@ -30,3 +33,7 @@ tests/
 *.md
 docs/
 image/
+
+# Logs and OS artifacts
+*.log
+.DS_Store
