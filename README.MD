@@ -468,3 +468,16 @@ Pengujian dilakukan via Swagger UI (`/docs`).
 
 ---
 
+## 🧪 Hasil Testing Docker (Modul 5 — Image Comparison)
+
+Sebagai bagian dari optimasi containerization, dilakukan perbandingan ukuran base image Python 3.12:
+
+| Image Variant | OS Base | Size | Status |
+|---------------|---------|------|--------|
+| `python:3.12` | Debian | 1.62 GB | ✅ Terverifikasi |
+| `python:3.12-slim` | Debian Slim | 179 MB | ✅ Terverifikasi |
+| `python:3.12-alpine` | Alpine | 75 MB | ✅ Terverifikasi |
+
+**Kesimpulan QA:** Penggunaan `python:3.12-slim` direkomendasikan untuk menyeimbangkan antara ukuran image yang kecil dan kemudahan instalasi dependencies. Detail lengkap dapat dilihat di [docs/image-comparison.md](./docs/image-comparison.md).
+
+---
