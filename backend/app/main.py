@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.database import get_db
+import firebase_admin
+from firebase_admin import credentials
+from app.config import settings
 
 app = FastAPI(
     title="Temuin API",
@@ -18,6 +21,20 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Initialize Firebase Admin
+if not firebase_admin._apps:
+    try:
+        if settings.FIREBASE_CREDENTIALS_FILE:
+            cred = credentials.Certificate(settings.FIREBASE_CREDENTIALS_FILE)
+            firebase_admin.initialize_app(cred)
+            print("Firebase Admin initialized with credentials file.")
+        else:
+            firebase_admin.initialize_app()
+            print("Firebase Admin initialized with default credentials.")
+    except Exception as e:
+        print(f"Error initializing Firebase Admin: {e}")
+
 
 @app.get("/")
 def read_root():
