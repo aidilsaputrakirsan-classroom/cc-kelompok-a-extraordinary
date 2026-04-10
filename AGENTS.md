@@ -16,6 +16,8 @@ Setiap AI coding agent wajib mulai dari file ini sebelum mengerjakan apa pun di 
 - Dokumen di `temuin-docs/archive/` adalah arsip, bukan acuan kerja aktif
 - Base branch final project adalah `master`
 - Jangan commit langsung ke `master`; buat feature branch dari branch itu
+- Agent wajib tanya persetujuan user sebelum commit dan push
+- PR dibuat sebagai draft; user yang memutuskan kapan ready for review
 - Frontend wajib memakai `React + Vite + Tailwind CSS + shadcn/ui`
 - Saat agent membangun UI, utamakan komponen dan pola shadcn/ui sebelum membuat markup custom
 
