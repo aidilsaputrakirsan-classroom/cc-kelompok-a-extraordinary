@@ -4,7 +4,7 @@
 
 ### Pull Image dari Docker Hub
 ```bash
-docker pull pangeransilaen/backend-app:alpine
+docker pull pangeransilaen/cloudapp-backend:alpine
 ```
 
 ### Jalankan dengan Docker Compose (Recommended)
@@ -48,7 +48,7 @@ docker run -d \
   -e ACCESS_TOKEN_EXPIRE_MINUTES=60 \
   -e ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000 \
   -p 8000:8000 \
-  pangeransilaen/backend-app:alpine
+  pangeransilaen/cloudapp-backend:alpine
 ```
 
 **4. Akses API**
@@ -142,7 +142,7 @@ Image ini dioptimasi menggunakan multi-stage build dengan Alpine Linux:
 ### Build Image Locally
 ```bash
 cd backend
-docker build -t backend-app:alpine .
+docker build -t cloudapp-backend:alpine .
 ```
 
 ### Run Tests

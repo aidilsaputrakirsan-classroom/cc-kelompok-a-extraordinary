@@ -31,7 +31,7 @@ NETWORK_NAME="cloudnet"
 
 # Docker Hub images
 DB_IMAGE="postgres:16-alpine"
-BACKEND_IMAGE="pangeransilaen/backend-app:alpine"
+BACKEND_IMAGE="pangeransilaen/cloudapp-backend:alpine"
 
 # Function: Print colored message
 print_info() {
