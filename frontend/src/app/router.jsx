@@ -2,6 +2,8 @@ import { createBrowserRouter } from "react-router-dom"
 import RootLayout from "@/components/layout/RootLayout"
 import HomePage from "@/pages/HomePage"
 import LoginPage from "@/pages/LoginPage"
+import ItemListPage from "@/pages/ItemListPage"
+import ItemDetailPage from "@/pages/ItemDetailPage"
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
 
 export const router = createBrowserRouter([
@@ -20,6 +22,14 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <HomePage />,
+      },
+      {
+        path: "items",
+        element: <ItemListPage />,
+      },
+      {
+        path: "items/:id",
+        element: <ItemDetailPage />,
       }
     ]
   }
