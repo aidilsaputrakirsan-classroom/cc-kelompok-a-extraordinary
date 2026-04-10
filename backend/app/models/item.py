@@ -21,6 +21,7 @@ class Item(Base):
     created_by = Column(String, ForeignKey("users.id"))
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     deleted_at = Column(DateTime, nullable=True)
+    images = relationship("ItemImage", backref="item", cascade="all, delete-orphan")
 
 class ItemImage(Base):
     __tablename__ = "item_images"
