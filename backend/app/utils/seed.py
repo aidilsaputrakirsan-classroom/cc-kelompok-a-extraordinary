@@ -6,9 +6,8 @@ from app.database import engine, Base, SessionLocal
 from app.models import Category, Building, Location, SecurityOfficer
 
 def seed_data():
-    print("Creating tables...")
-    Base.metadata.create_all(bind=engine)
-    
+    print("Connecting to DB for seeding...")
+
     db = SessionLocal()
     try:
         # categories
