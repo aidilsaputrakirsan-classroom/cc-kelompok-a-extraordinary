@@ -2,15 +2,15 @@
 
 ## Current Priority
 
-- **Active Sprint**: `sprint-01`
-- **Periode**: Minggu 1-2
-- **Alignment Modul**: Modul 1 dan Modul 2 sebagai fondasi awal project final
-- **Last Updated**: 2026-03-18
+- **Active Sprint**: `sprint-02`
+- **Periode**: Minggu 3-4
+- **Alignment Modul**: Auth flow dan core item flow
+- **Last Updated**: 2026-04-10
 
 ## Auto-Selection Rule
 
 Jika user hanya menyebut role:
-1. Buka `sprint-01.md`
+1. Buka `sprint-02.md`
 2. Cari section role yang sesuai
 3. Pilih task pertama yang statusnya bukan `done` atau `blocked`
 4. Pastikan semua dependency di kolom `Depends On` sudah `done`
