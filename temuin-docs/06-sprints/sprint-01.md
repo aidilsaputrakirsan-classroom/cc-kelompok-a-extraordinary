@@ -26,19 +26,19 @@ Membuat fondasi project final yang bersih di branch `master`: scaffold backend, 
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| DO-1.1 | Tambah `.env.example` backend dan frontend sesuai arsitektur | High | 1h | - | todo | - | - |
-| DO-1.2 | Siapkan panduan PostgreSQL lokal atau Docker untuk tim | Medium | 2h | DO-1.1 | todo | - | - |
-| DO-1.3 | Review scaffold repo dan pastikan `.gitignore` aman | Medium | 1h | DO-1.1 | todo | - | - |
-| DO-1.4 | Bantu validasi setup lokal setelah backend dan frontend hidup | Medium | 2h | BE-1.4, FE-1.4 | todo | - | - |
+| DO-1.1 | Tambah `.env.example` backend dan frontend sesuai arsitektur | High | 1h | - | done | chore/devops/sprint-01-02-env-firebase | Tambah Firebase vars di backend, buat frontend/.env.example |
+| DO-1.2 | Siapkan panduan PostgreSQL lokal atau Docker untuk tim | Medium | 2h | DO-1.1 | done | chore/devops/sprint-01-02-env-firebase | docs/setup-guide.md |
+| DO-1.3 | Review scaffold repo dan pastikan `.gitignore` aman | Medium | 1h | DO-1.1 | done | chore/devops/sprint-01-02-env-firebase | Tambah Firebase key + AI agent folders ke .gitignore |
+| DO-1.4 | Bantu validasi setup lokal setelah backend dan frontend hidup | Medium | 2h | BE-1.4, FE-1.4 | done | chore/devops/sprint-01-02-env-firebase | Langkah validasi ada di docs/setup-guide.md |
 
 ## Lead QA & Docs (@raniayudewi)
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| QA-1.1 | Review chain dokumen aktif dan catat gap yang membingungkan | High | 1h | - | todo | - | - |
-| QA-1.2 | Lakukan blackbox setup check untuk backend scaffold | Medium | 1h | BE-1.4 | todo | - | - |
-| QA-1.3 | Lakukan blackbox setup check untuk frontend scaffold | Medium | 1h | FE-1.4 | todo | - | - |
-| QA-1.4 | Simpan screenshot bukti halaman awal dan health check | Medium | 1h | QA-1.2, QA-1.3 | todo | - | - |
+| QA-1.1 | Review chain dokumen aktif dan catat gap yang membingungkan | High | 1h | - | done | feature/qa-sprint-01 | Tidak ditemukan gap signifikan |
+| QA-1.2 | Lakukan blackbox setup check untuk backend scaffold | Medium | 1h | BE-1.4 | done | feature/qa-sprint-01 | /health & / endpoint OK, DB connected |
+| QA-1.3 | Lakukan blackbox setup check untuk frontend scaffold | Medium | 1h | FE-1.4 | done | feature/qa-sprint-01 | 2 bug ditemukan & diperbaiki (psycopg2, shadcn import) |
+| QA-1.4 | Simpan screenshot bukti halaman awal dan health check | Medium | 1h | QA-1.2, QA-1.3 | done | feature/qa-sprint-01 | Screenshot di image/sprint-01/ |
 
 ## Quick Links
 

@@ -29,6 +29,9 @@
 - `done` berarti sudah di-push, bukan sekadar selesai lokal
 - PR direkomendasikan untuk review, tapi tidak menjadi syarat mutlak status task
 - Jika behavior berubah, update dokumen aktif yang relevan
+- Agent wajib minta persetujuan user sebelum menjalankan commit dan push
+- Saat membuat PR via CLI, gunakan mode draft (`--draft`)
+- User yang memutuskan kapan PR siap di-review atau di-merge
 
 ## Parallel Workspace Recommendation
 

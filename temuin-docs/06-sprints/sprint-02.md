@@ -17,16 +17,16 @@ Menyelesaikan login Google, JWT internal, flow item dasar, dan halaman utama yan
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| FE-2.1 | Buat LoginPage dan Google login button | High | 3h | FE-1.4, DO-2.1 | todo | - | API: POST /auth/login |
-| FE-2.2 | Buat auth state, logout, dan protected route | High | 3h | FE-2.1, BE-2.3 | todo | - | - |
-| FE-2.3 | Buat HomePage, ItemListPage, dan ItemDetailPage | High | 4h | FE-2.2, BE-2.4 | todo | - | API: GET /items, GET /items/:id |
-| FE-2.4 | Buat CreateItemPage dan form lost/found | High | 4h | FE-2.3, BE-2.4 | todo | - | API: POST /items, Ref: DEC-004, DEC-010, DEC-016 |
+| FE-2.1 | Buat LoginPage dan Google login button | High | 3h | FE-1.4, DO-2.1 | done | feature/sprint2-fe-core | API: POST /auth/login |
+| FE-2.2 | Buat auth state, logout, dan protected route | High | 3h | FE-2.1, BE-2.3 | done | feature/sprint2-fe-core | - |
+| FE-2.3 | Buat HomePage, ItemListPage, dan ItemDetailPage | High | 4h | FE-2.2, BE-2.4 | done | feature/sprint2-fe-core | API: GET /items, GET /items/:id |
+| FE-2.4 | Buat CreateItemPage dan form lost/found | High | 4h | FE-2.3, BE-2.4 | done | feature/sprint2-fe-core | API: POST /items, Ref: DEC-004, DEC-010, DEC-016 |
 
 ## Lead DevOps (@PangeranSilaen)
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| DO-2.1 | Siapkan placeholder konfigurasi Firebase untuk tim | High | 2h | DO-1.1 | todo | - | - |
+| DO-2.1 | Siapkan placeholder konfigurasi Firebase untuk tim | High | 2h | DO-1.1 | done | chore/devops/sprint-01-02-env-firebase | Panduan Firebase lengkap di docs/setup-guide.md |
 | DO-2.2 | Review dan bantu debug issue env atau CORS | Medium | 2h | BE-2.2, FE-2.1 | todo | - | - |
 | DO-2.3 | Tambah panduan singkat test API manual untuk tim | Low | 1h | BE-2.4 | todo | - | - |
 
