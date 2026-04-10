@@ -26,10 +26,10 @@ Membuat fondasi project final yang bersih di branch `master`: scaffold backend, 
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| DO-1.1 | Tambah `.env.example` backend dan frontend sesuai arsitektur | High | 1h | - | todo | - | - |
-| DO-1.2 | Siapkan panduan PostgreSQL lokal atau Docker untuk tim | Medium | 2h | DO-1.1 | todo | - | - |
-| DO-1.3 | Review scaffold repo dan pastikan `.gitignore` aman | Medium | 1h | DO-1.1 | todo | - | - |
-| DO-1.4 | Bantu validasi setup lokal setelah backend dan frontend hidup | Medium | 2h | BE-1.4, FE-1.4 | todo | - | - |
+| DO-1.1 | Tambah `.env.example` backend dan frontend sesuai arsitektur | High | 1h | - | done | chore/devops/sprint-01-02-env-firebase | Tambah Firebase vars di backend, buat frontend/.env.example |
+| DO-1.2 | Siapkan panduan PostgreSQL lokal atau Docker untuk tim | Medium | 2h | DO-1.1 | done | chore/devops/sprint-01-02-env-firebase | docs/setup-guide.md |
+| DO-1.3 | Review scaffold repo dan pastikan `.gitignore` aman | Medium | 1h | DO-1.1 | done | chore/devops/sprint-01-02-env-firebase | Tambah Firebase key + AI agent folders ke .gitignore |
+| DO-1.4 | Bantu validasi setup lokal setelah backend dan frontend hidup | Medium | 2h | BE-1.4, FE-1.4 | done | chore/devops/sprint-01-02-env-firebase | Langkah validasi ada di docs/setup-guide.md |
 
 ## Lead QA & Docs (@raniayudewi)
 
