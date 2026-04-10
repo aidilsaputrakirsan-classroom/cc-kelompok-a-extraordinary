@@ -8,10 +8,10 @@ Menyelesaikan login Google, JWT internal, flow item dasar, dan halaman utama yan
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| BE-2.1 | Integrasi Firebase Admin SDK dan login token verification | High | 3h | BE-1.2 | todo | - | Ref: backend-architecture.md auth flow |
-| BE-2.2 | Buat `POST /auth/login` dan sync user internal | High | 3h | BE-2.1 | todo | - | Ref: DEC-002, prd-user-flows.md login flow |
-| BE-2.3 | Buat `GET /auth/me`, `PUT /auth/me`, dan dependency auth | High | 3h | BE-2.2 | todo | - | - |
-| BE-2.4 | Buat CRUD dasar items dan validasi `found` wajib satpam | High | 4h | BE-1.4, BE-2.3 | todo | - | Ref: DEC-004, DEC-006, DEC-010, DEC-016 |
+| BE-2.1 | Integrasi Firebase Admin SDK dan login token verification | High | 3h | BE-1.2 | done | master | Ref: backend-architecture.md auth flow |
+| BE-2.2 | Buat `POST /auth/login` dan sync user internal | High | 3h | BE-2.1 | done | feat/be-2.2-login-sync | Ref: DEC-002, prd-user-flows.md login flow |
+| BE-2.3 | Buat `GET /auth/me`, `PUT /auth/me`, dan dependency auth | High | 3h | BE-2.2 | done | feat/be-2.2-login-sync | - |
+| BE-2.4 | Buat CRUD dasar items dan validasi `found` wajib satpam | High | 4h | BE-1.4, BE-2.3 | done | feat/be-2.2-login-sync | Ref: DEC-004, DEC-006, DEC-010, DEC-016 |
 
 ## Lead Frontend (@nicholasmnrng)
 
