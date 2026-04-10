@@ -4,6 +4,7 @@ import HomePage from "@/pages/HomePage"
 import LoginPage from "@/pages/LoginPage"
 import ItemListPage from "@/pages/ItemListPage"
 import ItemDetailPage from "@/pages/ItemDetailPage"
+import CreateItemPage from "@/pages/CreateItemPage"
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
 
 export const router = createBrowserRouter([
@@ -26,6 +27,10 @@ export const router = createBrowserRouter([
       {
         path: "items",
         element: <ItemListPage />,
+      },
+      {
+        path: "items/create",
+        element: <CreateItemPage />,
       },
       {
         path: "items/:id",
