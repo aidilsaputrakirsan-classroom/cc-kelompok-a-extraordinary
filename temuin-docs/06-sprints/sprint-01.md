@@ -35,10 +35,10 @@ Membuat fondasi project final yang bersih di branch `master`: scaffold backend, 
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| QA-1.1 | Review chain dokumen aktif dan catat gap yang membingungkan | High | 1h | - | todo | - | - |
-| QA-1.2 | Lakukan blackbox setup check untuk backend scaffold | Medium | 1h | BE-1.4 | todo | - | - |
-| QA-1.3 | Lakukan blackbox setup check untuk frontend scaffold | Medium | 1h | FE-1.4 | todo | - | - |
-| QA-1.4 | Simpan screenshot bukti halaman awal dan health check | Medium | 1h | QA-1.2, QA-1.3 | todo | - | - |
+| QA-1.1 | Review chain dokumen aktif dan catat gap yang membingungkan | High | 1h | - | done | feature/qa-sprint-01 | Tidak ditemukan gap signifikan |
+| QA-1.2 | Lakukan blackbox setup check untuk backend scaffold | Medium | 1h | BE-1.4 | done | feature/qa-sprint-01 | /health & / endpoint OK, DB connected |
+| QA-1.3 | Lakukan blackbox setup check untuk frontend scaffold | Medium | 1h | FE-1.4 | done | feature/qa-sprint-01 | 2 bug ditemukan & diperbaiki (psycopg2, shadcn import) |
+| QA-1.4 | Simpan screenshot bukti halaman awal dan health check | Medium | 1h | QA-1.2, QA-1.3 | done | feature/qa-sprint-01 | Screenshot di image/sprint-01/ |
 
 ## Quick Links
 
