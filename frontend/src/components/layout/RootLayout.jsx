@@ -1,5 +1,6 @@
 import { Outlet, Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
+import { Toaster } from "@/components/ui/sonner"
 
 export default function RootLayout() {
   return (
@@ -17,6 +18,7 @@ export default function RootLayout() {
       <main className="container flex-1 px-4 py-8 mx-auto">
         <Outlet />
       </main>
+      <Toaster />
     </div>
   )
 }
