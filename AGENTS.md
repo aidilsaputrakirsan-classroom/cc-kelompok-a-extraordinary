@@ -14,9 +14,8 @@ Setiap AI coding agent wajib mulai dari file ini sebelum mengerjakan apa pun di 
 ## Repository Rules
 - Source of truth aktif hanya ada di `temuin-docs/`
 - Dokumen di `temuin-docs/archive/` adalah arsip, bukan acuan kerja aktif
-- Base branch final project adalah `project/temuin`
-- Jangan mengandalkan perubahan default branch repo
-- Jangan commit langsung ke `project/temuin`; buat feature branch dari branch itu
+- Base branch final project adalah `master`
+- Jangan commit langsung ke `master`; buat feature branch dari branch itu
 - Frontend wajib memakai `React + Vite + Tailwind CSS + shadcn/ui`
 - Saat agent membangun UI, utamakan komponen dan pola shadcn/ui sebelum membuat markup custom
 

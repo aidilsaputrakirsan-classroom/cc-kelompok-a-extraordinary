@@ -3,9 +3,9 @@
 Temuin adalah project akhir mata kuliah Cloud Computing untuk platform lost and found internal kampus ITK.
 
 ## Working Branch
-- Branch kerja utama final project: `project/temuin`
-- Branch `master` dibiarkan sebagai histori practicum
-- Semua feature branch dibuat dari `project/temuin`
+- Branch kerja utama final project: `master`
+- Branch `praktikum` menyimpan histori practicum
+- Semua feature branch dibuat dari `master`
 
 ## Source of Truth
 - Dokumentasi aktif ada di `temuin-docs/`

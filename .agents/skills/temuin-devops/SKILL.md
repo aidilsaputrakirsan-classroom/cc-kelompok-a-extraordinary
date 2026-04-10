@@ -1,6 +1,6 @@
 ---
 name: temuin-devops
-description: Gunakan saat mengerjakan role devops di project Temuin. Skill ini mengunci agent ke branch project/temuin, docs devops, dan workflow yang tidak bergantung pada permission admin repo.
+description: Gunakan saat mengerjakan role devops di project Temuin. Skill ini mengunci agent ke branch master, docs devops, dan workflow yang tidak bergantung pada permission admin repo.
 ---
 
 # Temuin DevOps
