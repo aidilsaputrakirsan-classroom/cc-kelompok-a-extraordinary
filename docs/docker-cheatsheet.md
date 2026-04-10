@@ -172,23 +172,7 @@ Downloads the specified image from a registry to the local system.
 These debugging tools help the frontend team verify that the backend container is functioning properly and troubleshoot any issues during testing.
 
 **Last Updated**: April 10, 2026  
-**Author**: Lead Frontend - Cloud Computing Project Team# 🐳 Docker Cheatsheet - Praktikum CC
-
-Dokumentasi lengkap Docker commands yang sering dipakai dalam project ini. Cocok untuk development dan production setup.
-
----
-
-## 📋 Daftar Isi
-1. [Build Images](#build-images)
-2. [Run Containers](#run-containers)
-3. [List & Monitor](#list--monitor)
-4. [Logs & Debugging](#logs--debugging)
-5. [Execute Commands](#execute-commands)
-6. [Stop & Remove](#stop--remove)
-7. [Push & Pull](#push--pull)
-8. [Quick Tips](#quick-tips)
-
----
+**Author**: Lead Frontend - Cloud Computing Project Team
 
 ## 🏗️ Build Images
 
