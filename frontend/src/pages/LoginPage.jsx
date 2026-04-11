@@ -1,15 +1,37 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { signInWithPopup } from "firebase/auth"
+import { useAuth } from "@/app/providers"
 import { auth, googleProvider } from "@/config/firebase"
 import { api } from "@/config/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "sonner"
 
+function getErrorMessage(error) {
+  const detail = error.response?.data?.detail
+
+  if (typeof detail === "string") {
+    return detail
+  }
+
+  if (Array.isArray(detail)) {
+    return detail
+      .map((item) => item?.message || item?.msg || JSON.stringify(item))
+      .join("; ")
+  }
+
+  if (detail && typeof detail === "object") {
+    return detail.message || JSON.stringify(detail)
+  }
+
+  return error.message || "Gagal masuk."
+}
+
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const { setInternalToken } = useAuth()
 
   const handleGoogleLogin = async () => {
     try {
@@ -17,17 +39,14 @@ export default function LoginPage() {
       const result = await signInWithPopup(auth, googleProvider)
       const idToken = await result.user.getIdToken()
       
-      // Simulasi request API ke backend
-      const response = await api.post('/auth/login', { token: idToken })
-      
-      // Sesuai rancangan FE-2.1 -> akan dilengkapi pada FE-2.2 (Context/State)
-      localStorage.setItem('internalToken', response.data?.token || 'dummy_internal_token_fe_2.1')
-      
+      const response = await api.post('/auth/login', { id_token: idToken })
+      setInternalToken(response.data.access_token)
+
       toast.success("Login berhasil!")
       navigate("/")
     } catch (error) {
       console.error(error)
-      toast.error(error.message || "Gagal masuk.")
+      toast.error(getErrorMessage(error))
     } finally {
       setLoading(false)
     }

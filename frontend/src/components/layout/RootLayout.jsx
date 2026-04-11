@@ -1,6 +1,5 @@
 import { Outlet, Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { Toaster } from "@/components/ui/sonner"
 import { useAuth } from "@/app/providers"
 
 export default function RootLayout() {
@@ -28,7 +27,6 @@ export default function RootLayout() {
       <main className="container flex-1 px-4 py-8 mx-auto">
         <Outlet />
       </main>
-      <Toaster />
     </div>
   )
 }
