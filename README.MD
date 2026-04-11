@@ -481,3 +481,44 @@ Sebagai bagian dari optimasi containerization, dilakukan perbandingan ukuran bas
 **Kesimpulan QA:** Penggunaan `python:3.12-slim` direkomendasikan untuk menyeimbangkan antara ukuran image yang kecil dan kemudahan instalasi dependencies. Detail lengkap dapat dilihat di [docs/image-comparison.md](./docs/image-comparison.md).
 
 ---
+
+## 🏗️ Arsitektur Docker (Modul 6)
+
+Sebagai bagian dari implementasi containerization, aplikasi Temuin dikelola menggunakan **Docker Compose** dengan arsitektur 3-container (Frontend, Backend, dan Database).
+
+### Diagram Arsitektur (Mermaid)
+
+```mermaid
+graph TD
+    User([User / Browser])
+    
+    subgraph "Docker Host"
+        subgraph "cloudnet (Bridge Network)"
+            Frontend[temuin-frontend<br/>Nginx: Port 80]
+            Backend[temuin-backend<br/>FastAPI: Port 8000]
+            Database[(temuin-db<br/>PostgreSQL: Port 5432)]
+        end
+        
+        Volume[(pgdata<br/>Docker Volume)]
+    end
+
+    User -- "HTTP (Port 5173/3000)" --> Frontend
+    Frontend -- "REST API" --> Backend
+    Backend -- "SQL Connection" --> Database
+    Database -- "Persist Data" --> Volume
+```
+
+### Detail Konfigurasi Container
+
+| Komponen | Image | Port (Internal) | Port (External) | Env Vars Utama | Keterangan |
+|----------|-------|-----------------|-----------------|----------------|------------|
+| **Frontend** | `nginx:alpine` | 80 | 5173 / 3000 | `VITE_API_URL` | Melayani static files React via Nginx |
+| **Backend** | `python:3.12-alpine` | 8000 | 8000 | `DATABASE_URL`, `SECRET_KEY` | Business logic FastAPI |
+| **Database** | `postgres:16-alpine` | 5432 | 5432 | `POSTGRES_USER`, `POSTGRES_DB` | Penyimpanan data relasional |
+
+**Catatan Infrastruktur:**
+- **Network**: Menggunakan bridge network `cloudnet` untuk *internal service discovery* (backend menghubungi database via hostname `db`).
+- **Volume**: Menggunakan volume `pgdata` yang di-mount ke `/var/lib/postgresql/data` untuk memastikan data tetap ada meskipun container dihapus.
+- **Health Check**: Backend dilengkapi dengan health check otomatis via endpoint `/health`.
+
+---
