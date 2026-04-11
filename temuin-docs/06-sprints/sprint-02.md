@@ -28,7 +28,7 @@ Menyelesaikan login Google, JWT internal, flow item dasar, dan halaman utama yan
 |----|------|----------|----------|------------|--------|------------|-------|
 | DO-2.1 | Siapkan placeholder konfigurasi Firebase untuk tim | High | 2h | DO-1.1 | done | chore/devops/sprint-01-02-env-firebase | Panduan Firebase lengkap di docs/setup-guide.md |
 | DO-2.2 | Review dan bantu debug issue env atau CORS | Medium | 2h | BE-2.2, FE-2.1 | done | fix/devops/readme-env-cleanup (PR #29) | Fixed IPv6/CORS env mismatch, consolidated Firebase env vars |
-| DO-2.3 | Tambah panduan singkat test API manual untuk tim | Low | 1h | BE-2.4 | done | chore/devops/do-2.3-api-testing-guide | Ref: api-testing-guide.md |
+| DO-2.3 | Tambah panduan singkat test API manual untuk tim | Low | 1h | BE-2.4 | done | chore/devops/do-2.3-api-testing-guide | Ref: docs/api-testing-guide.md |
 
 ## Lead QA & Docs (@raniayudewi)
 
