@@ -74,20 +74,26 @@ pip install -r requirements.txt
 cp .env.example .env
 # Edit .env sesuai konfigurasi lokal kamu
 
-# Jalankan migrasi database
-alembic upgrade head
+# Buat tabel dari model dan tandai migrasi sudah applied
+python -c "from app.database import engine, Base; from app.models import *; Base.metadata.create_all(bind=engine)"
+alembic stamp head
 
 # Jalankan backend
 uvicorn app.main:app --reload
 ```
 
-Backend akan jalan di `http://localhost:8000`.
+> **Kenapa bukan `alembic upgrade head`?**
+> Migration files yang ada saat ini tidak membuat tabel dari nol (dua migration pertama kosong, yang ketiga hanya alter kolom). Perintah di atas membuat semua tabel langsung dari model Python, lalu `alembic stamp head` menandai bahwa DB sudah sinkron dengan migration terakhir. Ke depan, migration baru bisa dijalankan normal dengan `alembic upgrade head`.
+
+Backend akan jalan di `http://127.0.0.1:8000`.
 
 ### Verifikasi Backend
 
-- Buka `http://localhost:8000` — harus muncul `{"message": "Welcome to Temuin API"}`
-- Buka `http://localhost:8000/health` — harus muncul `{"status": "healthy", "database": "connected"}`
-- Buka `http://localhost:8000/docs` — Swagger UI
+- Buka `http://127.0.0.1:8000` — harus muncul `{"message": "Welcome to Temuin API"}`
+- Buka `http://127.0.0.1:8000/health` — harus muncul `{"status": "healthy", "database": "connected"}`
+- Buka `http://127.0.0.1:8000/docs` — Swagger UI
+
+> **Penting**: Gunakan `127.0.0.1`, bukan `localhost`. Di Windows, `localhost` bisa resolve ke IPv6 `::1` yang mengarah ke proses lain.
 
 ## 4. Setup Frontend
 
@@ -176,7 +182,7 @@ FIREBASE_CREDENTIALS_FILE=serviceAccountKey.json
 
 | Variable                            | Wajib | Contoh                              |
 | ----------------------------------- | ----- | ----------------------------------- |
-| `VITE_API_BASE_URL`                 | Ya    | `http://localhost:8000`             |
+| `VITE_API_BASE_URL`                 | Ya    | `http://127.0.0.1:8000`            |
 | `VITE_FIREBASE_API_KEY`             | Ya    | Dari Firebase Console               |
 | `VITE_FIREBASE_AUTH_DOMAIN`         | Ya    | `temuin-xxx.firebaseapp.com`        |
 | `VITE_FIREBASE_PROJECT_ID`          | Ya    | `temuin-xxx`                        |
@@ -196,5 +202,6 @@ FIREBASE_CREDENTIALS_FILE=serviceAccountKey.json
 - Pastikan Node.js versi 20+
 
 ### CORS error di browser
+- Pastikan backend diakses via `127.0.0.1:8000`, bukan `localhost:8000` (lihat catatan IPv6 di atas)
 - Pastikan `CORS_ORIGINS` di backend `.env` mengandung URL frontend (`http://localhost:5173`)
 - Restart backend setelah ubah `.env`
