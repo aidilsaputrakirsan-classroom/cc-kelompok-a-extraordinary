@@ -13,10 +13,11 @@ Temuin adalah project akhir mata kuliah Cloud Computing untuk platform lost and 
 - Arsip lama hanya disimpan di `temuin-docs/archive/`
 - Workspace-local skills ada di `.agents/skills/`
 
-## Repository Scaffold
-- `backend/` - placeholder backend final project
-- `frontend/` - placeholder frontend final project
+## Repository Structure
+- `backend/` - Backend FastAPI (auth, items, claims, master data)
+- `frontend/` - Frontend React + Vite + Tailwind CSS + shadcn/ui
 - `temuin-docs/` - source of truth project final
+- `docs/` - setup guide dan QA reports
 
 ## Next Read
 1. `AGENTS.md`
@@ -39,7 +40,7 @@ Temuin adalah project akhir mata kuliah Cloud Computing untuk platform lost and 
 ### 🏛️ Architecture Overview
 Temuin menggunakan pendekatan **Monolith-First** yang dirancang untuk skalabilitas menuju **Microservices** (Sprint 06).
 - **Authentication**: Integrasi Firebase Auth untuk login akun kampus ITK (`@itk.ac.id`) dengan sinkronisasi ke PostgreSQL internal.
-- **Storage**: Gambar item dikompresi di frontend dan disimpan sebagai `Base64` di database PostgreSQL sesuai spesifikasi [DEC-016](file:///c:/Users/Rani%20Ayu%20Dewi/OneDrive/Documents/GitHub/cc-kelompok-a-extraordinary/temuin-docs/01-concept/decision-log.md).
+- **Storage**: Gambar item dikompresi di frontend dan disimpan sebagai `Base64` di database PostgreSQL sesuai spesifikasi [DEC-016](temuin-docs/01-concept/decision-log.md).
 
 ### 🛣️ API Endpoints Summary
 
@@ -91,7 +92,24 @@ Setiap fitur diverifikasi melalui proses pengujian *Blackbox*.
 ---
 
 ### 📖 Getting Started
-1. Salin `.env.example` menjadi `.env` di folder `backend/` dan `frontend/`.
-2. Jalankan Backend: `cd backend && pip install -r requirements.txt && python run.py`.
-3. Jalankan Frontend: `cd frontend && npm install && npm run dev`.
-4. Panduan lengkap tersedia di: [docker-run-guide.md](file:///c:/Users/Rani%20Ayu%20Dewi/OneDrive/Documents/GitHub/cc-kelompok-a-extraordinary/docs/docker-run-guide.md).
+
+1. Salin `.env.example` menjadi `.env` di folder `backend/` dan `frontend/`, lalu isi nilainya.
+   - `SECRET_KEY` di backend wajib diisi (string random untuk JWT signing).
+   - `FIREBASE_CREDENTIALS_FILE` di backend diisi path ke service account key dari Firebase Console.
+   - Variabel `VITE_FIREBASE_*` di frontend diisi dari Firebase Console > Project Settings > Web app.
+2. Jalankan Backend:
+   ```bash
+   cd backend
+   python -m venv .venv
+   .venv\Scripts\activate        # Windows (atau: source .venv/bin/activate di macOS/Linux)
+   pip install -r requirements.txt
+   alembic upgrade head
+   uvicorn app.main:app --reload
+   ```
+3. Jalankan Frontend:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+4. Panduan lengkap tersedia di: [docs/setup-guide.md](docs/setup-guide.md).

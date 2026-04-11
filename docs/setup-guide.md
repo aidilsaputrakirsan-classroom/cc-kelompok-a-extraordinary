@@ -152,7 +152,7 @@ VITE_FIREBASE_APP_ID=1:123456789:web:abcdef
 5. Isi path di `backend/.env`:
 
 ```
-FIREBASE_SERVICE_ACCOUNT_PATH=serviceAccountKey.json
+FIREBASE_CREDENTIALS_FILE=serviceAccountKey.json
 ```
 
 > **PENTING**: Jangan commit file `serviceAccountKey.json` ke git. File ini sudah masuk `.gitignore`.
@@ -168,7 +168,7 @@ FIREBASE_SERVICE_ACCOUNT_PATH=serviceAccountKey.json
 | `ALGORITHM`                    | Tidak | `HS256` (default)                                       |
 | `ACCESS_TOKEN_EXPIRE_MINUTES`  | Tidak | `60` (default)                                          |
 | `CORS_ORIGINS`                 | Tidak | `["http://localhost:5173"]`                             |
-| `FIREBASE_SERVICE_ACCOUNT_PATH`| Ya*   | `serviceAccountKey.json`                                |
+| `FIREBASE_CREDENTIALS_FILE`    | Ya*   | `serviceAccountKey.json`                                |
 
 *Wajib mulai Sprint 02 saat auth flow aktif.
 
