@@ -26,10 +26,10 @@ Menyelesaikan search, filter, claim flow, notifications, dan master data.
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| DO-3.1 | Buat Dockerfile backend | High | 2h | BE-2.4 | todo | - | - |
-| DO-3.2 | Buat Dockerfile frontend | High | 2h | FE-2.4 | todo | - | - |
-| DO-3.3 | Buat `docker-compose.yml` monolith | High | 3h | DO-3.1, DO-3.2 | todo | - | - |
-| DO-3.4 | Tulis panduan singkat menjalankan Docker Compose | Medium | 1h | DO-3.3 | todo | - | - |
+| DO-3.1 | Buat Dockerfile backend | High | 2h | BE-2.4 | in_progress | feat/devops/sprint-03-docker | Multi-stage Alpine, entrypoint.sh with Alembic |
+| DO-3.2 | Buat Dockerfile frontend | High | 2h | FE-2.4 | in_progress | feat/devops/sprint-03-docker | Node build + Nginx serve, SPA routing |
+| DO-3.3 | Buat `docker-compose.yml` monolith | High | 3h | DO-3.1, DO-3.2 | in_progress | feat/devops/sprint-03-docker | + runner scripts (sh/ps1), .env.docker |
+| DO-3.4 | Tulis panduan singkat menjalankan Docker Compose | Medium | 1h | DO-3.3 | in_progress | feat/devops/sprint-03-docker | Added to devops.md |
 
 ## Lead QA & Docs (@raniayudewi)
 
