@@ -1,0 +1,29 @@
+# Dependencies (will be installed fresh in container)
+node_modules/
+
+# Build output (will be built in container)
+dist/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Documentation
+*.md
+
+# OS artifacts
+.DS_Store
+Thumbs.db
