@@ -53,15 +53,15 @@ Temuin menggunakan pendekatan **Monolith-First** yang dirancang untuk skalabilit
 #### 🔑 Auth Endpoints
 | Method | Endpoint | Description | Access | Status |
 |:---:|---|---|:---:|:---:|
-| `POST` | `/auth/login` | Exchange Firebase token for Internal JWT | Public | 🏗️ Sprint 2 |
-| `GET` | `/auth/me` | Current user profile | Protected 🔒 | 🏗️ Sprint 2 |
+| `POST` | `/auth/login` | Exchange Firebase token for Internal JWT | Public | ✅ Active |
+| `GET` | `/auth/me` | Current user profile | Protected 🔒 | ✅ Active |
 
 #### 📦 Item Endpoints (Protected 🔒)
 | Method | Endpoint | Description | Status |
 |:---:|---|---|:---:|
-| `GET` | `/items` | List items (with Search & Filter) | 🏗️ Sprint 2 |
-| `POST` | `/items` | Report new Lost or Found item | 🏗️ Sprint 2 |
-| `GET` | `/items/:id` | Item Detail by ID | 🏗️ Sprint 2 |
+| `GET` | `/items` | List items (with Search & Filter) | ✅ Active |
+| `POST` | `/items` | Report new Lost or Found item | ✅ Active (API) |
+| `GET` | `/items/:id` | Item Detail by ID | ✅ Active |
 
 ---
 
@@ -81,10 +81,12 @@ Setiap fitur diverifikasi melalui proses pengujian *Blackbox*.
 - **Sprint 01 (Verified)**:
   - ✅ Setup backend & frontend scaffold verified.
   - ✅ Health check endpoint active & DB connected.
+  - 📄 **Detail**: [docs/sprint-01-qa-report.md](docs/sprint-01-qa-report.md)
 - **Sprint 02 (Verified)**:
   - ✅ Login Google & ITK Email Validation (Frontend & Backend).
   - ✅ Item Listing & Detail functionality.
-  - ⚠️ Item Creation (Frontend Mockup): UI Flow sudah siap, namun integrasi API untuk simpan data permanen masih dalam tahap simulasi oleh tim frontend.
+  - ⚠️ Item Creation (Frontend Mockup): UI Flow sudah siap.
+  - 📄 **Detail**: [docs/sprint-02-qa-report.md](docs/sprint-02-qa-report.md)
 
 > [!TIP]
 > Detail hasil pengujian dan bukti screenshot dapat diakses pada [docs/sprint-02-qa-report.md](docs/sprint-02-qa-report.md) atau folder bukti gambar di [image/sprint-02/](image/sprint-02/).
