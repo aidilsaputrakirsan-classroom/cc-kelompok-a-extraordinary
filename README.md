@@ -69,8 +69,8 @@ Temuin menggunakan pendekatan **Monolith-First** yang dirancang untuk skalabilit
 | Sprint | Fokus Utama | Status | Note |
 |:---:|---|:---:|---|
 | **01** | Foundation: Scaffold & Data Models | ✅ **Done** | Base structure established |
-| **02** | Auth & Core Item Flow | 🏗️ **In Progress** | Implementation stage |
-| **03** | Search, Claim, & Master Data | ⏳ Todo | - |
+| **02** | Auth & Core Item Flow | ✅ **Done** | Core auth & list flow verified |
+| **03** | Search, Claim, & Master Data | 🏗️ **In Progress** | - |
 | **04** | Docker & Mid-Term Readiness | ⏳ Todo | - |
 
 ---
@@ -81,13 +81,13 @@ Setiap fitur diverifikasi melalui proses pengujian *Blackbox*.
 - **Sprint 01 (Verified)**:
   - ✅ Setup backend & frontend scaffold verified.
   - ✅ Health check endpoint active & DB connected.
-  - ✅ Bug fix: `psycopg2` dependency & `shadcn` import issues resolved.
-- **Sprint 02 (Draf Target)**:
-  - ◻️ Login Google & ITK Email Validation.
-  - ◻️ Item CRUD (Lost & Found reporting).
+- **Sprint 02 (Verified)**:
+  - ✅ Login Google & ITK Email Validation (Frontend & Backend).
+  - ✅ Item Listing & Detail functionality.
+  - ⚠️ Item Creation (Frontend Mockup): UI Flow sudah siap, namun integrasi API untuk simpan data permanen masih dalam tahap simulasi oleh tim frontend.
 
 > [!TIP]
-> Detail hasil pengujian dan bukti screenshot dapat diakses pada folder internal `temuin-docs/06-sprints/` atau folder bukti gambar di `images/sprint-xx/`.
+> Detail hasil pengujian dan bukti screenshot dapat diakses pada [docs/sprint-02-qa-report.md](docs/sprint-02-qa-report.md) atau folder bukti gambar di [image/sprint-02/](image/sprint-02/).
 
 ---
 

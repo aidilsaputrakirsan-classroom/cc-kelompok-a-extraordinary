@@ -34,10 +34,10 @@ Menyelesaikan login Google, JWT internal, flow item dasar, dan halaman utama yan
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| QA-2.1 | Blackbox login flow dan validasi email kampus | High | 2h | FE-2.2, BE-2.3 | todo | - | - |
-| QA-2.2 | Blackbox create item, list item, dan detail item | High | 2h | FE-2.4, BE-2.4 | todo | - | - |
-| QA-2.3 | Simpan screenshot flow login dan create item | Medium | 1h | QA-2.1, QA-2.2 | todo | - | - |
-| QA-2.4 | Update dokumen bila ada langkah auth atau item flow yang berubah | Medium | 1h | QA-2.1, QA-2.2 | todo | - | - |
+| QA-2.1 | Blackbox login flow dan validasi email kampus | High | 2h | FE-2.2, BE-2.3 | done | master | Ref: docs/sprint-02-qa-report.md |
+| QA-2.2 | Blackbox create item, list item, dan detail item | High | 2h | FE-2.4, BE-2.4 | done | master | Ref: docs/sprint-02-qa-report.md |
+| QA-2.3 | Simpan screenshot flow login dan create item | Medium | 1h | QA-2.1, QA-2.2 | done | master | Files in image/sprint-02/ |
+| QA-2.4 | Update dokumen bila ada langkah auth atau item flow yang berubah | Medium | 1h | QA-2.1, QA-2.2 | done | master | README updated |
 
 ## Quick Links
 
