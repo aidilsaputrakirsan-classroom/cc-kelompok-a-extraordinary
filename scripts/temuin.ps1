@@ -1,0 +1,210 @@
+# ============================================================
+# Temuin - Docker Runner Script (PowerShell)
+# ============================================================
+# Usage: .\scripts\temuin.ps1 [command]
+# Commands: start, stop, restart, status, logs, build, pull,
+#           migrate, seed, help
+# ============================================================
+
+param(
+    [Parameter(Position = 0)]
+    [string]$Command = "help",
+
+    [Parameter(Position = 1)]
+    [string]$Service = ""
+)
+
+$ErrorActionPreference = "Stop"
+
+# Navigate to project root (where docker-compose.yml lives)
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$ProjectRoot = Split-Path -Parent $ScriptDir
+Set-Location $ProjectRoot
+
+# ============================================================
+# Helpers
+# ============================================================
+
+function Write-Color {
+    param([string]$Text, [string]$Color = "White")
+    Write-Host $Text -ForegroundColor $Color
+}
+
+function Test-Docker {
+    if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+        Write-Color "Error: Docker is not installed or not in PATH" "Red"
+        exit 1
+    }
+    $composeCheck = docker compose version 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Color "Error: Docker Compose V2 is not available" "Red"
+        exit 1
+    }
+}
+
+function Test-EnvFile {
+    if (-not (Test-Path ".env")) {
+        Write-Color "Warning: .env file not found." "Yellow"
+        Write-Host "Copying from .env.docker template..."
+        Copy-Item ".env.docker" ".env"
+        Write-Color ".env created from .env.docker" "Green"
+        Write-Color "Please edit .env with your actual values (especially Firebase config)." "Yellow"
+    }
+}
+
+# ============================================================
+# Commands
+# ============================================================
+
+function Invoke-Start {
+    Write-Color "=== Starting Temuin ===" "Cyan"
+    Test-Docker
+    Test-EnvFile
+    docker compose up -d
+    Write-Host ""
+    Invoke-Status
+}
+
+function Invoke-Stop {
+    Write-Color "=== Stopping Temuin ===" "Cyan"
+    Test-Docker
+    docker compose down
+    Write-Color "All containers stopped." "Green"
+}
+
+function Invoke-Restart {
+    Write-Color "=== Restarting Temuin ===" "Cyan"
+    Invoke-Stop
+    Write-Host ""
+    Invoke-Start
+}
+
+function Invoke-Status {
+    Test-Docker
+    Write-Color "=== Container Status ===" "Cyan"
+    docker compose ps
+    Write-Host ""
+    Write-Color "=== Access URLs ===" "Cyan"
+    Write-Host "  Frontend:  " -NoNewline; Write-Color "http://localhost:3000" "Green"
+    Write-Host "  Backend:   " -NoNewline; Write-Color "http://localhost:8000" "Green"
+    Write-Host "  API Docs:  " -NoNewline; Write-Color "http://localhost:8000/docs" "Green"
+    Write-Host "  Database:  " -NoNewline; Write-Color "localhost:5434 (user: postgres)" "Green"
+}
+
+function Invoke-Logs {
+    Test-Docker
+    if ($Service -eq "") {
+        docker compose logs -f --tail=100
+    }
+    else {
+        docker compose logs -f --tail=100 $Service
+    }
+}
+
+function Invoke-Build {
+    Write-Color "=== Building Temuin Images ===" "Cyan"
+    Test-Docker
+    Test-EnvFile
+    docker compose build
+    Write-Color "Build complete." "Green"
+}
+
+function Invoke-Pull {
+    Write-Color "=== Pulling Temuin Images from Docker Hub ===" "Cyan"
+    Test-Docker
+    docker compose pull backend frontend
+    Write-Color "Pull complete." "Green"
+}
+
+function Invoke-Migrate {
+    Write-Color "=== Running Alembic Migrations ===" "Cyan"
+    Test-Docker
+    docker compose exec backend alembic upgrade head
+    Write-Color "Migrations complete." "Green"
+}
+
+function Invoke-Seed {
+    Write-Color "=== Seeding Database ===" "Cyan"
+    Test-Docker
+
+    $dbRunning = docker compose ps db 2>&1 | Select-String "running"
+    if (-not $dbRunning) {
+        Write-Color "Error: Database container is not running. Run '.\scripts\temuin.ps1 start' first." "Red"
+        exit 1
+    }
+
+    Write-Host "Creating seed data..."
+    $seedSQL = @"
+        INSERT INTO categories (name, description) VALUES
+            ('Elektronik', 'Perangkat elektronik seperti laptop, HP, charger'),
+            ('Dokumen', 'KTM, KTP, SIM, dan dokumen penting lainnya'),
+            ('Aksesoris', 'Jam tangan, kacamata, perhiasan'),
+            ('Pakaian', 'Jaket, topi, sepatu, dan pakaian lainnya'),
+            ('Lainnya', 'Barang lain yang tidak masuk kategori di atas')
+        ON CONFLICT DO NOTHING;
+
+        INSERT INTO buildings (name, code) VALUES
+            ('Gedung Kuliah Bersama', 'GKB'),
+            ('Gedung Rektorat', 'REK'),
+            ('Perpustakaan', 'LIB'),
+            ('Gedung Teknik Informatika', 'IF'),
+            ('Kantin Pusat', 'KAN')
+        ON CONFLICT DO NOTHING;
+"@
+
+    docker compose exec db psql -U postgres -d temuin_db -c $seedSQL 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Color "Note: Some seed data may already exist or tables not yet created." "Yellow"
+    }
+
+    Write-Color "Seed complete." "Green"
+}
+
+function Invoke-Help {
+    Write-Color "============================================================" "Cyan"
+    Write-Color "  Temuin - Docker Runner" "Cyan"
+    Write-Color "============================================================" "Cyan"
+    Write-Host ""
+    Write-Host "Usage: " -NoNewline; Write-Color ".\scripts\temuin.ps1" "Green" -NoNewline; Write-Color " [command]" "Yellow"
+    Write-Host ""
+    Write-Host "Commands:"
+    Write-Host "  " -NoNewline; Write-Color "start" "Green" -NoNewline; Write-Host "              Start all containers"
+    Write-Host "  " -NoNewline; Write-Color "stop" "Green" -NoNewline; Write-Host "               Stop all containers"
+    Write-Host "  " -NoNewline; Write-Color "restart" "Green" -NoNewline; Write-Host "            Restart all containers"
+    Write-Host "  " -NoNewline; Write-Color "status" "Green" -NoNewline; Write-Host "             Show container status and URLs"
+    Write-Host "  " -NoNewline; Write-Color "logs" "Green" -NoNewline; Write-Host " [service]     Tail logs (optional: db, backend, frontend)"
+    Write-Host "  " -NoNewline; Write-Color "build" "Green" -NoNewline; Write-Host "              Build images locally"
+    Write-Host "  " -NoNewline; Write-Color "pull" "Green" -NoNewline; Write-Host "               Pull images from Docker Hub"
+    Write-Host "  " -NoNewline; Write-Color "migrate" "Green" -NoNewline; Write-Host "            Run Alembic database migrations"
+    Write-Host "  " -NoNewline; Write-Color "seed" "Green" -NoNewline; Write-Host "               Seed database with initial data"
+    Write-Host "  " -NoNewline; Write-Color "help" "Green" -NoNewline; Write-Host "               Show this help message"
+    Write-Host ""
+    Write-Host "Examples:"
+    Write-Host "  .\scripts\temuin.ps1 start          # Start everything"
+    Write-Host "  .\scripts\temuin.ps1 logs backend    # Tail backend logs"
+    Write-Host "  .\scripts\temuin.ps1 seed            # Seed the database"
+    Write-Host ""
+}
+
+# ============================================================
+# Main
+# ============================================================
+
+switch ($Command.ToLower()) {
+    "start"   { Invoke-Start }
+    "stop"    { Invoke-Stop }
+    "restart" { Invoke-Restart }
+    "status"  { Invoke-Status }
+    "logs"    { Invoke-Logs }
+    "build"   { Invoke-Build }
+    "pull"    { Invoke-Pull }
+    "migrate" { Invoke-Migrate }
+    "seed"    { Invoke-Seed }
+    "help"    { Invoke-Help }
+    default {
+        Write-Color "Unknown command: $Command" "Red"
+        Write-Host ""
+        Invoke-Help
+        exit 1
+    }
+}

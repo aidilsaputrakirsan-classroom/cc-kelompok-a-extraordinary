@@ -1,0 +1,89 @@
+# ============================================================
+# Temuin - Docker Compose (Monolith)
+# ============================================================
+# Services: PostgreSQL + FastAPI Backend + React Frontend
+# Usage:    docker compose up -d
+# Docs:     temuin-docs/05-roles/devops.md
+# ============================================================
+
+services:
+  # --- PostgreSQL Database ---
+  db:
+    image: postgres:16-alpine
+    container_name: temuin-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres123}
+      POSTGRES_DB: ${DB_NAME:-temuin_db}
+    ports:
+      - "${DB_PORT:-5434}:5432"
+    volumes:
+      - temuin_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-temuin_db}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - temuin-net
+
+  # --- FastAPI Backend ---
+  backend:
+    image: pangeransilaen/temuin-backend:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: temuin-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres123}@temuin-db:5432/${DB_NAME:-temuin_db}
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+      CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:3000","http://localhost:5173"]}
+      FIREBASE_CREDENTIALS_FILE: ${FIREBASE_CREDENTIALS_FILE:-/app/serviceAccountKey.json}
+      DB_HOST: temuin-db
+      DB_PORT: "5432"
+      DB_USER: ${DB_USER:-postgres}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/serviceAccountKey.json:/app/serviceAccountKey.json:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - temuin-net
+
+  # --- React Frontend (Nginx) ---
+  frontend:
+    image: pangeransilaen/temuin-frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+        VITE_FIREBASE_API_KEY: ${VITE_FIREBASE_API_KEY:-}
+        VITE_FIREBASE_AUTH_DOMAIN: ${VITE_FIREBASE_AUTH_DOMAIN:-}
+        VITE_FIREBASE_PROJECT_ID: ${VITE_FIREBASE_PROJECT_ID:-}
+        VITE_FIREBASE_STORAGE_BUCKET: ${VITE_FIREBASE_STORAGE_BUCKET:-}
+        VITE_FIREBASE_MESSAGING_SENDER_ID: ${VITE_FIREBASE_MESSAGING_SENDER_ID:-}
+        VITE_FIREBASE_APP_ID: ${VITE_FIREBASE_APP_ID:-}
+    container_name: temuin-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - temuin-net
+
+volumes:
+  temuin_pgdata:
+    name: temuin_pgdata
+
+networks:
+  temuin-net:
+    name: temuin-net
+    driver: bridge
