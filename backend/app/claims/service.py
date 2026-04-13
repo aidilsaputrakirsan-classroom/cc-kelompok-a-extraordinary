@@ -34,8 +34,7 @@ def create_claim(db: Session, user_id: str, claim_in: ClaimCreate) -> Claim:
         ownership_answer=claim_in.ownership_answer
     )
     db.add(new_claim)
-    db.commit()
-    db.refresh(new_claim)
+    db.flush()
     
     history = ClaimStatusHistory(
         claim_id=new_claim.id,
@@ -44,21 +43,44 @@ def create_claim(db: Session, user_id: str, claim_in: ClaimCreate) -> Claim:
     )
     db.add(history)
     db.commit()
+    db.refresh(new_claim)
     
     return new_claim
 
 def get_claims_by_user(db: Session, user_id: str):
     return db.query(Claim).filter(Claim.user_id == user_id).all()
 
-def get_claim_by_id(db: Session, claim_id: str):
+def get_claim_by_id(db: Session, claim_id: str, user_id: str):
     claim = db.query(Claim).filter(Claim.id == claim_id).first()
     if not claim:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Claim not found")
+        
+    from app.models.user import User
+    user = db.query(User).filter(User.id == user_id).first()
+    item = db.query(Item).filter(Item.id == claim.item_id).first()
+    
+    is_claim_owner = claim.user_id == user_id
+    is_item_owner = item and item.created_by == user_id
+    is_admin = user and user.role in ["admin", "superadmin"]
+    
+    if not is_claim_owner and not is_item_owner and not is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to view this claim")
+        
     return claim
 
 def get_claims_by_item(db: Session, item_id: str, user_id: str):
-    # Retrieve claims for an item. The requester must be the item owner or an admin
-    # For now, let's just return them, filtering in router if needed.
+    item = db.query(Item).filter(Item.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+
+    from app.models.user import User
+    user = db.query(User).filter(User.id == user_id).first()
+    is_item_owner = item.created_by == user_id
+    is_admin = user and user.role in ["admin", "superadmin"]
+    
+    if not is_item_owner and not is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only item owner or admin can view claims for this item")
+        
     return db.query(Claim).filter(Claim.item_id == item_id).all()
 
 def update_claim_status(db: Session, claim_id: str, payload: ClaimStatusUpdate, user_id: str):
@@ -66,11 +88,20 @@ def update_claim_status(db: Session, claim_id: str, payload: ClaimStatusUpdate, 
     if not claim:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Claim not found")
 
-    valid_statuses = ["pending", "approved", "rejected", "completed", "cancelled"]
-    if payload.status not in valid_statuses:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid status")
-        
     item = db.query(Item).filter(Item.id == claim.item_id).first()
+    
+    from app.models.user import User
+    user = db.query(User).filter(User.id == user_id).first()
+    is_item_owner = item and item.created_by == user_id
+    is_claim_owner = claim.user_id == user_id
+    is_admin = user and user.role in ["admin", "superadmin"]
+
+    if payload.status in ["approved", "rejected", "completed"]:
+        if not is_item_owner and not is_admin:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only item owner or admin can approve/reject/complete claims")
+    elif payload.status == "cancelled":
+        if not is_claim_owner and not is_admin:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only claim owner or admin can cancel a claim")
     
     # Update claim status
     claim.status = payload.status

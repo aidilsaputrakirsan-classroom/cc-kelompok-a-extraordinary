@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Literal
 from datetime import datetime
 
 class ClaimCreate(BaseModel):
@@ -7,7 +7,7 @@ class ClaimCreate(BaseModel):
     ownership_answer: str
 
 class ClaimStatusUpdate(BaseModel):
-    status: str
+    status: Literal["approved", "rejected", "completed", "cancelled"]
 
 class ClaimResponse(BaseModel):
     id: str

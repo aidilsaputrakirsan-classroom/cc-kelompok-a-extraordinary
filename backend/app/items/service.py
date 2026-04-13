@@ -68,7 +68,8 @@ def get_items(
     query = db.query(Item).filter(Item.deleted_at == None)
     
     if search:
-        query = query.filter(or_(Item.title.ilike(f"%{search}%"), Item.description.ilike(f"%{search}%")))
+        escaped = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        query = query.filter(or_(Item.title.ilike(f"%{escaped}%", escape="\\"), Item.description.ilike(f"%{escaped}%", escape="\\")))
     if type:
         query = query.filter(Item.type == type)
     if status:

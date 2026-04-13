@@ -42,7 +42,7 @@ def get_claim_detail(
     """
     Ambil detail dari suatu claim berdasarkan ID.
     """
-    return service.get_claim_by_id(db=db, claim_id=claim_id)
+    return service.get_claim_by_id(db=db, claim_id=claim_id, user_id=current_user.id)
 
 @router.get("/", response_model=List[schemas.ClaimResponse])
 def get_claims_for_item(

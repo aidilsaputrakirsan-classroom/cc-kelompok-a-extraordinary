@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
@@ -18,7 +18,7 @@ def list_items(
     skip: int = 0, 
     limit: int = 100, 
     search: Optional[str] = None,
-    type: Optional[str] = None,
+    item_type: Optional[str] = Query(None, alias="type"),
     status: Optional[str] = None,
     category_id: Optional[str] = None,
     building_id: Optional[str] = None,
@@ -27,7 +27,7 @@ def list_items(
 ):
     return service.get_items(
         db=db, skip=skip, limit=limit, search=search, 
-        type=type, status=status, category_id=category_id, 
+        type=item_type, status=status, category_id=category_id, 
         building_id=building_id, location_id=location_id
     )
 
