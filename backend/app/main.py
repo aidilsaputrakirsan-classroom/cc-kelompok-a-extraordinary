@@ -8,6 +8,9 @@ from firebase_admin import credentials
 from app.config import settings
 from app.auth.router import router as auth_router
 from app.items.router import router as items_router
+from app.claims.router import router as claims_router
+from app.master_data.router import router as master_data_router
+from app.notifications.router import router as notifications_router
 
 app = FastAPI(
     title="Temuin API",
@@ -44,6 +47,9 @@ def read_root():
 
 app.include_router(auth_router)
 app.include_router(items_router)
+app.include_router(claims_router)
+app.include_router(master_data_router)
+app.include_router(notifications_router)
 
 @app.get("/health")
 def health_check(db: Session = Depends(get_db)):

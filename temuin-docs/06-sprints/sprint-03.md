@@ -8,10 +8,10 @@ Menyelesaikan search, filter, claim flow, notifications, dan master data.
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| BE-3.1 | Buat endpoint claim dan aturan satu claim aktif | High | 4h | BE-2.4 | todo | - | Ref: DEC-005, DEC-007 |
-| BE-3.2 | Sinkronkan perubahan status item dan claim + history | High | 3h | BE-3.1 | todo | - | - |
-| BE-3.3 | Tambah search, filter, dan pagination items | High | 3h | BE-2.4 | todo | - | Include pagination query params |
-| BE-3.4 | Tambah CRUD master data dan notification endpoints | Medium | 4h | BE-3.2 | todo | - | Notif testable via API dulu, full event flow di Sprint 4 |
+| BE-3.1 | Buat endpoint claim dan aturan satu claim aktif | High | 4h | BE-2.4 | done | feat/be-3.1-claim-endpoint | Ref: DEC-005, DEC-007 |
+| BE-3.2 | Sinkronkan perubahan status item dan claim + history | High | 3h | BE-3.1 | done | feat/be-3.1-claim-endpoint | - |
+| BE-3.3 | Tambah search, filter, dan pagination items | High | 3h | BE-2.4 | done | feat/be-3.1-claim-endpoint | Include pagination query params |
+| BE-3.4 | Tambah CRUD master data dan notification endpoints | Medium | 4h | BE-3.2 | done | feat/be-3.1-claim-endpoint | Notif testable via API dulu, full event flow di Sprint 4 |
 
 ## Lead Frontend (@nicholasmnrng)
 

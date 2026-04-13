@@ -2,10 +2,10 @@
 
 ## Current Priority
 
-- **Active Sprint**: `sprint-02`
-- **Periode**: Minggu 3-4
-- **Alignment Modul**: Auth flow dan core item flow
-- **Last Updated**: 2026-04-10
+- **Active Sprint**: `sprint-03`
+- **Periode**: Minggu 5-6
+- **Alignment Modul**: Interaksi antar entity (Claim, Notif)
+- **Last Updated**: 2026-04-13
 
 ## Auto-Selection Rule
 
