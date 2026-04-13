@@ -26,8 +26,14 @@ Set-Location $ProjectRoot
 # ============================================================
 
 function Write-Color {
-    param([string]$Text, [string]$Color = "White")
-    Write-Host $Text -ForegroundColor $Color
+    param(
+        [string]$Text,
+        [string]$Color = "White",
+        [switch]$NoNewline
+    )
+    $params = @{ Object = $Text; ForegroundColor = $Color }
+    if ($NoNewline) { $params.NoNewline = $true }
+    Write-Host @params
 }
 
 function Test-Docker {
@@ -56,10 +62,19 @@ function Test-EnvFile {
 # Commands
 # ============================================================
 
+function Test-FirebaseCreds {
+    if (-not (Test-Path "backend/serviceAccountKey.json")) {
+        Write-Color "WARNING: backend/serviceAccountKey.json not found." "Yellow"
+        Write-Host "Creating empty placeholder. Firebase auth will NOT work until you add the real file."
+        '{}' | Set-Content "backend/serviceAccountKey.json" -Encoding UTF8
+    }
+}
+
 function Invoke-Start {
     Write-Color "=== Starting Temuin ===" "Cyan"
     Test-Docker
     Test-EnvFile
+    Test-FirebaseCreds
     docker compose up -d
     Write-Host ""
     Invoke-Status

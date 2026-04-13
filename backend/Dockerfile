@@ -52,11 +52,10 @@ ENV PATH="/opt/venv/bin:$PATH"
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Copy application code
+# Copy application code (includes entrypoint.sh)
 COPY . .
 
-# Copy and set entrypoint
-COPY entrypoint.sh /app/entrypoint.sh
+# Make entrypoint executable
 RUN chmod +x /app/entrypoint.sh
 
 # Security: run as non-root user

@@ -45,6 +45,15 @@ check_env() {
     fi
 }
 
+# Check Firebase credentials exist
+check_firebase() {
+    if [ ! -f "backend/serviceAccountKey.json" ]; then
+        echo -e "${YELLOW}WARNING: backend/serviceAccountKey.json not found.${NC}"
+        echo "Creating empty placeholder. Firebase auth will NOT work until you add the real file."
+        echo '{}' > backend/serviceAccountKey.json
+    fi
+}
+
 # ============================================================
 # Commands
 # ============================================================
@@ -53,6 +62,7 @@ cmd_start() {
     echo -e "${CYAN}=== Starting Temuin ===${NC}"
     check_docker
     check_env
+    check_firebase
     docker compose up -d
     echo ""
     cmd_status
