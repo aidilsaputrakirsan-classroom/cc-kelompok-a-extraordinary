@@ -6,6 +6,9 @@ class ClaimCreate(BaseModel):
     item_id: str
     ownership_answer: str
 
+class ClaimStatusUpdate(BaseModel):
+    status: str
+
 class ClaimResponse(BaseModel):
     id: str
     item_id: str

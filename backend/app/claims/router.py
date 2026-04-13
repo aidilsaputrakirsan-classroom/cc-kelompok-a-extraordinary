@@ -54,3 +54,16 @@ def get_claims_for_item(
     Ambil semua claim untuk suatu item. Biasanya dipakai oleh pemilik item untuk me-review.
     """
     return service.get_claims_by_item(db=db, item_id=item_id, user_id=current_user.id)
+
+@router.put("/{claim_id}/status", response_model=schemas.ClaimResponse)
+def update_claim_status(
+    claim_id: str,
+    payload: schemas.ClaimStatusUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Ubah status klaim (misal: dirubah oleh pemilik item menjadi approved atau rejected).
+    Ini juga akan mensinkronkan status item terkait.
+    """
+    return service.update_claim_status(db=db, claim_id=claim_id, payload=payload, user_id=current_user.id)

@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from app.models.claim import Claim, ClaimStatusHistory
-from app.models.item import Item
-from app.claims.schemas import ClaimCreate
+from app.models.item import Item, ItemStatusHistory
+from app.claims.schemas import ClaimCreate, ClaimStatusUpdate
 
 def create_claim(db: Session, user_id: str, claim_in: ClaimCreate) -> Claim:
     item = db.query(Item).filter(Item.id == claim_in.item_id).first()
@@ -60,3 +60,49 @@ def get_claims_by_item(db: Session, item_id: str, user_id: str):
     # Retrieve claims for an item. The requester must be the item owner or an admin
     # For now, let's just return them, filtering in router if needed.
     return db.query(Claim).filter(Claim.item_id == item_id).all()
+
+def update_claim_status(db: Session, claim_id: str, payload: ClaimStatusUpdate, user_id: str):
+    claim = db.query(Claim).filter(Claim.id == claim_id).first()
+    if not claim:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Claim not found")
+
+    valid_statuses = ["pending", "approved", "rejected", "completed", "cancelled"]
+    if payload.status not in valid_statuses:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid status")
+        
+    item = db.query(Item).filter(Item.id == claim.item_id).first()
+    
+    # Update claim status
+    claim.status = payload.status
+    db.add(claim)
+    
+    # Log claim history
+    history = ClaimStatusHistory(
+        claim_id=claim.id,
+        status=payload.status,
+        changed_by=user_id
+    )
+    db.add(history)
+    
+    # Sync item status based on claim status
+    new_item_status = None
+    if payload.status == "approved":
+        new_item_status = "in_claim"
+    elif payload.status == "completed":
+        new_item_status = "returned"
+    elif payload.status in ["rejected", "cancelled"]:
+        new_item_status = "open"
+        
+    if new_item_status and item and item.status != new_item_status:
+        item.status = new_item_status
+        db.add(item)
+        item_history = ItemStatusHistory(
+            item_id=item.id,
+            status=new_item_status,
+            changed_by=user_id
+        )
+        db.add(item_history)
+        
+    db.commit()
+    db.refresh(claim)
+    return claim
