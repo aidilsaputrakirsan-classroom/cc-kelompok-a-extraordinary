@@ -138,22 +138,22 @@ cmd_seed() {
 
     echo "Creating seed data..."
     docker compose exec db psql -U postgres -d temuin_db -c "
-        -- Insert default categories
-        INSERT INTO categories (name, description) VALUES
-            ('Elektronik', 'Perangkat elektronik seperti laptop, HP, charger'),
-            ('Dokumen', 'KTM, KTP, SIM, dan dokumen penting lainnya'),
-            ('Aksesoris', 'Jam tangan, kacamata, perhiasan'),
-            ('Pakaian', 'Jaket, topi, sepatu, dan pakaian lainnya'),
-            ('Lainnya', 'Barang lain yang tidak masuk kategori di atas')
+        -- Insert default categories (model: id String PK, name String)
+        INSERT INTO categories (id, name) VALUES
+            ('cat-elektronik', 'Elektronik'),
+            ('cat-dokumen', 'Dokumen'),
+            ('cat-aksesoris', 'Aksesoris'),
+            ('cat-pakaian', 'Pakaian'),
+            ('cat-lainnya', 'Lainnya')
         ON CONFLICT DO NOTHING;
 
-        -- Insert default buildings
-        INSERT INTO buildings (name, code) VALUES
-            ('Gedung Kuliah Bersama', 'GKB'),
-            ('Gedung Rektorat', 'REK'),
-            ('Perpustakaan', 'LIB'),
-            ('Gedung Teknik Informatika', 'IF'),
-            ('Kantin Pusat', 'KAN')
+        -- Insert default buildings (model: id String PK, name String)
+        INSERT INTO buildings (id, name) VALUES
+            ('bld-gkb', 'Gedung Kuliah Bersama'),
+            ('bld-rek', 'Gedung Rektorat'),
+            ('bld-lib', 'Perpustakaan'),
+            ('bld-if', 'Gedung Teknik Informatika'),
+            ('bld-kan', 'Kantin Pusat')
         ON CONFLICT DO NOTHING;
     " 2>/dev/null || echo -e "${YELLOW}Note: Some seed data may already exist or tables not yet created.${NC}"
 

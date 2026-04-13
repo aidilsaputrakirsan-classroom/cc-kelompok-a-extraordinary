@@ -25,7 +25,7 @@ ARG VITE_FIREBASE_APP_ID
 COPY package.json package-lock.json ./
 
 # Install dependencies
-RUN npm ci --ignore-scripts
+RUN npm ci
 
 # Copy source code
 COPY . .

@@ -20,6 +20,7 @@ Setiap AI coding agent wajib mulai dari file ini sebelum mengerjakan apa pun di 
 - PR dibuat sebagai draft; user yang memutuskan kapan ready for review
 - Frontend wajib memakai `React + Vite + Tailwind CSS + shadcn/ui`
 - Saat agent membangun UI, utamakan komponen dan pola shadcn/ui sebelum membuat markup custom
+- `temuin-docs/` hanya untuk dokumen arsitektur, sprint, dan role guide — jangan tambah file baru kecuali benar-benar perlu (seperti update status sprint). Guides, reports, dan dokumen kerja lainnya masuk ke `docs/`
 
 ## Task Tracking Rules
 - Status task yang valid hanya `todo`, `in_progress`, `blocked`, `done`
@@ -36,7 +37,7 @@ Setiap AI coding agent wajib mulai dari file ini sebelum mengerjakan apa pun di 
 
 ## QA and Documentation Rules
 - QA fokus pada blackbox testing, screenshot bukti, dan update dokumentasi seperlunya
-- Jangan menambah issue tracker formal, bug template, atau dokumen known issues yang berat
+- Gunakan GitHub Issues untuk tracking sprint completion dan bug reports (lihat `.agents/skills/temuin-sprint-issue/` untuk format)
 - Jika behavior berubah, update dokumen aktif yang relevan di `temuin-docs/`
 
 ## Workspace Skills
