@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from app.models.claim import Claim, ClaimStatusHistory
 from app.models.item import Item, ItemStatusHistory
+from app.models.user import User
 from app.claims.schemas import ClaimCreate, ClaimStatusUpdate
 
 def create_claim(db: Session, user_id: str, claim_in: ClaimCreate) -> Claim:
@@ -54,11 +55,10 @@ def get_claim_by_id(db: Session, claim_id: str, user_id: str):
     claim = db.query(Claim).filter(Claim.id == claim_id).first()
     if not claim:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Claim not found")
-        
-    from app.models.user import User
+
     user = db.query(User).filter(User.id == user_id).first()
     item = db.query(Item).filter(Item.id == claim.item_id).first()
-    
+
     is_claim_owner = claim.user_id == user_id
     is_item_owner = item and item.created_by == user_id
     is_admin = user and user.role in ["admin", "superadmin"]
@@ -73,7 +73,6 @@ def get_claims_by_item(db: Session, item_id: str, user_id: str):
     if not item:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
 
-    from app.models.user import User
     user = db.query(User).filter(User.id == user_id).first()
     is_item_owner = item.created_by == user_id
     is_admin = user and user.role in ["admin", "superadmin"]
@@ -89,8 +88,7 @@ def update_claim_status(db: Session, claim_id: str, payload: ClaimStatusUpdate, 
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Claim not found")
 
     item = db.query(Item).filter(Item.id == claim.item_id).first()
-    
-    from app.models.user import User
+
     user = db.query(User).filter(User.id == user_id).first()
     is_item_owner = item and item.created_by == user_id
     is_claim_owner = claim.user_id == user_id
