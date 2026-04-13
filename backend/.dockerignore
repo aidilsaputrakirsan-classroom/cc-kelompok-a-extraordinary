@@ -1,0 +1,41 @@
+# Virtual environment
+venv/
+.venv/
+
+# Environment files (secrets!)
+.env
+.env.local
+.env.docker
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Docker (don't copy Dockerfile into image)
+Dockerfile
+.dockerignore
+
+# Testing
+tests/
+
+# Documentation
+*.md
+
+# Firebase credentials (mounted at runtime, never baked into image)
+serviceAccountKey.json
+
+# OS artifacts
+*.log
+.DS_Store
+Thumbs.db

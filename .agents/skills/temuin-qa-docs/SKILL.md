@@ -15,7 +15,7 @@ description: Gunakan saat mengerjakan role QA & Docs di project Temuin. Skill in
 
 - Fokus pada blackbox flow
 - Simpan screenshot bukti seperlunya
-- Jangan membuat issue tracker formal atau bug template formal
+- Gunakan GitHub Issues untuk tracking sprint completion (lihat skill `temuin-sprint-issue`)
 - Update dokumen aktif hanya jika flow atau langkah berubah
 - Update status task sesuai aturan repo
 - Setiap sprint yang sudah selesai di-QA wajib punya satu file report di `docs/`

@@ -22,6 +22,10 @@
 3. Jangan buat workflow yang bergantung pada permission admin repo kalau belum pasti ada
 4. Dokumentasikan langkah penting seperlunya
 
+## Docker
+
+Lihat panduan lengkap di [`docs/docker-guide.md`](../../docs/docker-guide.md).
+
 ## Bacaan Kunci
 
 - `temuin-docs/03-architecture/devops-architecture.md`
