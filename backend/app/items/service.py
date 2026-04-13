@@ -3,6 +3,8 @@ from app.models.item import Item, ItemImage
 from app.items.schemas import ItemCreate, ItemUpdate
 from fastapi import HTTPException, status
 from datetime import datetime, timezone
+from sqlalchemy import or_
+from typing import Optional
 
 def create_item(db: Session, user_id: str, item_data: ItemCreate):
     if item_data.type == "found" and not item_data.security_officer_id:
@@ -52,8 +54,34 @@ def create_item(db: Session, user_id: str, item_data: ItemCreate):
     db.refresh(new_item)
     return new_item
 
-def get_items(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(Item).filter(Item.deleted_at == None).offset(skip).limit(limit).all()
+def get_items(
+    db: Session, 
+    skip: int = 0, 
+    limit: int = 100,
+    search: Optional[str] = None,
+    type: Optional[str] = None,
+    status: Optional[str] = None,
+    category_id: Optional[str] = None,
+    building_id: Optional[str] = None,
+    location_id: Optional[str] = None
+):
+    query = db.query(Item).filter(Item.deleted_at == None)
+    
+    if search:
+        query = query.filter(or_(Item.title.ilike(f"%{search}%"), Item.description.ilike(f"%{search}%")))
+    if type:
+        query = query.filter(Item.type == type)
+    if status:
+        query = query.filter(Item.status == status)
+    if category_id:
+        query = query.filter(Item.category_id == category_id)
+    if building_id:
+        query = query.filter(Item.building_id == building_id)
+    if location_id:
+        query = query.filter(Item.location_id == location_id)
+        
+    query = query.order_by(Item.created_at.desc())
+    return query.offset(skip).limit(limit).all()
 
 def get_item(db: Session, item_id: str):
     return db.query(Item).filter(Item.id == item_id, Item.deleted_at == None).first()
