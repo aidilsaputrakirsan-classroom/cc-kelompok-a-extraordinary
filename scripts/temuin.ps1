@@ -2,8 +2,8 @@
 # Temuin - Docker Runner Script (PowerShell)
 # ============================================================
 # Usage: .\scripts\temuin.ps1 [command]
-# Commands: start, stop, restart, status, logs, build, pull,
-#           migrate, seed, help
+# Commands: start, stop, restart, reset, status, logs, build,
+#           pull, migrate, seed, help
 # ============================================================
 
 param(
@@ -67,6 +67,12 @@ function Test-FirebaseCreds {
         Write-Color "WARNING: backend/serviceAccountKey.json not found." "Yellow"
         Write-Host "Creating empty placeholder. Firebase auth will NOT work until you add the real file."
         '{}' | Set-Content "backend/serviceAccountKey.json" -Encoding UTF8
+    } else {
+        $content = (Get-Content "backend/serviceAccountKey.json" -Raw).Trim()
+        if ($content -eq '{}' -or $content.Length -lt 50) {
+            Write-Color "WARNING: backend/serviceAccountKey.json appears to be a placeholder." "Yellow"
+            Write-Color "Firebase auth will NOT work. Replace with the real credentials file." "Yellow"
+        }
     }
 }
 
@@ -92,6 +98,27 @@ function Invoke-Restart {
     Invoke-Stop
     Write-Host ""
     Invoke-Start
+}
+
+function Invoke-Reset {
+    Write-Color "=== Resetting Temuin (full clean restart) ===" "Red"
+    Write-Color "WARNING: This will DELETE the database and all data!" "Yellow"
+    $confirm = Read-Host "Type 'yes' to confirm"
+    if ($confirm -ne "yes") {
+        Write-Color "Reset cancelled." "Yellow"
+        return
+    }
+    Test-Docker
+    Test-EnvFile
+    Test-FirebaseCreds
+    Write-Host "Stopping containers and removing volumes..."
+    docker compose down -v
+    Write-Host "Pulling latest images..."
+    docker compose pull backend frontend
+    Write-Host "Starting from scratch..."
+    docker compose up -d
+    Write-Host ""
+    Invoke-Status
 }
 
 function Invoke-Status {
@@ -184,8 +211,9 @@ function Invoke-Help {
     Write-Host ""
     Write-Host "Commands:"
     Write-Host "  " -NoNewline; Write-Color "start" "Green" -NoNewline; Write-Host "              Start all containers"
-    Write-Host "  " -NoNewline; Write-Color "stop" "Green" -NoNewline; Write-Host "               Stop all containers"
+    Write-Host "  " -NoNewline; Write-Color "stop" "Green" -NoNewline; Write-Host "               Stop all containers (data preserved)"
     Write-Host "  " -NoNewline; Write-Color "restart" "Green" -NoNewline; Write-Host "            Restart all containers"
+    Write-Host "  " -NoNewline; Write-Color "reset" "Green" -NoNewline; Write-Host "              Full clean restart (DELETES database!)"
     Write-Host "  " -NoNewline; Write-Color "status" "Green" -NoNewline; Write-Host "             Show container status and URLs"
     Write-Host "  " -NoNewline; Write-Color "logs" "Green" -NoNewline; Write-Host " [service]     Tail logs (optional: db, backend, frontend)"
     Write-Host "  " -NoNewline; Write-Color "build" "Green" -NoNewline; Write-Host "              Build images locally"
@@ -198,6 +226,7 @@ function Invoke-Help {
     Write-Host "  .\scripts\temuin.ps1 start          # Start everything"
     Write-Host "  .\scripts\temuin.ps1 logs backend    # Tail backend logs"
     Write-Host "  .\scripts\temuin.ps1 seed            # Seed the database"
+    Write-Host "  .\scripts\temuin.ps1 reset           # Nuke DB + pull latest + start fresh"
     Write-Host ""
 }
 
@@ -209,6 +238,7 @@ switch ($Command.ToLower()) {
     "start"   { Invoke-Start }
     "stop"    { Invoke-Stop }
     "restart" { Invoke-Restart }
+    "reset"   { Invoke-Reset }
     "status"  { Invoke-Status }
     "logs"    { Invoke-Logs }
     "build"   { Invoke-Build }

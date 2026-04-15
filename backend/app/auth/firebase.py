@@ -4,6 +4,12 @@ from fastapi import HTTPException, status
 
 logger = logging.getLogger(__name__)
 
+# Toleransi clock skew antara Docker container dan Google server.
+# Docker Desktop di Windows/Mac sering mengalami clock drift setelah
+# sleep/hibernate, menyebabkan error "Token used too early".
+# Nilai maksimum yang diizinkan Firebase SDK: 60 detik.
+CLOCK_SKEW_SECONDS = 5
+
 def verify_firebase_token(id_token: str) -> dict:
     """
     Verifies a Firebase ID token using the Firebase Admin SDK.
@@ -11,7 +17,7 @@ def verify_firebase_token(id_token: str) -> dict:
     Raises HTTPException if invalid.
     """
     try:
-        decoded_token = auth.verify_id_token(id_token)
+        decoded_token = auth.verify_id_token(id_token, clock_skew_seconds=CLOCK_SKEW_SECONDS)
         return decoded_token
     except auth.ExpiredIdTokenError:
         logger.warning("Firebase token expired.")
