@@ -2,8 +2,8 @@
 # Temuin - Docker Runner Script (PowerShell)
 # ============================================================
 # Usage: .\scripts\temuin.ps1 [command]
-# Commands: start, stop, restart, reset, status, logs, build,
-#           pull, migrate, seed, help
+# Commands: start, stop, restart, status, logs, build, pull,
+#           migrate, seed, help
 # ============================================================
 
 param(
@@ -75,9 +75,7 @@ function Invoke-Start {
     Test-Docker
     Test-EnvFile
     Test-FirebaseCreds
-    # --build ensures images are rebuilt when source code changes (e.g. after git pull)
-    # Data in DB volume is preserved across restarts.
-    docker compose up -d --build
+    docker compose up -d
     Write-Host ""
     Invoke-Status
 }
@@ -94,25 +92,6 @@ function Invoke-Restart {
     Invoke-Stop
     Write-Host ""
     Invoke-Start
-}
-
-function Invoke-Reset {
-    Write-Color "=== Resetting Temuin (full clean restart) ===" "Red"
-    Write-Color "WARNING: This will DELETE the database and all data!" "Yellow"
-    $confirm = Read-Host "Type 'yes' to confirm"
-    if ($confirm -ne "yes") {
-        Write-Color "Reset cancelled." "Yellow"
-        return
-    }
-    Test-Docker
-    Test-EnvFile
-    Test-FirebaseCreds
-    Write-Host "Stopping containers and removing volumes..."
-    docker compose down -v
-    Write-Host "Rebuilding and starting from scratch..."
-    docker compose up -d --build
-    Write-Host ""
-    Invoke-Status
 }
 
 function Invoke-Status {
@@ -204,10 +183,9 @@ function Invoke-Help {
     Write-Host "Usage: " -NoNewline; Write-Color ".\scripts\temuin.ps1" "Green" -NoNewline; Write-Color " [command]" "Yellow"
     Write-Host ""
     Write-Host "Commands:"
-    Write-Host "  " -NoNewline; Write-Color "start" "Green" -NoNewline; Write-Host "              Start all containers (auto-build if code changed)"
-    Write-Host "  " -NoNewline; Write-Color "stop" "Green" -NoNewline; Write-Host "               Stop all containers (data preserved)"
+    Write-Host "  " -NoNewline; Write-Color "start" "Green" -NoNewline; Write-Host "              Start all containers"
+    Write-Host "  " -NoNewline; Write-Color "stop" "Green" -NoNewline; Write-Host "               Stop all containers"
     Write-Host "  " -NoNewline; Write-Color "restart" "Green" -NoNewline; Write-Host "            Restart all containers"
-    Write-Host "  " -NoNewline; Write-Color "reset" "Green" -NoNewline; Write-Host "              Full clean restart (DELETES database!)"
     Write-Host "  " -NoNewline; Write-Color "status" "Green" -NoNewline; Write-Host "             Show container status and URLs"
     Write-Host "  " -NoNewline; Write-Color "logs" "Green" -NoNewline; Write-Host " [service]     Tail logs (optional: db, backend, frontend)"
     Write-Host "  " -NoNewline; Write-Color "build" "Green" -NoNewline; Write-Host "              Build images locally"
@@ -217,10 +195,9 @@ function Invoke-Help {
     Write-Host "  " -NoNewline; Write-Color "help" "Green" -NoNewline; Write-Host "               Show this help message"
     Write-Host ""
     Write-Host "Examples:"
-    Write-Host "  .\scripts\temuin.ps1 start          # Start everything (auto-rebuild)"
+    Write-Host "  .\scripts\temuin.ps1 start          # Start everything"
     Write-Host "  .\scripts\temuin.ps1 logs backend    # Tail backend logs"
     Write-Host "  .\scripts\temuin.ps1 seed            # Seed the database"
-    Write-Host "  .\scripts\temuin.ps1 reset           # Nuke DB + rebuild from scratch"
     Write-Host ""
 }
 
@@ -232,7 +209,6 @@ switch ($Command.ToLower()) {
     "start"   { Invoke-Start }
     "stop"    { Invoke-Stop }
     "restart" { Invoke-Restart }
-    "reset"   { Invoke-Reset }
     "status"  { Invoke-Status }
     "logs"    { Invoke-Logs }
     "build"   { Invoke-Build }
