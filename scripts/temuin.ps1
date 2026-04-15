@@ -67,6 +67,12 @@ function Test-FirebaseCreds {
         Write-Color "WARNING: backend/serviceAccountKey.json not found." "Yellow"
         Write-Host "Creating empty placeholder. Firebase auth will NOT work until you add the real file."
         '{}' | Set-Content "backend/serviceAccountKey.json" -Encoding UTF8
+    } else {
+        $content = (Get-Content "backend/serviceAccountKey.json" -Raw).Trim()
+        if ($content -eq '{}' -or $content.Length -lt 50) {
+            Write-Color "WARNING: backend/serviceAccountKey.json appears to be a placeholder." "Yellow"
+            Write-Color "Firebase auth will NOT work. Replace with the real credentials file." "Yellow"
+        }
     }
 }
 
@@ -75,9 +81,7 @@ function Invoke-Start {
     Test-Docker
     Test-EnvFile
     Test-FirebaseCreds
-    # --build ensures images are rebuilt when source code changes (e.g. after git pull)
-    # Data in DB volume is preserved across restarts.
-    docker compose up -d --build
+    docker compose up -d
     Write-Host ""
     Invoke-Status
 }
@@ -109,8 +113,10 @@ function Invoke-Reset {
     Test-FirebaseCreds
     Write-Host "Stopping containers and removing volumes..."
     docker compose down -v
-    Write-Host "Rebuilding and starting from scratch..."
-    docker compose up -d --build
+    Write-Host "Pulling latest images..."
+    docker compose pull backend frontend
+    Write-Host "Starting from scratch..."
+    docker compose up -d
     Write-Host ""
     Invoke-Status
 }
@@ -204,7 +210,7 @@ function Invoke-Help {
     Write-Host "Usage: " -NoNewline; Write-Color ".\scripts\temuin.ps1" "Green" -NoNewline; Write-Color " [command]" "Yellow"
     Write-Host ""
     Write-Host "Commands:"
-    Write-Host "  " -NoNewline; Write-Color "start" "Green" -NoNewline; Write-Host "              Start all containers (auto-build if code changed)"
+    Write-Host "  " -NoNewline; Write-Color "start" "Green" -NoNewline; Write-Host "              Start all containers"
     Write-Host "  " -NoNewline; Write-Color "stop" "Green" -NoNewline; Write-Host "               Stop all containers (data preserved)"
     Write-Host "  " -NoNewline; Write-Color "restart" "Green" -NoNewline; Write-Host "            Restart all containers"
     Write-Host "  " -NoNewline; Write-Color "reset" "Green" -NoNewline; Write-Host "              Full clean restart (DELETES database!)"
@@ -217,10 +223,10 @@ function Invoke-Help {
     Write-Host "  " -NoNewline; Write-Color "help" "Green" -NoNewline; Write-Host "               Show this help message"
     Write-Host ""
     Write-Host "Examples:"
-    Write-Host "  .\scripts\temuin.ps1 start          # Start everything (auto-rebuild)"
+    Write-Host "  .\scripts\temuin.ps1 start          # Start everything"
     Write-Host "  .\scripts\temuin.ps1 logs backend    # Tail backend logs"
     Write-Host "  .\scripts\temuin.ps1 seed            # Seed the database"
-    Write-Host "  .\scripts\temuin.ps1 reset           # Nuke DB + rebuild from scratch"
+    Write-Host "  .\scripts\temuin.ps1 reset           # Nuke DB + pull latest + start fresh"
     Write-Host ""
 }
 

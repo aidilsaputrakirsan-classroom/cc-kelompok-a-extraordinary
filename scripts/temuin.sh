@@ -3,8 +3,8 @@
 # Temuin - Docker Runner Script (Bash)
 # ============================================================
 # Usage: ./scripts/temuin.sh [command]
-# Commands: start, stop, restart, status, logs, build, pull,
-#           migrate, seed, help
+# Commands: start, stop, restart, reset, status, logs, build,
+#           pull, migrate, seed, help
 # ============================================================
 
 set -e
@@ -51,6 +51,13 @@ check_firebase() {
         echo -e "${YELLOW}WARNING: backend/serviceAccountKey.json not found.${NC}"
         echo "Creating empty placeholder. Firebase auth will NOT work until you add the real file."
         echo '{}' > backend/serviceAccountKey.json
+    else
+        local content
+        content=$(cat backend/serviceAccountKey.json | tr -d '[:space:]')
+        if [ "$content" = "{}" ] || [ ${#content} -lt 50 ]; then
+            echo -e "${YELLOW}WARNING: backend/serviceAccountKey.json appears to be a placeholder.${NC}"
+            echo -e "${YELLOW}Firebase auth will NOT work. Replace with the real credentials file.${NC}"
+        fi
     fi
 }
 
@@ -80,6 +87,27 @@ cmd_restart() {
     cmd_stop
     echo ""
     cmd_start
+}
+
+cmd_reset() {
+    echo -e "${RED}=== Resetting Temuin (full clean restart) ===${NC}"
+    echo -e "${YELLOW}WARNING: This will DELETE the database and all data!${NC}"
+    read -p "Type 'yes' to confirm: " confirm
+    if [ "$confirm" != "yes" ]; then
+        echo -e "${YELLOW}Reset cancelled.${NC}"
+        return
+    fi
+    check_docker
+    check_env
+    check_firebase
+    echo "Stopping containers and removing volumes..."
+    docker compose down -v
+    echo "Pulling latest images..."
+    docker compose pull backend frontend
+    echo "Starting from scratch..."
+    docker compose up -d
+    echo ""
+    cmd_status
 }
 
 cmd_status() {
@@ -169,8 +197,9 @@ cmd_help() {
     echo ""
     echo -e "Commands:"
     echo -e "  ${GREEN}start${NC}              Start all containers"
-    echo -e "  ${GREEN}stop${NC}               Stop all containers"
+    echo -e "  ${GREEN}stop${NC}               Stop all containers (data preserved)"
     echo -e "  ${GREEN}restart${NC}            Restart all containers"
+    echo -e "  ${GREEN}reset${NC}              Full clean restart (DELETES database!)"
     echo -e "  ${GREEN}status${NC}             Show container status and URLs"
     echo -e "  ${GREEN}logs${NC} [service]     Tail logs (optional: db, backend, frontend)"
     echo -e "  ${GREEN}build${NC}              Build images locally"
@@ -183,6 +212,7 @@ cmd_help() {
     echo -e "  ./scripts/temuin.sh start          # Start everything"
     echo -e "  ./scripts/temuin.sh logs backend    # Tail backend logs"
     echo -e "  ./scripts/temuin.sh seed            # Seed the database"
+    echo -e "  ./scripts/temuin.sh reset           # Nuke DB + pull latest + start fresh"
     echo ""
 }
 
@@ -196,6 +226,7 @@ case "$COMMAND" in
     start)    cmd_start ;;
     stop)     cmd_stop ;;
     restart)  cmd_restart ;;
+    reset)    cmd_reset ;;
     status)   cmd_status ;;
     logs)     cmd_logs "$2" ;;
     build)    cmd_build ;;

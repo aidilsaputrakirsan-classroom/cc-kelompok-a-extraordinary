@@ -78,6 +78,7 @@ Hanya DevOps lead (@PangeranSilaen) yang build dan push images ke Docker Hub.
 | `start`          | Buat `.env` jika belum ada, buat placeholder `serviceAccountKey.json` jika belum ada, start db → backend → frontend |
 | `stop`           | Stop semua container. Data **tetap tersimpan** di volume                                                          |
 | `restart`        | Stop + start                                                                                                      |
+| `reset`          | Full clean restart: stop, hapus volume DB, pull images terbaru, start ulang. **MENGHAPUS semua data!**            |
 | `status`         | Lihat status container dan URL akses                                                                              |
 | `logs [service]` | Tail logs (opsional: `db`, `backend`, `frontend`)                                                                 |
 | `build`          | Build images lokal (hanya untuk DevOps)                                                                           |
@@ -87,7 +88,7 @@ Hanya DevOps lead (@PangeranSilaen) yang build dan push images ke Docker Hub.
 
 ## Catatan Penting
 
-- **Database TIDAK di-reset** saat start/stop. Data tersimpan di Docker volume `temuin_pgdata`. Untuk reset total: `docker volume rm temuin_pgdata` lalu start ulang.
+- **Database TIDAK di-reset** saat start/stop. Data tersimpan di Docker volume `temuin_pgdata`. Untuk reset total: jalankan `reset` command (atau manual: `docker compose down -v` lalu start ulang).
 - **Migrations otomatis**: Backend container menjalankan `alembic upgrade head` saat start via `entrypoint.sh`. Command `migrate` hanya untuk manual run jika perlu.
 - **Seed data**: Jalankan `seed` sekali setelah pertama kali start. Ini mengisi tabel `categories` dan `buildings` dengan data awal.
 - **Frontend env berubah**: Jalankan `build` ulang karena `VITE_*` di-bake saat build.
@@ -112,4 +113,4 @@ Hanya DevOps lead (@PangeranSilaen) yang build dan push images ke Docker Hub.
 - **Firebase error**: Pastikan `serviceAccountKey.json` ada di `backend/`. Tanpa file ini, login tidak bisa tapi endpoint lain tetap jalan
 - **DB connection error**: Tunggu beberapa detik setelah start, PostgreSQL butuh waktu init
 - **Frontend env berubah**: Jalankan `build` ulang karena `VITE_*` di-bake saat build
-- **Mau reset database**: `docker volume rm temuin_pgdata` lalu `.\scripts\temuin.ps1 start` ulang
+- **Mau reset database**: Jalankan `.\scripts\temuin.ps1 reset` (akan hapus DB, pull images terbaru, dan start ulang)

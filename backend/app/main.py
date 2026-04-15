@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -58,4 +58,7 @@ def health_check(db: Session = Depends(get_db)):
         db.execute(text("SELECT 1"))
         return {"status": "healthy", "database": "connected"}
     except Exception as e:
-        return {"status": "unhealthy", "database": str(e)}
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"status": "unhealthy", "database": str(e)}
+        )
