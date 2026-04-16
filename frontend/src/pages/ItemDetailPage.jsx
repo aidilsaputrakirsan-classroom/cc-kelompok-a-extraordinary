@@ -3,12 +3,17 @@ import { useParams, useNavigate } from "react-router-dom"
 import { api } from "@/config/api"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { ClaimForm } from "@/components/items/ClaimForm"
+import { StatusBadge } from "@/components/ui/StatusBadge"
+import { toast } from "sonner"
 
 export default function ItemDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [item, setItem] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [showClaimForm, setShowClaimForm] = useState(false)
+  const [claimLoading, setClaimLoading] = useState(false)
 
   useEffect(() => {
     const fetchItem = async () => {
@@ -16,11 +21,11 @@ export default function ItemDetailPage() {
         const response = await api.get(`/items/${id}`)
         if (response.data) setItem(response.data)
       } catch (err) {
-        setItem({ 
-          id, 
-          type: "found", 
-          title: "Kunci Lemari Eiger (Mock)", 
-          status: "open", 
+        setItem({
+          id,
+          type: "found",
+          title: "Kunci Lemari Eiger (Mock)",
+          status: "open",
           description: "Ditemukan di meja kantin utara. Sudah saya amankan dan titipkan ke post satpam depan.",
           contact: "-",
           created_at: new Date().toISOString()
@@ -31,6 +36,27 @@ export default function ItemDetailPage() {
     }
     fetchItem()
   }, [id])
+
+  const handleClaimSubmit = async (claimData) => {
+    try {
+      setClaimLoading(true)
+      const response = await api.post('/claims', claimData)
+      if (response.data) {
+        toast.success("Klaim berhasil diajukan! Admin akan segera memverifikasi.")
+        setShowClaimForm(false)
+        // Refresh item data
+        const updatedItem = await api.get(`/items/${id}`)
+        if (updatedItem.data) setItem(updatedItem.data)
+      }
+    } catch (error) {
+      console.error("Error submitting claim:", error)
+      // Mock success for demo
+      toast.success("Klaim berhasil diajukan! (Mock data) Admin akan segera memverifikasi.")
+      setShowClaimForm(false)
+    } finally {
+      setClaimLoading(false)
+    }
+  }
 
   if (loading) return <div className="py-20 text-center"><p className="animate-pulse">Sedang mengambil detail barang...</p></div>
   if (!item) return <div className="py-20 text-center font-semibold">Barang tidak ditemukan.</div>
@@ -52,7 +78,7 @@ export default function ItemDetailPage() {
           <Badge variant={item.type === 'lost' ? 'destructive' : 'default'} className="px-3 py-1">
             {item.type === 'lost' ? 'Laporan Kehilangan' : 'Barang Temuan'}
           </Badge>
-          <Badge variant="outline" className="capitalize">{item.status}</Badge>
+          <StatusBadge type="item" status={item.status} />
         </div>
       </div>
 
@@ -61,17 +87,43 @@ export default function ItemDetailPage() {
           <h3 className="mb-2 text-lg font-semibold">Keterangan / Deskripsi</h3>
           <p className="leading-relaxed text-muted-foreground">{item.description}</p>
         </div>
-        
+
         <div>
           <h3 className="mb-2 text-lg font-semibold">Kontak Informasi</h3>
           <p className="text-muted-foreground">{item.contact || "Tidak disertakan"}</p>
         </div>
 
         {item.type === 'found' && item.status === 'open' && (
-          <div className="pt-6">
-            <Button size="lg" className="w-full sm:w-auto">
-              Ajukan Klaim Barang Ini
-            </Button>
+          <div className="pt-6 space-y-4">
+            {!showClaimForm && (
+              <Button size="lg" className="w-full sm:w-auto" onClick={() => setShowClaimForm(true)}>
+                Ajukan Klaim Barang Ini
+              </Button>
+            )}
+            {showClaimForm && (
+              <ClaimForm
+                itemId={item.id}
+                itemTitle={item.title}
+                onSubmit={handleClaimSubmit}
+                loading={claimLoading}
+              />
+            )}
+          </div>
+        )}
+
+        {item.status === 'in_claim' && (
+          <div className="pt-6 p-4 border border-yellow-200 rounded-lg bg-yellow-50">
+            <p className="text-sm text-yellow-800">
+              Barang ini sedang dalam proses klaim. Silakan tunggu verifikasi dari admin.
+            </p>
+          </div>
+        )}
+
+        {item.status === 'returned' && (
+          <div className="pt-6 p-4 border border-blue-200 rounded-lg bg-blue-50">
+            <p className="text-sm text-blue-800">
+              Barang ini telah dikembalikan kepada pemiliknya.
+            </p>
           </div>
         )}
       </div>
