@@ -4,10 +4,14 @@ import { api } from "@/config/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { SearchFilter } from "@/components/items/SearchFilter"
+import { StatusBadge } from "@/components/ui/StatusBadge"
 
 export default function ItemListPage() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState("")
+  const [status, setStatus] = useState("all")
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -30,6 +34,12 @@ export default function ItemListPage() {
     fetchItems()
   }, [])
 
+  const filteredItems = items.filter(item => {
+    const matchesSearch = item.title.toLowerCase().includes(search.toLowerCase())
+    const matchesStatus = status === "all" || item.status === status
+    return matchesSearch && matchesStatus
+  })
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -39,6 +49,13 @@ export default function ItemListPage() {
         </Button>
       </div>
 
+      <SearchFilter
+        search={search}
+        status={status}
+        onSearchChange={setSearch}
+        onStatusChange={setStatus}
+      />
+
       {loading ? (
         <div className="py-20 text-center">
           <p className="text-muted-foreground animate-pulse">Memuat daftar barang...</p>
@@ -47,9 +64,13 @@ export default function ItemListPage() {
         <div className="py-20 text-center border rounded-lg bg-card">
           <p className="text-muted-foreground">Belum ada barang yang didata.</p>
         </div>
+      ) : filteredItems.length === 0 ? (
+        <div className="py-20 text-center border rounded-lg bg-card">
+          <p className="text-muted-foreground">Tidak ada barang yang sesuai dengan pencarian Anda.</p>
+        </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) => (
+          {filteredItems.map((item) => (
             <Card key={item.id} className="flex flex-col">
               <CardHeader>
                 <div className="flex items-start justify-between gap-2">
@@ -58,7 +79,9 @@ export default function ItemListPage() {
                     {item.type === 'lost' ? 'Hilang' : 'Ditemukan'}
                   </Badge>
                 </div>
-                <CardDescription>Status: <span className="font-medium capitalize">{item.status}</span></CardDescription>
+                <CardDescription className="flex items-center gap-2 mt-2">
+                  Status: <StatusBadge type="item" status={item.status} />
+                </CardDescription>
               </CardHeader>
               <CardContent className="flex-1">
                 <p className="text-sm text-muted-foreground line-clamp-2">{item.description}</p>
