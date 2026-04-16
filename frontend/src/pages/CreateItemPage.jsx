@@ -67,8 +67,14 @@ export default function CreateItemPage() {
 
     try {
       setLoading(true)
-      const payload = { ...formData, images }
-      const response = await api.post('/items', payload)
+      const payload = {
+        type: formData.type,
+        title: formData.title,
+        description: formData.description || undefined,
+        security_officer_id: formData.security_officer_id || undefined,
+        images: images.map((img, idx) => ({ image_data: img, display_order: idx }))
+      }
+      const response = await api.post('/items/', payload)
       if (response.status === 201 || response.status === 200) {
         toast.success("Laporan berhasil dibuat!")
         navigate("/items")

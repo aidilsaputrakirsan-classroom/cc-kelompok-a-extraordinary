@@ -16,7 +16,7 @@ export default function ItemListPage() {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const response = await api.get('/items')
+        const response = await api.get('/items/')
         // Handle both response.data.data and response.data directly
         const itemsData = response.data?.data || response.data || []
         if (Array.isArray(itemsData)) {

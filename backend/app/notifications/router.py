@@ -12,6 +12,11 @@ router = APIRouter(prefix="/notifications", tags=["notifications"])
 def get_my_notifications(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     return service.get_my_notifications(db, user.id)
 
+@router.put("/read-all", status_code=status.HTTP_204_NO_CONTENT)
+def mark_all_read(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    service.mark_all_as_read(db, user.id)
+    return None
+
 @router.put("/{notif_id}/read", response_model=schemas.NotificationResponse)
 def mark_read(notif_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     return service.mark_as_read(db, notif_id, user.id)

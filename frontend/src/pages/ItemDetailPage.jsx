@@ -18,7 +18,7 @@ export default function ItemDetailPage() {
   useEffect(() => {
     const fetchItem = async () => {
       try {
-        const response = await api.get(`/items/${id}`)
+        const response = await api.get(`/items/${id}/`)
         // Handle both response.data.data and response.data directly
         const itemData = response.data?.data || response.data
         if (itemData) setItem(itemData)
@@ -44,13 +44,13 @@ export default function ItemDetailPage() {
   const handleClaimSubmit = async (claimData) => {
     try {
       setClaimLoading(true)
-      const response = await api.post('/claims', claimData)
+      const response = await api.post('/claims/', claimData)
       if (response.status === 201 || response.status === 200) {
         toast.success("Klaim berhasil diajukan! Admin akan segera memverifikasi.")
         setShowClaimForm(false)
         // Refresh item data
         try {
-          const updatedItem = await api.get(`/items/${id}`)
+          const updatedItem = await api.get(`/items/${id}/`)
           if (updatedItem.data) setItem(updatedItem.data)
         } catch (refreshError) {
           console.error("Error refreshing item:", refreshError)

@@ -12,7 +12,7 @@ export default function MyClaimsPage() {
   useEffect(() => {
     const fetchMyClaims = async () => {
       try {
-        const response = await api.get('/claims/my')
+        const response = await api.get('/claims/me/')
         // Handle both response.data.data and response.data directly
         const claimsData = response.data?.data || response.data || []
         if (Array.isArray(claimsData)) {
@@ -27,7 +27,7 @@ export default function MyClaimsPage() {
             item_id: 2,
             item_title: "Kunci Lemari Eiger",
             status: "pending",
-            verification_answer: "Kunci warna perak dengan logo Eiger",
+            ownership_answer: "Kunci warna perak dengan logo Eiger",
             created_at: new Date().toISOString()
           },
           {
@@ -35,7 +35,7 @@ export default function MyClaimsPage() {
             item_id: 3,
             item_title: "Botol Tupperware Hitam",
             status: "approved",
-            verification_answer: "Botol hitam berisi minuman",
+            ownership_answer: "Botol hitam berisi minuman",
             created_at: new Date(Date.now() - 86400000).toISOString()
           }
         ])
@@ -75,7 +75,7 @@ export default function MyClaimsPage() {
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <CardTitle className="text-lg line-clamp-1">{claim.item_title}</CardTitle>
+                    <CardTitle className="text-lg line-clamp-1">{claim.item_title || `Barang #${claim.item_id?.slice(0, 8)}`}</CardTitle>
                     <CardDescription className="text-xs mt-1">
                       Klaim ID: {claim.id}
                     </CardDescription>
@@ -85,8 +85,8 @@ export default function MyClaimsPage() {
               </CardHeader>
               <CardContent className="pb-3 space-y-2">
                 <div>
-                  <p className="text-xs text-muted-foreground font-semibold">Jawaban Verifikasi:</p>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{claim.verification_answer}</p>
+                  <p className="text-xs text-muted-foreground font-semibold">Jawaban Kepemilikan:</p>
+                  <p className="text-sm text-muted-foreground line-clamp-2">{claim.ownership_answer}</p>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Diajukan: {new Date(claim.created_at).toLocaleDateString("id-ID")}

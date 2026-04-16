@@ -13,6 +13,13 @@ def create_notification(db: Session, data: NotificationCreate):
 def get_my_notifications(db: Session, user_id: str):
     return db.query(Notification).filter(Notification.user_id == user_id).order_by(Notification.created_at.desc()).all()
 
+def mark_all_as_read(db: Session, user_id: str):
+    db.query(Notification).filter(
+        Notification.user_id == user_id,
+        Notification.is_read == False
+    ).update({"is_read": True})
+    db.commit()
+
 def mark_as_read(db: Session, notif_id: str, user_id: str):
     notif = db.query(Notification).filter(Notification.id == notif_id).first()
     if not notif:

@@ -13,6 +13,13 @@ router = APIRouter(prefix="/items", tags=["Items"])
 def create_item(item: schemas.ItemCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return service.create_item(db=db, user_id=current_user.id, item_data=item)
 
+@router.get("/me", response_model=List[schemas.ItemResponse])
+def list_my_items(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return service.get_items_by_user(db=db, user_id=current_user.id)
+
 @router.get("/", response_model=List[schemas.ItemResponse])
 def list_items(
     skip: int = 0, 
