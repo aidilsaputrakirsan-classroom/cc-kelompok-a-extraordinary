@@ -32,10 +32,10 @@ def create_item(db: Session, user_id: str, item_data: ItemCreate):
         type=item_data.type,
         title=item_data.title,
         description=item_data.description,
-        category_id=item_data.category_id,
-        building_id=item_data.building_id,
-        location_id=item_data.location_id,
-        security_officer_id=item_data.security_officer_id,
+        category_id=item_data.category_id or None,
+        building_id=item_data.building_id or None,
+        location_id=item_data.location_id or None,
+        security_officer_id=item_data.security_officer_id or None,
         created_by=user_id,
         status="open"
     )
@@ -53,6 +53,12 @@ def create_item(db: Session, user_id: str, item_data: ItemCreate):
     db.commit()
     db.refresh(new_item)
     return new_item
+
+def get_items_by_user(db: Session, user_id: str):
+    return db.query(Item).filter(
+        Item.created_by == user_id,
+        Item.deleted_at == None
+    ).order_by(Item.created_at.desc()).all()
 
 def get_items(
     db: Session, 

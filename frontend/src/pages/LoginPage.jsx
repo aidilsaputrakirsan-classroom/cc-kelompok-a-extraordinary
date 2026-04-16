@@ -39,7 +39,7 @@ export default function LoginPage() {
       const result = await signInWithPopup(auth, googleProvider)
       const idToken = await result.user.getIdToken()
       
-      const response = await api.post('/auth/login', { id_token: idToken })
+      const response = await api.post('/auth/login/', { id_token: idToken })
       setInternalToken(response.data.access_token)
 
       toast.success("Login berhasil!")

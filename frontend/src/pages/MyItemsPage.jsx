@@ -13,7 +13,7 @@ export default function MyItemsPage() {
   useEffect(() => {
     const fetchMyItems = async () => {
       try {
-        const response = await api.get('/items/my')
+        const response = await api.get('/items/me/')
         // Handle both response.data.data and response.data directly
         const itemsData = response.data?.data || response.data || []
         if (Array.isArray(itemsData)) {

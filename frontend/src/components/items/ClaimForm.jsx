@@ -51,7 +51,7 @@ export function ClaimForm({ itemId, itemTitle, onSubmit, loading = false }) {
     try {
       await onSubmit({
         item_id: itemId,
-        ...formData
+        ownership_answer: formData.verification_answer
       })
     } catch (error) {
       console.error("Error submitting claim form:", error)
