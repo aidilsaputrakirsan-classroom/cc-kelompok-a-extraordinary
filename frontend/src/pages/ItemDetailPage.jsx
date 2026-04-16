@@ -19,8 +19,12 @@ export default function ItemDetailPage() {
     const fetchItem = async () => {
       try {
         const response = await api.get(`/items/${id}`)
-        if (response.data) setItem(response.data)
+        // Handle both response.data.data and response.data directly
+        const itemData = response.data?.data || response.data
+        if (itemData) setItem(itemData)
       } catch (err) {
+        console.error("Error fetching item:", err)
+        // Mock fallback data for development
         setItem({
           id,
           type: "found",
@@ -41,18 +45,21 @@ export default function ItemDetailPage() {
     try {
       setClaimLoading(true)
       const response = await api.post('/claims', claimData)
-      if (response.data) {
+      if (response.status === 201 || response.status === 200) {
         toast.success("Klaim berhasil diajukan! Admin akan segera memverifikasi.")
         setShowClaimForm(false)
         // Refresh item data
-        const updatedItem = await api.get(`/items/${id}`)
-        if (updatedItem.data) setItem(updatedItem.data)
+        try {
+          const updatedItem = await api.get(`/items/${id}`)
+          if (updatedItem.data) setItem(updatedItem.data)
+        } catch (refreshError) {
+          console.error("Error refreshing item:", refreshError)
+        }
       }
     } catch (error) {
       console.error("Error submitting claim:", error)
-      // Mock success for demo
-      toast.success("Klaim berhasil diajukan! (Mock data) Admin akan segera memverifikasi.")
-      setShowClaimForm(false)
+      const errorMsg = error.response?.data?.detail || error.response?.data?.message || "Gagal mengajukan klaim. Silakan coba lagi."
+      toast.error(errorMsg)
     } finally {
       setClaimLoading(false)
     }

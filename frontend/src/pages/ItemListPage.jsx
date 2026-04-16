@@ -17,11 +17,14 @@ export default function ItemListPage() {
     const fetchItems = async () => {
       try {
         const response = await api.get('/items')
-        if (response.data && response.data.data) {
-          setItems(response.data.data)
+        // Handle both response.data.data and response.data directly
+        const itemsData = response.data?.data || response.data || []
+        if (Array.isArray(itemsData)) {
+          setItems(itemsData)
         }
       } catch (err) {
-        console.error("API belum ada, menggunakan data mockup", err)
+        console.error("Error fetching items:", err)
+        // Mock fallback data for development
         setItems([
           { id: 1, type: "lost", title: "KTM a/n Budi", status: "open", description: "Jatuh di sekitar GSG" },
           { id: 2, type: "found", title: "Kunci Lemari Eiger", status: "open", description: "Ditemukan di kantin kampus, saya serahkan ke satpam" },

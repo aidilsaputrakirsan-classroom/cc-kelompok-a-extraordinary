@@ -64,17 +64,19 @@ export default function CreateItemPage() {
       toast.error("Untuk barang temuan, wajib mengisi ID atau Nama Satpam Penitipan.")
       return
     }
-    
+
     try {
       setLoading(true)
       const payload = { ...formData, images }
-      await api.post('/items', payload)
-      toast.success("Laporan berhasil dibuat!")
-      navigate("/items")
+      const response = await api.post('/items', payload)
+      if (response.status === 201 || response.status === 200) {
+        toast.success("Laporan berhasil dibuat!")
+        navigate("/items")
+      }
     } catch (error) {
-      console.error(error)
-      toast.success("Mock: Laporan simulasi berhasil dibuat! (Karena endpoint POST belum siap)")
-      navigate("/items")
+      console.error("Error creating item:", error)
+      const errorMsg = error.response?.data?.detail || error.response?.data?.message || "Gagal membuat laporan. Silakan coba lagi."
+      toast.error(errorMsg)
     } finally {
       setLoading(false)
     }
@@ -155,7 +157,7 @@ export default function CreateItemPage() {
               {images.length > 0 && (
                 <div className="grid grid-cols-4 gap-2 mt-4">
                   {images.map((src, idx) => (
-                    <img key={idx} src={src} alt={`Preview ${idx+1}`} className="object-cover w-full h-24 rounded-md border" />
+                    <img key={`img-${idx}-${Date.now()}`} src={src} alt={`Preview ${idx+1}`} className="object-cover w-full h-24 rounded-md border" />
                   ))}
                 </div>
               )}

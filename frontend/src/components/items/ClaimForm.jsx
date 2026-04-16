@@ -54,7 +54,9 @@ export function ClaimForm({ itemId, itemTitle, onSubmit, loading = false }) {
         ...formData
       })
     } catch (error) {
-      console.error("Error submitting claim:", error)
+      console.error("Error submitting claim form:", error)
+      const errorMsg = error.response?.data?.detail || error.response?.data?.message || "Gagal mengirim klaim. Silakan coba lagi."
+      toast.error(errorMsg)
     }
   }
 

@@ -13,11 +13,14 @@ export default function MyClaimsPage() {
     const fetchMyClaims = async () => {
       try {
         const response = await api.get('/claims/my')
-        if (response.data && response.data.data) {
-          setClaims(response.data.data)
+        // Handle both response.data.data and response.data directly
+        const claimsData = response.data?.data || response.data || []
+        if (Array.isArray(claimsData)) {
+          setClaims(claimsData)
         }
       } catch (err) {
-        console.error("API belum ada, menggunakan data mockup", err)
+        console.error("Error fetching user claims:", err)
+        // Mock fallback data for development
         setClaims([
           {
             id: 1,
