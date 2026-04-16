@@ -8,9 +8,9 @@ Menstabilkan flow inti di Docker, menambah halaman admin penting, dan menyiapkan
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| BE-4.1 | Perbaiki bug backend hasil blackbox sprint 02-03 | High | 3h | QA-3.3 | todo | - | - |
-| BE-4.2 | Review kelengkapan endpoint terhadap flow inti UTS | Medium | 2h | BE-4.1 | todo | - | - |
-| BE-4.3 | Pastikan backend stabil saat dijalankan via Docker Compose | High | 2h | DO-3.3, BE-4.2 | todo | - | - |
+| BE-4.1 | Perbaiki bug backend hasil blackbox sprint 02-03 | High | 3h | QA-3.3 | done | feat/backend/sprint-04-v2 | test added |
+| BE-4.2 | Review kelengkapan endpoint terhadap flow inti UTS | Medium | 2h | BE-4.1 | done | feat/backend/sprint-04-v2 | admin claims check added |
+| BE-4.3 | Pastikan backend stabil saat dijalankan via Docker Compose | High | 2h | DO-3.3, BE-4.2 | done | feat/backend/sprint-04-v2 | cors updated for docker compose |
 
 ## Lead Frontend (@nicholasmnrng)
 

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.user import User
@@ -46,12 +46,12 @@ def get_claim_detail(
 
 @router.get("/", response_model=List[schemas.ClaimResponse])
 def get_claims_for_item(
-    item_id: str,
+    item_id: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """
-    Ambil semua claim untuk suatu item. Biasanya dipakai oleh pemilik item untuk me-review.
+    Ambil semua claim untuk suatu item (bila item_id disebutkan), atau ambil seluruh claim (jika admin).
     """
     return service.get_claims_by_item(db=db, item_id=item_id, user_id=current_user.id)
 

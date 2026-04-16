@@ -3,6 +3,7 @@ from fastapi import HTTPException, status
 from app.models.claim import Claim, ClaimStatusHistory
 from app.models.item import Item, ItemStatusHistory
 from app.models.user import User
+from typing import Optional
 from app.claims.schemas import ClaimCreate, ClaimStatusUpdate
 
 def create_claim(db: Session, user_id: str, claim_in: ClaimCreate) -> Claim:
@@ -68,14 +69,20 @@ def get_claim_by_id(db: Session, claim_id: str, user_id: str):
         
     return claim
 
-def get_claims_by_item(db: Session, item_id: str, user_id: str):
+def get_claims_by_item(db: Session, item_id: Optional[str], user_id: str):
+    user = db.query(User).filter(User.id == user_id).first()
+    is_admin = user and user.role in ["admin", "superadmin"]
+
+    if not item_id:
+        if not is_admin:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only admin can view all claims without specifying an item_id")
+        return db.query(Claim).all()
+
     item = db.query(Item).filter(Item.id == item_id).first()
     if not item:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
 
-    user = db.query(User).filter(User.id == user_id).first()
     is_item_owner = item.created_by == user_id
-    is_admin = user and user.role in ["admin", "superadmin"]
     
     if not is_item_owner and not is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only item owner or admin can view claims for this item")
