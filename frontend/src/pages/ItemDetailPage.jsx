@@ -31,7 +31,6 @@ export default function ItemDetailPage() {
           title: "Kunci Lemari Eiger (Mock)",
           status: "open",
           description: "Ditemukan di meja kantin utara. Sudah saya amankan dan titipkan ke post satpam depan.",
-          contact: "-",
           created_at: new Date().toISOString()
         })
       } finally {
@@ -93,11 +92,6 @@ export default function ItemDetailPage() {
         <div>
           <h3 className="mb-2 text-lg font-semibold">Keterangan / Deskripsi</h3>
           <p className="leading-relaxed text-muted-foreground">{item.description}</p>
-        </div>
-
-        <div>
-          <h3 className="mb-2 text-lg font-semibold">Kontak Informasi</h3>
-          <p className="text-muted-foreground">{item.contact || "Tidak disertakan"}</p>
         </div>
 
         {item.type === 'found' && item.status === 'open' && (

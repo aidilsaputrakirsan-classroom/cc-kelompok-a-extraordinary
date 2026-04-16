@@ -14,7 +14,6 @@ export default function CreateItemPage() {
     type: "lost",
     title: "",
     description: "",
-    contact: "",
     security_officer_id: ""
   })
   const [images, setImages] = useState([])
@@ -133,11 +132,6 @@ export default function CreateItemPage() {
                 className="flex w-full min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus:ring-2 focus:ring-ring"
                 placeholder="Cantumkan detail ciri-ciri spesifik dan perkiraan lokasi kejadian..."
               />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="contact">Kontak Tambahan (Opsional)</Label>
-              <Input id="contact" name="contact" value={formData.contact} onChange={handleChange} placeholder="No HP/WA atau Line" />
             </div>
 
             {formData.type === 'found' && (
