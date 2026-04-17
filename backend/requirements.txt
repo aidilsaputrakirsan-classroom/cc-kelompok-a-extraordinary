@@ -4,6 +4,6 @@ sqlalchemy
 pydantic-settings
 psycopg2-binary
 python-dotenv
-firebase-admin
 python-jose[cryptography]
 alembic
+passlib[bcrypt]

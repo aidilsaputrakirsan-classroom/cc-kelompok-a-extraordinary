@@ -5,8 +5,8 @@ Panduan singkat untuk menguji endpoint backend Temuin secara manual.
 ## Prasyarat
 
 - Backend berjalan di `http://127.0.0.1:8000` (gunakan `127.0.0.1`, **bukan** `localhost`)
-- File `serviceAccountKey.json` ada di folder `backend/`
 - Database `temuin_db` sudah dibuat dan migrasi sudah dijalankan
+- Untuk endpoint protected, gunakan token dari `POST /auth/register` atau `POST /auth/login`
 
 ## Swagger UI
 
@@ -14,12 +14,9 @@ Cara tercepat untuk menguji API: buka **http://127.0.0.1:8000/docs** di browser.
 
 ## Cara Mendapatkan Token
 
-Login Google tidak bisa diotomasi via curl. Gunakan cara berikut:
+Gunakan endpoint register atau login, lalu salin nilai `access_token` dari response untuk dipakai sebagai header:
 
-1. Buka frontend (`http://localhost:5173`) dan login dengan akun Google `@itk.ac.id`
-2. Buka browser DevTools (F12) > tab **Application** > **Local Storage** > `http://localhost:5173`
-3. Salin nilai `internalToken` -- ini adalah `access_token` JWT internal
-4. Gunakan token tersebut di header: `Authorization: Bearer <TOKEN>`
+`Authorization: Bearer <TOKEN>`
 
 ## Endpoint Reference
 
@@ -36,10 +33,16 @@ curl http://127.0.0.1:8000/health
 ### Auth
 
 ```bash
-# Login (kirim Firebase ID token, dapat JWT internal)
+# Register user baru (email harus berakhiran itk.ac.id)
+curl -X POST http://127.0.0.1:8000/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@student.itk.ac.id", "password": "test1234", "name": "Test User"}'
+# Response: {"access_token": "...", "token_type": "bearer"}
+
+# Login (email + password, dapat JWT internal)
 curl -X POST http://127.0.0.1:8000/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"id_token": "<FIREBASE_ID_TOKEN>"}'
+  -d '{"email": "test@student.itk.ac.id", "password": "test1234"}'
 # Response: {"access_token": "...", "token_type": "bearer"}
 
 # Get profil user saat ini
@@ -89,5 +92,5 @@ curl -X DELETE http://127.0.0.1:8000/items/<ITEM_ID> \
 
 - Semua ID (item, user) bertipe string UUID, bukan integer
 - Field `type` pada create item hanya menerima `"lost"` atau `"found"`
-- Endpoint `POST /auth/login` memverifikasi token Firebase dan hanya menerima email `@itk.ac.id` (lihat DEC-002)
+- Endpoint auth backend hanya menerima email `@itk.ac.id` dan memakai password policy minimal 8 karakter yang mengandung huruf dan angka
 - Jika dapat error CORS, pastikan backend berjalan di `127.0.0.1:8000` dan bukan proses lain yang menempati port 8000

@@ -1,15 +1,20 @@
-from pydantic import BaseModel
+from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict
+
+class RegisterRequest(BaseModel):
+    email: str
+    password: str
+    name: str
 
 class LoginRequest(BaseModel):
-    id_token: str
+    email: str
+    password: str
 
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
-
-from typing import Optional
-from datetime import datetime
-from pydantic import ConfigDict
 
 class UserBase(BaseModel):
     name: str
@@ -25,4 +30,3 @@ class UserResponse(UserBase):
     created_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
-

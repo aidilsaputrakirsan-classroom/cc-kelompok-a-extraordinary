@@ -74,16 +74,12 @@ pip install -r requirements.txt
 cp .env.example .env
 # Edit .env sesuai konfigurasi lokal kamu
 
-# Buat tabel dari model dan tandai migrasi sudah applied
-python -c "from app.database import engine, Base; from app.models import *; Base.metadata.create_all(bind=engine)"
-alembic stamp head
+# Jalankan migration
+alembic upgrade head
 
 # Jalankan backend
 uvicorn app.main:app --reload
 ```
-
-> **Kenapa bukan `alembic upgrade head`?**
-> Migration files yang ada saat ini tidak membuat tabel dari nol (dua migration pertama kosong, yang ketiga hanya alter kolom). Perintah di atas membuat semua tabel langsung dari model Python, lalu `alembic stamp head` menandai bahwa DB sudah sinkron dengan migration terakhir. Ke depan, migration baru bisa dijalankan normal dengan `alembic upgrade head`.
 
 Backend akan jalan di `http://127.0.0.1:8000`.
 
@@ -105,7 +101,7 @@ npm install
 
 # Copy env template dan isi nilai yang sesuai
 cp .env.example .env
-# Edit .env sesuai konfigurasi Firebase kamu
+# Edit .env sesuai konfigurasi frontend kamu
 
 # Jalankan frontend
 npm run dev
@@ -117,51 +113,11 @@ Frontend akan jalan di `http://localhost:5173`.
 
 - Buka `http://localhost:5173` — halaman awal harus tampil tanpa error
 
-## 5. Setup Firebase
+## 5. Catatan Auth Saat Ini
 
-### 5.1 Buat Project Firebase
-
-1. Buka https://console.firebase.google.com/
-2. Buat project baru (atau pakai yang sudah ada)
-3. Nama project: `temuin` (atau sesuai kesepakatan tim)
-
-### 5.2 Aktifkan Authentication
-
-1. Di Firebase Console, buka **Authentication** > **Sign-in method**
-2. Enable **Google** sebagai provider
-3. Isi support email
-4. Save
-
-### 5.3 Ambil Config Frontend (Firebase Client SDK)
-
-1. Di Firebase Console, buka **Project Settings** (ikon gear)
-2. Scroll ke **Your apps** > klik **Web app** (ikon `</>`)
-3. Register app dengan nama `temuin-web`
-4. Copy nilai `firebaseConfig` yang muncul
-5. Isi ke `frontend/.env`:
-
-```
-VITE_FIREBASE_API_KEY=AIzaSy...
-VITE_FIREBASE_AUTH_DOMAIN=temuin-xxx.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=temuin-xxx
-VITE_FIREBASE_STORAGE_BUCKET=temuin-xxx.firebasestorage.app
-VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
-VITE_FIREBASE_APP_ID=1:123456789:web:abcdef
-```
-
-### 5.4 Ambil Service Account Key (Firebase Admin SDK untuk Backend)
-
-1. Di Firebase Console, buka **Project Settings** > **Service accounts**
-2. Klik **Generate new private key**
-3. Download file JSON
-4. Simpan file di `backend/serviceAccountKey.json` (sudah di-gitignore)
-5. Isi path di `backend/.env`:
-
-```
-FIREBASE_CREDENTIALS_FILE=serviceAccountKey.json
-```
-
-> **PENTING**: Jangan commit file `serviceAccountKey.json` ke git. File ini sudah masuk `.gitignore`.
+- Backend auth aktif sekarang memakai email kampus `@itk.ac.id` + password dan menerbitkan internal JWT.
+- Tidak ada lagi kebutuhan `serviceAccountKey.json` atau Firebase Admin SDK untuk backend.
+- Frontend existing masih menyimpan integrasi Firebase lama dan butuh task lanjutan agar UI login sepenuhnya selaras dengan backend auth baru.
 
 ## 6. Env Vars Reference
 
@@ -174,21 +130,13 @@ FIREBASE_CREDENTIALS_FILE=serviceAccountKey.json
 | `ALGORITHM`                    | Tidak | `HS256` (default)                                       |
 | `ACCESS_TOKEN_EXPIRE_MINUTES`  | Tidak | `60` (default)                                          |
 | `CORS_ORIGINS`                 | Tidak | `["http://localhost:5173"]`                             |
-| `FIREBASE_CREDENTIALS_FILE`    | Ya*   | `serviceAccountKey.json`                                |
-
-*Wajib mulai Sprint 02 saat auth flow aktif.
 
 ### Frontend (`frontend/.env`)
 
 | Variable                            | Wajib | Contoh                              |
 | ----------------------------------- | ----- | ----------------------------------- |
 | `VITE_API_BASE_URL`                 | Ya    | `http://127.0.0.1:8000`            |
-| `VITE_FIREBASE_API_KEY`             | Ya    | Dari Firebase Console               |
-| `VITE_FIREBASE_AUTH_DOMAIN`         | Ya    | `temuin-xxx.firebaseapp.com`        |
-| `VITE_FIREBASE_PROJECT_ID`          | Ya    | `temuin-xxx`                        |
-| `VITE_FIREBASE_STORAGE_BUCKET`      | Ya    | `temuin-xxx.firebasestorage.app`    |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Ya    | `123456789`                         |
-| `VITE_FIREBASE_APP_ID`             | Ya    | `1:123456789:web:abcdef`            |
+| Frontend lama mungkin masih memerlukan `VITE_FIREBASE_*` | Tergantung | Hanya sampai login frontend dimigrasikan |
 
 ## Troubleshooting
 

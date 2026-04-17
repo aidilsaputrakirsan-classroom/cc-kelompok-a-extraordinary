@@ -34,12 +34,12 @@ Temuin adalah project akhir mata kuliah Cloud Computing untuk platform lost and 
 | **Frontend** | React, Vite, Tailwind CSS, shadcn/ui |
 | **Backend** | FastAPI (Python), SQLAlchemy |
 | **Database** | PostgreSQL |
-| **Auth** | Firebase Admin SDK, Google OpenID Connect |
+| **Auth** | Email + Password, Internal JWT |
 | **DevOps** | Docker, Docker Compose (On Progress) |
 
 ### 🏛️ Architecture Overview
 Temuin menggunakan pendekatan **Monolith-First** yang dirancang untuk skalabilitas menuju **Microservices** (Sprint 06).
-- **Authentication**: Integrasi Firebase Auth untuk login akun kampus ITK (`@itk.ac.id`) dengan sinkronisasi ke PostgreSQL internal.
+- **Authentication**: Backend menangani register/login email kampus ITK (`@itk.ac.id`) dengan password, menyimpan `password_hash` di PostgreSQL, lalu menerbitkan internal JWT.
 - **Storage**: Gambar item dikompresi di frontend dan disimpan sebagai `Base64` di database PostgreSQL sesuai spesifikasi [DEC-016](temuin-docs/01-concept/decision-log.md).
 
 ### 🛣️ API Endpoints Summary
@@ -53,8 +53,10 @@ Temuin menggunakan pendekatan **Monolith-First** yang dirancang untuk skalabilit
 #### 🔑 Auth Endpoints
 | Method | Endpoint | Description | Access | Status |
 |:---:|---|---|:---:|:---:|
-| `POST` | `/auth/login` | Exchange Firebase token for Internal JWT | Public | ✅ Active |
+| `POST` | `/auth/register` | Register email kampus dan dapat internal JWT | Public | ✅ Active |
+| `POST` | `/auth/login` | Login email+password dan dapat internal JWT | Public | ✅ Active |
 | `GET` | `/auth/me` | Current user profile | Protected 🔒 | ✅ Active |
+| `PUT` | `/auth/me` | Update current user profile | Protected 🔒 | ✅ Active |
 
 #### 📦 Item Endpoints (Protected 🔒)
 | Method | Endpoint | Description | Status |
@@ -83,7 +85,7 @@ Setiap fitur diverifikasi melalui proses pengujian *Blackbox*.
   - ✅ Health check endpoint active & DB connected.
   - 📄 **Detail**: [docs/sprint-01-qa-report.md](docs/sprint-01-qa-report.md)
 - **Sprint 02 (Verified)**:
-  - ✅ Login Google & ITK Email Validation (Frontend & Backend).
+  - ✅ Auth backend dan validasi email ITK.
   - ✅ Item Listing & Detail functionality.
   - ⚠️ Item Creation (Frontend Mockup): UI Flow sudah siap.
   - 📄 **Detail**: [docs/sprint-02-qa-report.md](docs/sprint-02-qa-report.md)
@@ -97,8 +99,8 @@ Setiap fitur diverifikasi melalui proses pengujian *Blackbox*.
 
 1. Salin `.env.example` menjadi `.env` di folder `backend/` dan `frontend/`, lalu isi nilainya.
    - `SECRET_KEY` di backend wajib diisi (string random untuk JWT signing).
-   - `FIREBASE_CREDENTIALS_FILE` di backend diisi path ke service account key dari Firebase Console.
-   - Variabel `VITE_FIREBASE_*` di frontend diisi dari Firebase Console > Project Settings > Web app.
+   - `DATABASE_URL` backend harus mengarah ke PostgreSQL yang aktif.
+   - Frontend existing masih membawa konfigurasi Firebase lama dan membutuhkan task lanjutan agar login UI mengikuti auth backend baru.
 2. Jalankan Backend:
    ```bash
    cd backend
