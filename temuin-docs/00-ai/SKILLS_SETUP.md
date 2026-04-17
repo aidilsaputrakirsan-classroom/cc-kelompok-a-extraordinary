@@ -28,7 +28,6 @@ Di repo ini, folder tersebut sudah tersedia.
 
 | Skill | Fungsi |
 |------|--------|
-| `firebase-auth-basics` | Bantuan Firebase Authentication |
 | `web-design-guidelines` | Review dan kualitas UI |
 | `design-taste-frontend` | Taste dan kualitas desain frontend |
 | `shadcn` | Pola kerja shadcn/ui |
@@ -37,6 +36,5 @@ Di repo ini, folder tersebut sudah tersedia.
 
 - Mulai dari `temuin-router`
 - Jika task sudah jelas per role, panggil skill role yang relevan
-- Untuk auth berbasis Firebase, gabungkan dengan `firebase-auth-basics`
 - Untuk frontend, utamakan `temuin-frontend`, lalu gunakan `shadcn`, `design-taste-frontend`, dan `web-design-guidelines` bila agent mendukung skill tambahan
 - Jika agent tidak mendukung skill system, fallback ke `AGENTS.md` dan dokumen di `temuin-docs/`

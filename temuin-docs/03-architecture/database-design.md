@@ -4,7 +4,7 @@
 
 | Tabel | Fungsi |
 |------|--------|
-| `users` | User internal hasil sinkronisasi login |
+| `users` | User internal hasil register/login |
 | `items` | Laporan barang lost/found |
 | `item_images` | Data gambar item disimpan sebagai base64 (DEC-016) |
 | `claims` | Proses klaim item found |
@@ -21,8 +21,9 @@
 
 ### users
 - `id`
-- `firebase_uid`
+- `firebase_uid` (deprecated, nullable - legacy dari Firebase Auth)
 - `email`
+- `password_hash` (bcrypt hash, nullable untuk user lama yang belum re-register)
 - `name`
 - `role`
 - `phone`
@@ -58,8 +59,9 @@
 
 ## Aturan Data
 
-- `users.firebase_uid` menyimpan identitas user dari Firebase Auth
-- User internal tetap disimpan di PostgreSQL walau login memakai Google Sign-In via Firebase
+- `users.firebase_uid` adalah kolom legacy dari Firebase Auth, nullable dan deprecated
+- `users.password_hash` menyimpan bcrypt hash password user
+- User mendaftar dan login langsung dengan email + password
 - `items.type` hanya `lost` atau `found`
 - `items.status` dan `claims.status` dipisahkan
 - `security_officer_id` wajib untuk item `found`

@@ -9,8 +9,6 @@
 - Tailwind CSS 4
 - shadcn/ui
 - Axios
-- Firebase Auth SDK
-
 Catatan:
 - `shadcn/ui` wajib dipakai sebagai basis komponen UI
 - Jangan membuat sistem UI custom besar jika komponen shadcn sudah cukup
@@ -32,8 +30,7 @@ frontend/
     │   ├── router.jsx
     │   └── providers.jsx
     ├── config/
-    │   ├── api.js
-    │   └── firebase.js
+    │   └── api.js
     ├── components/
     │   ├── ui/
     │   ├── layout/
@@ -75,17 +72,16 @@ frontend/
 
 ## Auth Flow Frontend
 
-1. User klik login Google
-2. Firebase Auth SDK membuka popup Google
-3. Frontend menerima Firebase ID token
-4. Frontend mengirim token itu ke backend
-5. Backend memverifikasi token dan mengembalikan JWT internal aplikasi
-6. Frontend menyimpan JWT internal dan data user internal
-7. Semua request API selanjutnya memakai JWT internal, bukan token Firebase langsung
+1. User register dengan email `itk.ac.id`, password, dan nama via form
+2. Atau user login dengan email dan password via form
+3. Frontend mengirim credentials ke backend (`POST /auth/register` atau `POST /auth/login`)
+4. Backend memverifikasi dan mengembalikan JWT internal aplikasi
+5. Frontend menyimpan JWT internal di `localStorage` dan fetch profil user dari `GET /auth/me`
+6. Semua request API selanjutnya memakai JWT internal via axios interceptor
 
 Catatan:
-- Firebase dipakai untuk proses sign-in
-- PostgreSQL tetap menjadi tempat data user internal dan seluruh data domain Temuin
+- Tidak ada dependency eksternal untuk autentikasi (Firebase dihapus)
+- PostgreSQL adalah satu-satunya tempat data user dan seluruh data domain Temuin
 
 ## Dokumen Terkait
 

@@ -4,7 +4,7 @@
 
 - Bangun UI dan flow user dengan React + Vite
 - Gunakan Tailwind CSS dan shadcn/ui sebagai basis komponen
-- Integrasi Firebase Auth dan API backend
+- Integrasi auth (email+password) dan API backend
 - Jaga UX tetap sederhana, responsif, dan mudah diuji
 
 ## Output Yang Diharapkan

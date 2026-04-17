@@ -8,9 +8,12 @@ Dokumen ini mencatat keputusan final yang tidak boleh dilanggar tanpa keputusan 
 - Sistem hanya dapat diakses setelah login
 - Tidak ada mode anonim atau publik
 
-### DEC-002: Login via Google dan email kampus
-- Hanya akun Google dengan suffix `itk.ac.id` yang boleh masuk
-- User pertama kali otomatis dibuat di database internal dengan role default `user`
+### DEC-002: Login via email kampus
+- Login dan register menggunakan email + password biasa
+- Hanya email dengan suffix `itk.ac.id` yang boleh mendaftar dan masuk
+- Password minimal 8 karakter, harus mengandung huruf dan angka
+- User mendaftar via form register, lalu login via form login
+- Firebase Auth dihapus karena instabilitas (API key suspension, network error di mobile, intermittent failures)
 
 ### DEC-003: Role sistem
 - Role aktif adalah `user`, `admin`, dan `superadmin`
