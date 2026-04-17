@@ -21,10 +21,15 @@ Images sudah tersedia di Docker Hub — kebanyakan anggota tim **tidak perlu bui
 # 1. Pull images terbaru dari Docker Hub
 .\scripts\temuin.ps1 pull
 
-# 2. Start semua service
+# 2. Start semua service (migration + seed master data otomatis)
 .\scripts\temuin.ps1 start
 
-# 3. Buka browser
+# 3. Buka browser, register akun di http://localhost:3000/register
+
+# 4. (Opsional) Jadikan akun kamu admin:
+.\scripts\temuin.ps1 make-admin emailkamu@student.itk.ac.id
+
+# Akses:
 #    Frontend:  http://localhost:3000
 #    Backend:   http://localhost:8000
 #    API Docs:  http://localhost:8000/docs
@@ -39,7 +44,6 @@ Images sudah tersedia di Docker Hub — kebanyakan anggota tim **tidak perlu bui
    ```
 
 2. **Edit `.env`** — pastikan `SECRET_KEY` dan konfigurasi database sesuai kebutuhan lokal.
-3. Frontend existing masih membawa konfigurasi Firebase lama. Docker stack backend tetap bisa jalan tanpa file credential Firebase apa pun.
 
 ## Workflow: Anggota Tim (Backend/Frontend Dev)
 
@@ -82,13 +86,15 @@ Hanya DevOps lead (@PangeranSilaen) yang build dan push images ke Docker Hub.
 | `build`          | Build images lokal (hanya untuk DevOps)                                                                           |
 | `pull`           | Pull images dari Docker Hub                                                                                       |
 | `migrate`        | Jalankan Alembic migrations (sudah otomatis saat backend start)                                                   |
-| `seed`           | Seed master data (categories, buildings) — hanya perlu sekali                                                     |
+| `seed`           | Seed master data (sudah otomatis saat start, command ini untuk manual re-seed)                                    |
+| `make-admin <email>` | Promote user yang sudah register menjadi admin                                                                |
 
 ## Catatan Penting
 
 - **Database TIDAK di-reset** saat start/stop. Data tersimpan di Docker volume `temuin_pgdata`. Untuk reset total: jalankan `reset` command (atau manual: `docker compose down -v` lalu start ulang).
 - **Migrations otomatis**: Backend container menjalankan `alembic upgrade head` saat start via `entrypoint.sh`. Command `migrate` hanya untuk manual run jika perlu.
-- **Seed data**: Jalankan `seed` sekali setelah pertama kali start. Ini mengisi tabel `categories` dan `buildings` dengan data awal.
+- **Seed otomatis**: Master data (categories, buildings, locations, security officers) otomatis di-seed saat backend start. Hanya insert jika tabel kosong, aman dijalankan berulang.
+- **Admin account**: Tidak ada akun admin default. Register dulu lewat UI, lalu promote via `make-admin` command.
 - **Frontend env berubah**: Jalankan `build` ulang karena `VITE_*` di-bake saat build.
 
 ## Akses
