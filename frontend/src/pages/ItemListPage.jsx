@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge"
 import { SearchFilter } from "@/components/items/SearchFilter"
 import { StatusBadge } from "@/components/ui/StatusBadge"
+import { toast } from "sonner"
 
 export default function ItemListPage() {
   const [items, setItems] = useState([])
@@ -16,7 +17,7 @@ export default function ItemListPage() {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const response = await api.get('/items/')
+        const response = await api.get('/items')
         // Handle both response.data.data and response.data directly
         const itemsData = response.data?.data || response.data || []
         if (Array.isArray(itemsData)) {
@@ -24,12 +25,7 @@ export default function ItemListPage() {
         }
       } catch (err) {
         console.error("Error fetching items:", err)
-        // Mock fallback data for development
-        setItems([
-          { id: 1, type: "lost", title: "KTM a/n Budi", status: "open", description: "Jatuh di sekitar GSG" },
-          { id: 2, type: "found", title: "Kunci Lemari Eiger", status: "open", description: "Ditemukan di kantin kampus, saya serahkan ke satpam" },
-          { id: 3, type: "lost", title: "Botol Tupperware Hitam", status: "open", description: "Ketinggalan di G-201" }
-        ])
+        toast.error("Gagal memuat daftar barang.")
       } finally {
         setLoading(false)
       }

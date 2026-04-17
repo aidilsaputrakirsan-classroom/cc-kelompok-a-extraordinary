@@ -1,10 +1,11 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { api } from "@/config/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
 
 export default function CreateItemPage() {
@@ -14,12 +15,47 @@ export default function CreateItemPage() {
     type: "lost",
     title: "",
     description: "",
+    category_id: "",
+    building_id: "",
+    location_id: "",
     security_officer_id: ""
   })
   const [images, setImages] = useState([])
 
+  // Master data state
+  const [categories, setCategories] = useState([])
+  const [buildings, setBuildings] = useState([])
+  const [locations, setLocations] = useState([])
+  const [securityOfficers, setSecurityOfficers] = useState([])
+
+  // Fetch master data on mount
+  useEffect(() => {
+    const fetchMasterData = async () => {
+      try {
+        const [catRes, buildRes, locRes, soRes] = await Promise.all([
+          api.get('/master-data/categories'),
+          api.get('/master-data/buildings'),
+          api.get('/master-data/locations'),
+          api.get('/master-data/security-officers'),
+        ])
+        setCategories(catRes.data?.data || catRes.data || [])
+        setBuildings(buildRes.data?.data || buildRes.data || [])
+        setLocations(locRes.data?.data || locRes.data || [])
+        setSecurityOfficers(soRes.data?.data || soRes.data || [])
+      } catch (err) {
+        console.error("Error fetching master data:", err)
+        toast.error("Gagal memuat data referensi. Silakan refresh halaman.")
+      }
+    }
+    fetchMasterData()
+  }, [])
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
+
+  const handleSelectChange = (name, value) => {
+    setFormData({ ...formData, [name]: value === "_none" ? "" : value })
   }
 
   // Kompresi image ke base64 (< 2MB)
@@ -40,14 +76,14 @@ export default function CreateItemPage() {
           const scaleSize = MAX_WIDTH / img.width
           canvas.width = MAX_WIDTH
           canvas.height = img.height * scaleSize
-          
+
           const ctx = canvas.getContext("2d")
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-          
+
           const base64String = canvas.toDataURL("image/jpeg", 0.7)
-          
+
           setImages(prev => {
-            if(prev.length < 4) return [...prev, base64String]
+            if (prev.length < 4) return [...prev, base64String]
             return prev
           })
         }
@@ -57,10 +93,14 @@ export default function CreateItemPage() {
     })
   }
 
+  const removeImage = (index) => {
+    setImages(prev => prev.filter((_, i) => i !== index))
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (formData.type === 'found' && !formData.security_officer_id) {
-      toast.error("Untuk barang temuan, wajib mengisi ID atau Nama Satpam Penitipan.")
+      toast.error("Untuk barang temuan, wajib memilih Satpam Penitipan.")
       return
     }
 
@@ -70,10 +110,13 @@ export default function CreateItemPage() {
         type: formData.type,
         title: formData.title,
         description: formData.description || undefined,
+        category_id: formData.category_id || undefined,
+        building_id: formData.building_id || undefined,
+        location_id: formData.location_id || undefined,
         security_officer_id: formData.security_officer_id || undefined,
         images: images.map((img, idx) => ({ image_data: img, display_order: idx }))
       }
-      const response = await api.post('/items/', payload)
+      const response = await api.post('/items', payload)
       if (response.status === 201 || response.status === 200) {
         toast.success("Laporan berhasil dibuat!")
         navigate("/items")
@@ -101,19 +144,18 @@ export default function CreateItemPage() {
             <CardDescription>Isi detail informasi barang yang hilang atau ditemukan secara akurat.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
-            
+
             <div className="space-y-2">
               <Label htmlFor="type">Tipe Laporan</Label>
-              <select 
-                id="type"
-                name="type" 
-                value={formData.type} 
-                onChange={handleChange}
-                className="w-full h-10 px-3 py-2 text-sm border rounded-md border-input bg-background focus-visible:outline-none focus:ring-2 focus:ring-ring"
-              >
-                <option value="lost">Laporan Barang Hilang</option>
-                <option value="found">Laporan Barang Temuan</option>
-              </select>
+              <Select value={formData.type} onValueChange={(v) => handleSelectChange("type", v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih tipe laporan" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="lost">Laporan Barang Hilang</SelectItem>
+                  <SelectItem value="found">Laporan Barang Temuan</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -123,41 +165,100 @@ export default function CreateItemPage() {
 
             <div className="space-y-2">
               <Label htmlFor="description">Deskripsi Lengkap / Spesifik</Label>
-              <textarea 
+              <textarea
                 id="description"
-                name="description" 
-                required 
-                value={formData.description} 
+                name="description"
+                required
+                value={formData.description}
                 onChange={handleChange}
                 className="flex w-full min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus:ring-2 focus:ring-ring"
                 placeholder="Cantumkan detail ciri-ciri spesifik dan perkiraan lokasi kejadian..."
               />
             </div>
 
+            <div className="space-y-2">
+              <Label>Kategori</Label>
+              <Select value={formData.category_id || "_none"} onValueChange={(v) => handleSelectChange("category_id", v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih kategori (opsional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="_none">-- Tidak dipilih --</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Gedung</Label>
+                <Select value={formData.building_id || "_none"} onValueChange={(v) => handleSelectChange("building_id", v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih gedung" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">-- Tidak dipilih --</SelectItem>
+                    {buildings.map((b) => (
+                      <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Lokasi</Label>
+                <Select value={formData.location_id || "_none"} onValueChange={(v) => handleSelectChange("location_id", v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih lokasi" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">-- Tidak dipilih --</SelectItem>
+                    {locations.map((loc) => (
+                      <SelectItem key={loc.id} value={loc.id}>{loc.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             {formData.type === 'found' && (
               <div className="space-y-2 p-4 border rounded-md bg-secondary/30">
-                <Label htmlFor="security_officer_id" className="text-destructive font-semibold">
+                <Label className="text-destructive font-semibold">
                   Satpam Penitipan (Wajib Untuk Barang Temuan)
                 </Label>
-                <Input 
-                  id="security_officer_id" 
-                  name="security_officer_id" 
-                  required={formData.type === 'found'} 
-                  value={formData.security_officer_id} 
-                  onChange={handleChange} 
-                  placeholder="Masukkan Nama atau ID Satpam Penerima Titipan" 
-                />
+                <Select value={formData.security_officer_id || "_none"} onValueChange={(v) => handleSelectChange("security_officer_id", v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih satpam penerima titipan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">-- Pilih satpam --</SelectItem>
+                    {securityOfficers.map((so) => (
+                      <SelectItem key={so.id} value={so.id}>{so.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             )}
 
             <div className="space-y-2">
               <Label htmlFor="images">Upload Foto Barang (Max 4 foto)</Label>
               <Input id="images" type="file" accept="image/*" multiple onChange={handleImageUpload} />
-              
+
               {images.length > 0 && (
                 <div className="grid grid-cols-4 gap-2 mt-4">
                   {images.map((src, idx) => (
-                    <img key={`img-${idx}-${Date.now()}`} src={src} alt={`Preview ${idx+1}`} className="object-cover w-full h-24 rounded-md border" />
+                    <div key={`img-${idx}`} className="relative group">
+                      <img src={src} alt={`Preview ${idx + 1}`} className="object-cover w-full h-24 rounded-md border" />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(idx)}
+                        className="absolute top-1 right-1 w-5 h-5 bg-destructive text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        x
+                      </button>
+                    </div>
                   ))}
                 </div>
               )}

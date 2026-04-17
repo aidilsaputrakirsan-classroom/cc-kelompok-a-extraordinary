@@ -19,14 +19,14 @@ export default function LoginPage() {
     e.preventDefault()
     try {
       setLoading(true)
-      const response = await api.post("/auth/login/", { email, password })
+      const response = await api.post("/auth/login", { email, password })
       const { access_token } = response.data
 
       // Simpan token dulu agar interceptor bisa pakai
       localStorage.setItem("internalToken", access_token)
 
       // Fetch user profile
-      const meResponse = await api.get("/auth/me/")
+      const meResponse = await api.get("/auth/me")
       login(access_token, meResponse.data)
 
       toast.success("Login berhasil!")

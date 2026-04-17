@@ -4,6 +4,7 @@ import { api } from "@/config/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { StatusBadge } from "@/components/ui/StatusBadge"
+import { toast } from "sonner"
 
 export default function MyClaimsPage() {
   const [claims, setClaims] = useState([])
@@ -12,7 +13,7 @@ export default function MyClaimsPage() {
   useEffect(() => {
     const fetchMyClaims = async () => {
       try {
-        const response = await api.get('/claims/me/')
+        const response = await api.get('/claims/me')
         // Handle both response.data.data and response.data directly
         const claimsData = response.data?.data || response.data || []
         if (Array.isArray(claimsData)) {
@@ -20,25 +21,7 @@ export default function MyClaimsPage() {
         }
       } catch (err) {
         console.error("Error fetching user claims:", err)
-        // Mock fallback data for development
-        setClaims([
-          {
-            id: 1,
-            item_id: 2,
-            item_title: "Kunci Lemari Eiger",
-            status: "pending",
-            ownership_answer: "Kunci warna perak dengan logo Eiger",
-            created_at: new Date().toISOString()
-          },
-          {
-            id: 2,
-            item_id: 3,
-            item_title: "Botol Tupperware Hitam",
-            status: "approved",
-            ownership_answer: "Botol hitam berisi minuman",
-            created_at: new Date(Date.now() - 86400000).toISOString()
-          }
-        ])
+        toast.error("Gagal memuat daftar klaim.")
       } finally {
         setLoading(false)
       }

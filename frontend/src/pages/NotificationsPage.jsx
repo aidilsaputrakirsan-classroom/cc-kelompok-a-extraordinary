@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { api } from "@/config/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { toast } from "sonner"
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([])
@@ -10,7 +11,7 @@ export default function NotificationsPage() {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const response = await api.get('/notifications/me/')
+        const response = await api.get('/notifications/me')
         // Handle both response.data.data and response.data directly
         const notifData = response.data?.data || response.data || []
         if (Array.isArray(notifData)) {
@@ -18,33 +19,7 @@ export default function NotificationsPage() {
         }
       } catch (err) {
         console.error("Error fetching notifications:", err)
-        // Mock fallback data for development
-        setNotifications([
-          {
-            id: 1,
-            title: "Klaim Anda Diverifikasi",
-            message: "Klaim untuk 'Kunci Lemari Eiger' telah diverifikasi oleh admin.",
-            type: "claim_verified",
-            is_read: false,
-            created_at: new Date().toISOString()
-          },
-          {
-            id: 2,
-            title: "Barang Baru Ditemukan",
-            message: "Ada barang temuan baru yang cocok dengan laporan Anda. Silakan cek!",
-            type: "new_item",
-            is_read: false,
-            created_at: new Date(Date.now() - 3600000).toISOString()
-          },
-          {
-            id: 3,
-            title: "Notifikasi Sistem",
-            message: "Sistem telah diperbarui dengan fitur pencarian yang lebih baik.",
-            type: "system",
-            is_read: true,
-            created_at: new Date(Date.now() - 86400000).toISOString()
-          }
-        ])
+        toast.error("Gagal memuat notifikasi.")
       } finally {
         setLoading(false)
       }
@@ -54,7 +29,7 @@ export default function NotificationsPage() {
 
   const handleMarkAsRead = async (id) => {
     try {
-      await api.put(`/notifications/${id}/read/`)
+      await api.put(`/notifications/${id}/read`)
       setNotifications(prev =>
         prev.map(notif => notif.id === id ? { ...notif, is_read: true } : notif)
       )
@@ -69,7 +44,7 @@ export default function NotificationsPage() {
 
   const handleMarkAllAsRead = async () => {
     try {
-      await api.put('/notifications/read-all/')
+      await api.put('/notifications/read-all')
       setNotifications(prev => prev.map(notif => ({ ...notif, is_read: true })))
     } catch (error) {
       console.error("Error marking all as read:", error)

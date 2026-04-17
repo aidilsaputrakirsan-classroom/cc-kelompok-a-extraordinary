@@ -42,11 +42,11 @@ export default function RegisterPage() {
 
     try {
       setLoading(true)
-      const response = await api.post("/auth/register/", { email, password, name })
+      const response = await api.post("/auth/register", { email, password, name })
       const { access_token } = response.data
 
       localStorage.setItem("internalToken", access_token)
-      const meResponse = await api.get("/auth/me/")
+      const meResponse = await api.get("/auth/me")
       login(access_token, meResponse.data)
 
       toast.success("Registrasi berhasil!")

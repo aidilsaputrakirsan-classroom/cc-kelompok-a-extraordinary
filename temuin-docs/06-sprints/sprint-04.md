@@ -11,16 +11,16 @@ Menstabilkan flow inti di Docker, menambah halaman admin penting, dan menyiapkan
 | BE-4.1 | Perbaiki bug backend hasil blackbox sprint 02-03 | High | 3h | QA-3.3 | done | feat/backend/sprint-04-v2 | test added |
 | BE-4.2 | Review kelengkapan endpoint terhadap flow inti UTS | Medium | 2h | BE-4.1 | done | feat/backend/sprint-04-v2 | admin claims check added |
 | BE-4.3 | Pastikan backend stabil saat dijalankan via Docker Compose | High | 2h | DO-3.3, BE-4.2 | done | feat/backend/sprint-04-v2 | cors updated for docker compose |
-| BE-4.4 | Hapus Firebase Auth, implementasi register/login email+password | High | 4h | BE-4.1 | todo | - | Issue #46. Tambah passlib[bcrypt], migration password_hash, rewrite auth service/router/schemas |
+| BE-4.4 | Hapus Firebase Auth, implementasi register/login email+password | High | 4h | BE-4.1 | done | PR #50 | Issue #46. Merged via PR #50 |
 
 ## Lead Frontend (@nicholasmnrng)
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| FE-4.0 | Hapus Firebase Auth, buat form register/login email+password | High | 3h | - | in_progress | - | Issue #47. Rewrite providers, login page, buat register page, hapus firebase.js |
-| FE-4.1 | Buat halaman admin claim list dan claim detail | High | 4h | FE-3.2, BE-3.2 | todo | - | - |
-| FE-4.2 | Buat halaman admin master data | Medium | 4h | FE-3.3, BE-3.4 | todo | - | - |
-| FE-4.3 | Tambah toast, empty state, dan error state penting | Medium | 3h | FE-4.1, FE-4.2 | todo | - | - |
+| FE-4.0 | Hapus Firebase Auth, buat form register/login email+password | High | 3h | - | done | PR #49 | Issue #47. Merged via PR #49 |
+| FE-4.1 | Buat halaman admin claim list dan claim detail | High | 4h | FE-3.2, BE-3.2 | in_progress | feat/frontend/sprint-04-admin-ui | AdminClaimsPage + claim actions di ItemDetailPage |
+| FE-4.2 | Buat halaman admin master data | Medium | 4h | FE-3.3, BE-3.4 | in_progress | feat/frontend/sprint-04-admin-ui | AdminMasterDataPage CRUD + CreateItemPage dropdown |
+| FE-4.3 | Tambah toast, empty state, dan error state penting | Medium | 3h | FE-4.1, FE-4.2 | in_progress | feat/frontend/sprint-04-admin-ui | Hapus mock data, tambah toast error di semua page |
 | FE-4.4 | Rapikan responsivitas untuk flow demo UTS | Medium | 2h | FE-4.3 | todo | - | - |
 
 ## Lead DevOps (@PangeranSilaen)
@@ -29,7 +29,7 @@ Menstabilkan flow inti di Docker, menambah halaman admin penting, dan menyiapkan
 |----|------|----------|----------|------------|--------|------------|-------|
 | DO-4.1 | Optimasi Dockerfile dan `.dockerignore` | Medium | 2h | DO-3.3 | todo | - | - |
 | DO-4.2 | Tambah volume atau workflow hot reload dev bila diperlukan | Medium | 2h | DO-4.1 | todo | - | - |
-| DO-4.3 | Update docker-compose.yml: hapus Firebase mounts dan env vars | High | 1h | BE-4.4, FE-4.0 | todo | - | Issue #46 step 10. Hapus serviceAccountKey mount, VITE_FIREBASE_* args |
+| DO-4.3 | Update docker-compose.yml: hapus Firebase mounts dan env vars | High | 1h | BE-4.4, FE-4.0 | done | PR #50 | Sudah dihapus via PR #50 |
 | DO-4.4 | Verifikasi alur UTS berjalan penuh via Docker Compose | High | 2h | DO-4.2, DO-4.3, BE-4.4, FE-4.4 | todo | - | - |
 
 ## Lead QA & Docs (@raniayudewi)

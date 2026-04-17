@@ -9,7 +9,10 @@ import CreateItemPage from "@/pages/CreateItemPage"
 import MyItemsPage from "@/pages/MyItemsPage"
 import MyClaimsPage from "@/pages/MyClaimsPage"
 import NotificationsPage from "@/pages/NotificationsPage"
+import AdminClaimsPage from "@/pages/AdminClaimsPage"
+import AdminMasterDataPage from "@/pages/AdminMasterDataPage"
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
+import AdminRoute from "@/components/auth/AdminRoute"
 
 export const router = createBrowserRouter([
   {
@@ -55,7 +58,24 @@ export const router = createBrowserRouter([
       {
         path: "notifications",
         element: <NotificationsPage />,
-      }
+      },
+      // Admin routes
+      {
+        path: "admin/claims",
+        element: (
+          <AdminRoute>
+            <AdminClaimsPage />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "admin/master-data",
+        element: (
+          <AdminRoute>
+            <AdminMasterDataPage />
+          </AdminRoute>
+        ),
+      },
     ]
   }
 ])
