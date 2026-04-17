@@ -113,13 +113,33 @@ Frontend akan jalan di `http://localhost:5173`.
 
 - Buka `http://localhost:5173` — halaman awal harus tampil tanpa error
 
-## 5. Catatan Auth Saat Ini
+## 5. Seed Master Data & Admin
 
-- Backend auth aktif sekarang memakai email kampus `@itk.ac.id` + password dan menerbitkan internal JWT.
-- Tidak ada lagi kebutuhan `serviceAccountKey.json` atau Firebase Admin SDK untuk backend.
-- Frontend existing masih menyimpan integrasi Firebase lama dan butuh task lanjutan agar UI login sepenuhnya selaras dengan backend auth baru.
+```bash
+cd backend
 
-## 6. Env Vars Reference
+# Seed master data (categories, buildings, locations, security officers)
+python -m app.utils.seed
+```
+
+> Master data harus di-seed sebelum bisa buat laporan barang temuan (dropdown kategori, gedung, lokasi, satpam).
+
+### Membuat Akun Admin
+
+1. Register akun biasa lewat UI (`/register`)
+2. Promote ke admin via psql:
+```bash
+psql -U postgres -d temuin_db -c "UPDATE users SET role = 'admin' WHERE email = 'emailkamu@student.itk.ac.id';"
+```
+3. Login ulang — akun sekarang punya akses admin (Kelola Klaim, Master Data)
+
+## 6. Catatan Auth
+
+- Auth memakai email kampus `@itk.ac.id` + password (minimal 8 karakter, harus ada huruf dan angka)
+- Backend menerbitkan internal JWT, tidak ada Firebase
+- Tidak ada kebutuhan `serviceAccountKey.json` atau Firebase SDK
+
+## 7. Env Vars Reference
 
 ### Backend (`backend/.env`)
 
@@ -133,10 +153,9 @@ Frontend akan jalan di `http://localhost:5173`.
 
 ### Frontend (`frontend/.env`)
 
-| Variable                            | Wajib | Contoh                              |
-| ----------------------------------- | ----- | ----------------------------------- |
-| `VITE_API_BASE_URL`                 | Ya    | `http://127.0.0.1:8000`            |
-| Frontend lama mungkin masih memerlukan `VITE_FIREBASE_*` | Tergantung | Hanya sampai login frontend dimigrasikan |
+| Variable            | Wajib | Contoh                 |
+| ------------------- | ----- | ---------------------- |
+| `VITE_API_BASE_URL` | Ya    | `http://127.0.0.1:8000` |
 
 ## Troubleshooting
 

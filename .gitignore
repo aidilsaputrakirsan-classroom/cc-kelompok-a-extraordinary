@@ -46,9 +46,8 @@ temp/
 *.tar
 *.gz
 
-# Firebase service account keys
+# Credentials (safety net)
 serviceAccountKey.json
-*-firebase-adminsdk-*.json
 
 # AI agent local files
 .opencode/

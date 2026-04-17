@@ -3,7 +3,7 @@
 # ============================================================
 # Usage: .\scripts\temuin.ps1 [command]
 # Commands: start, stop, restart, reset, status, logs, build,
-#           pull, migrate, seed, help
+#           pull, migrate, seed, make-admin, help
 # ============================================================
 
 param(
@@ -54,7 +54,7 @@ function Test-EnvFile {
         Write-Host "Copying from .env.docker template..."
         Copy-Item ".env.docker" ".env"
         Write-Color ".env created from .env.docker" "Green"
-        Write-Color "Please edit .env with your actual values (especially Firebase config)." "Yellow"
+        Write-Color "Please edit .env with your actual values (especially SECRET_KEY)." "Yellow"
     }
 }
 
@@ -62,25 +62,10 @@ function Test-EnvFile {
 # Commands
 # ============================================================
 
-function Test-FirebaseCreds {
-    if (-not (Test-Path "backend/serviceAccountKey.json")) {
-        Write-Color "WARNING: backend/serviceAccountKey.json not found." "Yellow"
-        Write-Host "Creating empty placeholder. Firebase auth will NOT work until you add the real file."
-        '{}' | Set-Content "backend/serviceAccountKey.json" -Encoding UTF8
-    } else {
-        $content = (Get-Content "backend/serviceAccountKey.json" -Raw).Trim()
-        if ($content -eq '{}' -or $content.Length -lt 50) {
-            Write-Color "WARNING: backend/serviceAccountKey.json appears to be a placeholder." "Yellow"
-            Write-Color "Firebase auth will NOT work. Replace with the real credentials file." "Yellow"
-        }
-    }
-}
-
 function Invoke-Start {
     Write-Color "=== Starting Temuin ===" "Cyan"
     Test-Docker
     Test-EnvFile
-    Test-FirebaseCreds
     docker compose up -d
     Write-Host ""
     Invoke-Status
@@ -110,7 +95,6 @@ function Invoke-Reset {
     }
     Test-Docker
     Test-EnvFile
-    Test-FirebaseCreds
     Write-Host "Stopping containers and removing volumes..."
     docker compose down -v
     Write-Host "Pulling latest images..."
@@ -169,37 +153,39 @@ function Invoke-Seed {
     Write-Color "=== Seeding Database ===" "Cyan"
     Test-Docker
 
-    $dbRunning = docker compose ps db 2>&1 | Select-String "running"
-    if (-not $dbRunning) {
-        Write-Color "Error: Database container is not running. Run '.\scripts\temuin.ps1 start' first." "Red"
+    $backendRunning = docker compose ps backend 2>&1 | Select-String "running"
+    if (-not $backendRunning) {
+        Write-Color "Error: Backend container is not running. Run '.\scripts\temuin.ps1 start' first." "Red"
         exit 1
     }
 
-    Write-Host "Creating seed data..."
-    $seedSQL = @"
-        INSERT INTO categories (id, name) VALUES
-            ('cat-elektronik', 'Elektronik'),
-            ('cat-dokumen', 'Dokumen'),
-            ('cat-aksesoris', 'Aksesoris'),
-            ('cat-pakaian', 'Pakaian'),
-            ('cat-lainnya', 'Lainnya')
-        ON CONFLICT DO NOTHING;
-
-        INSERT INTO buildings (id, name) VALUES
-            ('bld-gkb', 'Gedung Kuliah Bersama'),
-            ('bld-rek', 'Gedung Rektorat'),
-            ('bld-lib', 'Perpustakaan'),
-            ('bld-if', 'Gedung Teknik Informatika'),
-            ('bld-kan', 'Kantin Pusat')
-        ON CONFLICT DO NOTHING;
-"@
-
-    docker compose exec db psql -U postgres -d temuin_db -c $seedSQL 2>$null
+    Write-Host "Running seed script via backend container..."
+    docker compose exec backend python -m app.utils.seed
     if ($LASTEXITCODE -ne 0) {
-        Write-Color "Note: Some seed data may already exist or tables not yet created." "Yellow"
+        Write-Color "Note: Seed may have partially failed. Check backend logs." "Yellow"
     }
 
     Write-Color "Seed complete." "Green"
+}
+
+function Invoke-MakeAdmin {
+    Write-Color "=== Make User Admin ===" "Cyan"
+    Test-Docker
+
+    if ($Service -eq "") {
+        Write-Color "Error: Email is required." "Red"
+        Write-Host "Usage: .\scripts\temuin.ps1 make-admin user@student.itk.ac.id"
+        exit 1
+    }
+
+    $email = $Service
+    Write-Host "Setting role=admin for: $email"
+    docker compose exec db psql -U postgres -d temuin_db -c "UPDATE users SET role = 'admin' WHERE email = '$email';"
+    if ($LASTEXITCODE -eq 0) {
+        Write-Color "Done. $email is now admin." "Green"
+    } else {
+        Write-Color "Failed. Make sure the user has registered first." "Red"
+    }
 }
 
 function Invoke-Help {
@@ -220,12 +206,14 @@ function Invoke-Help {
     Write-Host "  " -NoNewline; Write-Color "pull" "Green" -NoNewline; Write-Host "               Pull images from Docker Hub"
     Write-Host "  " -NoNewline; Write-Color "migrate" "Green" -NoNewline; Write-Host "            Run Alembic database migrations"
     Write-Host "  " -NoNewline; Write-Color "seed" "Green" -NoNewline; Write-Host "               Seed database with initial data"
+    Write-Host "  " -NoNewline; Write-Color "make-admin" "Green" -NoNewline; Write-Host " <email>  Promote a user to admin role"
     Write-Host "  " -NoNewline; Write-Color "help" "Green" -NoNewline; Write-Host "               Show this help message"
     Write-Host ""
     Write-Host "Examples:"
     Write-Host "  .\scripts\temuin.ps1 start          # Start everything"
     Write-Host "  .\scripts\temuin.ps1 logs backend    # Tail backend logs"
     Write-Host "  .\scripts\temuin.ps1 seed            # Seed the database"
+    Write-Host "  .\scripts\temuin.ps1 make-admin nim@student.itk.ac.id"
     Write-Host "  .\scripts\temuin.ps1 reset           # Nuke DB + pull latest + start fresh"
     Write-Host ""
 }
@@ -245,6 +233,7 @@ switch ($Command.ToLower()) {
     "pull"    { Invoke-Pull }
     "migrate" { Invoke-Migrate }
     "seed"    { Invoke-Seed }
+    "make-admin" { Invoke-MakeAdmin }
     "help"    { Invoke-Help }
     default {
         Write-Color "Unknown command: $Command" "Red"

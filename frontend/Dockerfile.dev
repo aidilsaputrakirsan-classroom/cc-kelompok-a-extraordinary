@@ -1,0 +1,18 @@
+# ============================================================
+# Temuin Frontend - Development (Vite Dev Server with HMR)
+# ============================================================
+# Used by docker-compose.dev.yml for hot-reload development
+# ============================================================
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+
+EXPOSE 5173
+
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

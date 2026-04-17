@@ -32,9 +32,6 @@ tests/
 # Documentation
 *.md
 
-# Firebase credentials (mounted at runtime, never baked into image)
-serviceAccountKey.json
-
 # OS artifacts
 *.log
 .DS_Store

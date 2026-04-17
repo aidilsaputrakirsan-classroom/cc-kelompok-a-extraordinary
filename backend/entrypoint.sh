@@ -37,6 +37,14 @@ else
     echo "WARNING: Alembic migration failed. Starting app anyway..."
 fi
 
+# --- Seed Master Data ---
+echo "Seeding master data (if empty)..."
+if python -m app.utils.seed; then
+    echo "Seed check completed."
+else
+    echo "WARNING: Seed script failed. Starting app anyway..."
+fi
+
 # --- Start Uvicorn ---
 echo "Starting uvicorn on 0.0.0.0:8000..."
 exec uvicorn app.main:app --host 0.0.0.0 --port 8000

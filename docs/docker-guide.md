@@ -18,13 +18,24 @@ Images sudah tersedia di Docker Hub — kebanyakan anggota tim **tidak perlu bui
 ## Quick Start (Untuk Semua Anggota Tim)
 
 ```powershell
-# 1. Pull images terbaru dari Docker Hub
+# 1. Pull repo terbaru
+git checkout master
+git pull
+
+# 2. Setup .env (lihat section "Setup Pertama Kali" di bawah)
+
+# 3. Pull images terbaru dari Docker Hub
 .\scripts\temuin.ps1 pull
 
-# 2. Start semua service
+# 4. Start semua service (migration + seed master data otomatis)
 .\scripts\temuin.ps1 start
 
-# 3. Buka browser
+# 5. Buka browser, register akun di http://localhost:3000/register
+
+# 6. (Opsional) Jadikan akun kamu admin:
+.\scripts\temuin.ps1 make-admin emailkamu@student.itk.ac.id
+
+# Akses:
 #    Frontend:  http://localhost:3000
 #    Backend:   http://localhost:8000
 #    API Docs:  http://localhost:8000/docs
@@ -32,14 +43,35 @@ Images sudah tersedia di Docker Hub — kebanyakan anggota tim **tidak perlu bui
 
 ## Setup Pertama Kali
 
-1. **Copy environment template:**
-   ```powershell
-   copy .env.docker .env        # Windows
-   cp .env.docker .env          # Linux/Mac
-   ```
+### Bagaimana `.env` bekerja
 
-2. **Edit `.env`** — pastikan `SECRET_KEY` dan konfigurasi database sesuai kebutuhan lokal.
-3. Frontend existing masih membawa konfigurasi Firebase lama. Docker stack backend tetap bisa jalan tanpa file credential Firebase apa pun.
+Docker Compose hanya membaca **root `.env`** (di folder utama project). File ini berisi config untuk semua service sekaligus (database, backend, frontend). Docker Compose **tidak** membaca `backend/.env` atau `frontend/.env` — itu hanya untuk dev lokal tanpa Docker.
+
+### Langkah setup `.env`
+
+**Kalau belum punya root `.env`:**
+```powershell
+copy .env.docker .env        # Windows
+cp .env.docker .env          # Linux/Mac
+```
+
+**Kalau sudah punya root `.env` dari sebelumnya (masih ada `VITE_FIREBASE_*` dll):**
+```powershell
+# Hapus .env lama dan buat ulang dari template bersih
+del .env                     # Windows
+rm .env                      # Linux/Mac
+
+copy .env.docker .env        # Windows
+cp .env.docker .env          # Linux/Mac
+```
+
+> Firebase sudah dihapus dari project. Vars `VITE_FIREBASE_*` dan `FIREBASE_CREDENTIALS_FILE` di `.env` lama tidak akan menyebabkan error, tapi lebih bersih kalau di-regenerate dari template.
+
+**Edit `.env`** — untuk dev lokal, default values sudah cukup. Untuk production, ganti `SECRET_KEY`:
+```powershell
+# Generate SECRET_KEY baru:
+python -c "import secrets; print(secrets.token_hex(32))"
+```
 
 ## Workflow: Anggota Tim (Backend/Frontend Dev)
 
@@ -82,13 +114,15 @@ Hanya DevOps lead (@PangeranSilaen) yang build dan push images ke Docker Hub.
 | `build`          | Build images lokal (hanya untuk DevOps)                                                                           |
 | `pull`           | Pull images dari Docker Hub                                                                                       |
 | `migrate`        | Jalankan Alembic migrations (sudah otomatis saat backend start)                                                   |
-| `seed`           | Seed master data (categories, buildings) — hanya perlu sekali                                                     |
+| `seed`           | Seed master data (sudah otomatis saat start, command ini untuk manual re-seed)                                    |
+| `make-admin <email>` | Promote user yang sudah register menjadi admin                                                                |
 
 ## Catatan Penting
 
 - **Database TIDAK di-reset** saat start/stop. Data tersimpan di Docker volume `temuin_pgdata`. Untuk reset total: jalankan `reset` command (atau manual: `docker compose down -v` lalu start ulang).
 - **Migrations otomatis**: Backend container menjalankan `alembic upgrade head` saat start via `entrypoint.sh`. Command `migrate` hanya untuk manual run jika perlu.
-- **Seed data**: Jalankan `seed` sekali setelah pertama kali start. Ini mengisi tabel `categories` dan `buildings` dengan data awal.
+- **Seed otomatis**: Master data (categories, buildings, locations, security officers) otomatis di-seed saat backend start. Hanya insert jika tabel kosong, aman dijalankan berulang.
+- **Admin account**: Tidak ada akun admin default. Register dulu lewat UI, lalu promote via `make-admin` command.
 - **Frontend env berubah**: Jalankan `build` ulang karena `VITE_*` di-bake saat build.
 
 ## Akses
@@ -111,3 +145,5 @@ Hanya DevOps lead (@PangeranSilaen) yang build dan push images ke Docker Hub.
 - **DB connection error**: Tunggu beberapa detik setelah start, PostgreSQL butuh waktu init
 - **Frontend env berubah**: Jalankan `build` ulang karena `VITE_*` di-bake saat build
 - **Mau reset database**: Jalankan `.\scripts\temuin.ps1 reset` (akan hapus DB, pull images terbaru, dan start ulang)
+- **`.env` lama masih ada Firebase vars**: Tidak akan error, tapi lebih bersih kalau regenerate dari `.env.docker` (lihat "Setup Pertama Kali")
+- **`make-admin` tidak berhasil**: Pastikan user sudah register dulu lewat UI. Command ini hanya update role, tidak buat akun baru

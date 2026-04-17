@@ -7,3 +7,4 @@ python-dotenv
 python-jose[cryptography]
 alembic
 passlib[bcrypt]
+bcrypt==4.0.1
