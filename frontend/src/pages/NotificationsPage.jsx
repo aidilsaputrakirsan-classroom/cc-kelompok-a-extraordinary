@@ -10,7 +10,7 @@ export default function NotificationsPage() {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const response = await api.get('/notifications/me/')
+        const response = await api.get('/notifications/me')
         // Handle both response.data.data and response.data directly
         const notifData = response.data?.data || response.data || []
         if (Array.isArray(notifData)) {
@@ -54,7 +54,7 @@ export default function NotificationsPage() {
 
   const handleMarkAsRead = async (id) => {
     try {
-      await api.put(`/notifications/${id}/read/`)
+      await api.put(`/notifications/${id}/read`)
       setNotifications(prev =>
         prev.map(notif => notif.id === id ? { ...notif, is_read: true } : notif)
       )
@@ -69,7 +69,7 @@ export default function NotificationsPage() {
 
   const handleMarkAllAsRead = async () => {
     try {
-      await api.put('/notifications/read-all/')
+      await api.put('/notifications/read-all')
       setNotifications(prev => prev.map(notif => ({ ...notif, is_read: true })))
     } catch (error) {
       console.error("Error marking all as read:", error)

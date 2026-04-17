@@ -12,7 +12,7 @@ export default function MyClaimsPage() {
   useEffect(() => {
     const fetchMyClaims = async () => {
       try {
-        const response = await api.get('/claims/me/')
+        const response = await api.get('/claims/me')
         // Handle both response.data.data and response.data directly
         const claimsData = response.data?.data || response.data || []
         if (Array.isArray(claimsData)) {

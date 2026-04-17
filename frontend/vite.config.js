@@ -11,4 +11,33 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
+  server: {
+    allowedHosts: true,
+    proxy: {
+      "/auth": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+      },
+      "/items": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+      },
+      "/claims": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+      },
+      "/master-data": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+      },
+      "/notifications": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+      },
+      "/health": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+      },
+    },
+  },
 });
