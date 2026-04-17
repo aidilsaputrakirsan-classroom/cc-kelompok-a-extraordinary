@@ -27,10 +27,10 @@ Menstabilkan flow inti di Docker, menambah halaman admin penting, dan menyiapkan
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| DO-4.1 | Optimasi Dockerfile dan `.dockerignore` | Medium | 2h | DO-3.3 | todo | - | - |
-| DO-4.2 | Tambah volume atau workflow hot reload dev bila diperlukan | Medium | 2h | DO-4.1 | todo | - | - |
-| DO-4.3 | Update docker-compose.yml: hapus Firebase mounts dan env vars | High | 1h | BE-4.4, FE-4.0 | todo | - | Issue #46 step 10. Hapus serviceAccountKey mount, VITE_FIREBASE_* args |
-| DO-4.4 | Verifikasi alur UTS berjalan penuh via Docker Compose | High | 2h | DO-4.2, DO-4.3, BE-4.4, FE-4.4 | todo | - | - |
+| DO-4.1 | Optimasi Dockerfile dan `.dockerignore` | Medium | 2h | DO-3.3 | done | feat/devops/sprint-04-docker-cleanup | Reviewed Dockerfiles, updated .dockerignore |
+| DO-4.2 | Tambah volume atau workflow hot reload dev bila diperlukan | Medium | 2h | DO-4.1 | done | feat/devops/sprint-04-docker-cleanup | docker-compose.dev.yml + Dockerfile.dev |
+| DO-4.3 | Update docker-compose.yml: hapus Firebase mounts dan env vars | High | 1h | BE-4.4, FE-4.0 | done | feat/devops/sprint-04-docker-cleanup | Removed all Firebase refs from 8 files |
+| DO-4.4 | Verifikasi alur UTS berjalan penuh via Docker Compose | High | 2h | DO-4.2, DO-4.3, BE-4.4, FE-4.4 | done | feat/devops/sprint-04-docker-cleanup | Build + health + auth verified |
 
 ## Lead QA & Docs (@raniayudewi)
 

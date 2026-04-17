@@ -27,3 +27,6 @@ Dockerfile
 # OS artifacts
 .DS_Store
 Thumbs.db
+
+.env.example
+Dockerfile.dev
