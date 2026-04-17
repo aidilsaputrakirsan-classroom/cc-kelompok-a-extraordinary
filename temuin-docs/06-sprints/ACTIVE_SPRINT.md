@@ -2,15 +2,15 @@
 
 ## Current Priority
 
-- **Active Sprint**: `sprint-03`
-- **Periode**: Minggu 5-6
-- **Alignment Modul**: Interaksi antar entity (Claim, Notif)
-- **Last Updated**: 2026-04-13
+- **Active Sprint**: `sprint-04`
+- **Periode**: Minggu 7-8
+- **Alignment Modul**: Docker, UTS Readiness, Firebase Removal
+- **Last Updated**: 2026-04-17
 
 ## Auto-Selection Rule
 
 Jika user hanya menyebut role:
-1. Buka `sprint-02.md`
+1. Buka `sprint-04.md`
 2. Cari section role yang sesuai
 3. Pilih task pertama yang statusnya bukan `done` atau `blocked`
 4. Pastikan semua dependency di kolom `Depends On` sudah `done`

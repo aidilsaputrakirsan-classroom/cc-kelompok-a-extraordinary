@@ -17,19 +17,19 @@ Menyelesaikan search, filter, claim flow, notifications, dan master data.
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| FE-3.1 | Buat komponen search dan filter di daftar item | High | 3h | FE-2.3, BE-3.3 | todo | - | - |
-| FE-3.2 | Buat ClaimForm dan flow submit claim | High | 3h | FE-2.3, BE-3.1 | todo | - | API: POST /claims, Ref: DEC-005 |
-| FE-3.3 | Buat halaman MyItems, MyClaims, dan Notifications | Medium | 4h | FE-3.2, BE-3.4 | todo | - | - |
-| FE-3.4 | Buat ImageUpload dan badge status item/claim | Medium | 3h | FE-2.4, BE-3.2 | todo | - | - |
+| FE-3.1 | Buat komponen search dan filter di daftar item | High | 3h | FE-2.3, BE-3.3 | done | fix/frontend-backend-sprint3-integration (PR #43) | - |
+| FE-3.2 | Buat ClaimForm dan flow submit claim | High | 3h | FE-2.3, BE-3.1 | done | fix/frontend-backend-sprint3-integration (PR #43) | API: POST /claims, Ref: DEC-005 |
+| FE-3.3 | Buat halaman MyItems, MyClaims, dan Notifications | Medium | 4h | FE-3.2, BE-3.4 | done | fix/frontend-backend-sprint3-integration (PR #43) | - |
+| FE-3.4 | Buat ImageUpload dan badge status item/claim | Medium | 3h | FE-2.4, BE-3.2 | done | fix/frontend-backend-sprint3-integration (PR #43) | - |
 
 ## Lead DevOps (@PangeranSilaen)
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| DO-3.1 | Buat Dockerfile backend | High | 2h | BE-2.4 | in_progress | feat/devops/sprint-03-docker | Multi-stage Alpine, entrypoint.sh with Alembic |
-| DO-3.2 | Buat Dockerfile frontend | High | 2h | FE-2.4 | in_progress | feat/devops/sprint-03-docker | Node build + Nginx serve, SPA routing |
-| DO-3.3 | Buat `docker-compose.yml` monolith | High | 3h | DO-3.1, DO-3.2 | in_progress | feat/devops/sprint-03-docker | + runner scripts (sh/ps1), .env.docker |
-| DO-3.4 | Tulis panduan singkat menjalankan Docker Compose | Medium | 1h | DO-3.3 | in_progress | feat/devops/sprint-03-docker | Added to devops.md |
+| DO-3.1 | Buat Dockerfile backend | High | 2h | BE-2.4 | done | feat/devops/sprint-03-docker (PR #32) | Multi-stage Alpine, entrypoint.sh with Alembic |
+| DO-3.2 | Buat Dockerfile frontend | High | 2h | FE-2.4 | done | feat/devops/sprint-03-docker (PR #32) | Node build + Nginx serve, SPA routing |
+| DO-3.3 | Buat `docker-compose.yml` monolith | High | 3h | DO-3.1, DO-3.2 | done | feat/devops/sprint-03-docker (PR #32) | + runner scripts (sh/ps1), .env.docker |
+| DO-3.4 | Tulis panduan singkat menjalankan Docker Compose | Medium | 1h | DO-3.3 | done | feat/devops/sprint-03-docker (PR #32) | Added to devops.md |
 
 ## Lead QA & Docs (@raniayudewi)
 
