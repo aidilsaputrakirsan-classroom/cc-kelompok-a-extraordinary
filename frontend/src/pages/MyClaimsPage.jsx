@@ -4,45 +4,33 @@ import { api } from "@/config/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { StatusBadge } from "@/components/ui/StatusBadge"
+import PageState from "@/components/PageState"
 
 export default function MyClaimsPage() {
   const [claims, setClaims] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  const fetchMyClaims = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await api.get('/claims/me')
+      const claimsData = response.data?.data || response.data || []
+      if (Array.isArray(claimsData)) {
+        setClaims(claimsData)
+      } else {
+        setClaims([])
+      }
+    } catch (err) {
+      console.error("Error fetching user claims:", err)
+      setError(err.response?.data?.detail || "Gagal memuat klaim Anda.")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchMyClaims = async () => {
-      try {
-        const response = await api.get('/claims/me/')
-        // Handle both response.data.data and response.data directly
-        const claimsData = response.data?.data || response.data || []
-        if (Array.isArray(claimsData)) {
-          setClaims(claimsData)
-        }
-      } catch (err) {
-        console.error("Error fetching user claims:", err)
-        // Mock fallback data for development
-        setClaims([
-          {
-            id: 1,
-            item_id: 2,
-            item_title: "Kunci Lemari Eiger",
-            status: "pending",
-            ownership_answer: "Kunci warna perak dengan logo Eiger",
-            created_at: new Date().toISOString()
-          },
-          {
-            id: 2,
-            item_id: 3,
-            item_title: "Botol Tupperware Hitam",
-            status: "approved",
-            ownership_answer: "Botol hitam berisi minuman",
-            created_at: new Date(Date.now() - 86400000).toISOString()
-          }
-        ])
-      } finally {
-        setLoading(false)
-      }
-    }
     fetchMyClaims()
   }, [])
 
@@ -55,11 +43,10 @@ export default function MyClaimsPage() {
         </p>
       </div>
 
-      {loading ? (
-        <div className="py-20 text-center">
-          <p className="text-muted-foreground animate-pulse">Memuat daftar klaim Anda...</p>
-        </div>
-      ) : claims.length === 0 ? (
+      {loading && <PageState state="loading" loadingText="Memuat daftar klaim Anda..." />}
+      {!loading && error && <PageState state="error" errorText={error} onRetry={fetchMyClaims} />}
+
+      {!loading && !error && claims.length === 0 ? (
         <Card>
           <CardContent className="pt-6 text-center py-12">
             <p className="text-muted-foreground mb-4">Anda belum mengajukan klaim apapun.</p>
@@ -69,37 +56,39 @@ export default function MyClaimsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
-          {claims.map((claim) => (
-            <Card key={claim.id} className="overflow-hidden">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg line-clamp-1">{claim.item_title || `Barang #${claim.item_id?.slice(0, 8)}`}</CardTitle>
-                    <CardDescription className="text-xs mt-1">
-                      Klaim ID: {claim.id}
-                    </CardDescription>
+        !loading && !error && (
+          <div className="space-y-4">
+            {claims.map((claim) => (
+              <Card key={claim.id} className="overflow-hidden">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg line-clamp-1">{claim.item_title || `Barang #${claim.item_id?.slice(0, 8)}`}</CardTitle>
+                      <CardDescription className="text-xs mt-1">
+                        Klaim ID: {claim.id}
+                      </CardDescription>
+                    </div>
+                    <StatusBadge type="claim" status={claim.status} />
                   </div>
-                  <StatusBadge type="claim" status={claim.status} />
-                </div>
-              </CardHeader>
-              <CardContent className="pb-3 space-y-2">
-                <div>
-                  <p className="text-xs text-muted-foreground font-semibold">Jawaban Kepemilikan:</p>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{claim.ownership_answer}</p>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Diajukan: {new Date(claim.created_at).toLocaleDateString("id-ID")}
-                </p>
-              </CardContent>
-              <CardFooter>
-                <Button variant="outline" className="w-full" asChild>
-                  <Link to={`/items/${claim.item_id}`}>Lihat Barang</Link>
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+                </CardHeader>
+                <CardContent className="pb-3 space-y-2">
+                  <div>
+                    <p className="text-xs text-muted-foreground font-semibold">Jawaban Kepemilikan:</p>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{claim.ownership_answer}</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Diajukan: {new Date(claim.created_at).toLocaleDateString("id-ID")}
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="outline" className="w-full" asChild>
+                    <Link to={`/items/${claim.item_id}`}>Lihat Barang</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        )
       )}
     </div>
   )

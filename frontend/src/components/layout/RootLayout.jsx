@@ -12,7 +12,9 @@ export default function RootLayout() {
     navigate("/login", { replace: true })
   }
 
+  const isAdmin = user?.role === "admin" || user?.role === "superadmin"
   const isActive = (path) => location.pathname === path
+  const isActivePrefix = (prefix) => location.pathname.startsWith(prefix)
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -61,6 +63,31 @@ export default function RootLayout() {
               >
                 Notifikasi
               </Link>
+              {isAdmin && (
+                <>
+                  <span className="text-muted-foreground/40">|</span>
+                  <Link
+                    to="/admin/claims"
+                    className={`text-sm transition-colors ${
+                      isActivePrefix('/admin/claims')
+                        ? 'text-foreground font-semibold'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    Kelola Klaim
+                  </Link>
+                  <Link
+                    to="/admin/master-data"
+                    className={`text-sm transition-colors ${
+                      isActivePrefix('/admin/master-data')
+                        ? 'text-foreground font-semibold'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    Master Data
+                  </Link>
+                </>
+              )}
             </nav>
           </div>
         </div>
@@ -88,6 +115,20 @@ export default function RootLayout() {
                 Notif
               </Button>
             </Link>
+            {isAdmin && (
+              <>
+                <Link to="/admin/claims">
+                  <Button variant="ghost" size="sm" className={isActivePrefix('/admin/claims') ? 'bg-accent' : ''}>
+                    Kelola Klaim
+                  </Button>
+                </Link>
+                <Link to="/admin/master-data">
+                  <Button variant="ghost" size="sm" className={isActivePrefix('/admin/master-data') ? 'bg-accent' : ''}>
+                    Master Data
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -99,7 +140,12 @@ export default function RootLayout() {
       <footer className="border-t bg-card">
         <div className="container flex items-center justify-between h-16 px-4 mx-auto">
           <div className="flex items-center gap-4">
-            {user && <span className="hidden text-sm text-muted-foreground md:inline-block">{user.email}</span>}
+            {user && (
+              <span className="hidden text-sm text-muted-foreground md:inline-block">
+                {user.email}
+                {isAdmin && <span className="ml-2 text-xs font-medium text-primary">[Admin]</span>}
+              </span>
+            )}
           </div>
           <Button variant="outline" size="sm" onClick={handleLogout}>
             Keluar

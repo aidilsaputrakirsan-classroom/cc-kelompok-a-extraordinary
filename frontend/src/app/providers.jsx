@@ -15,7 +15,7 @@ export function AuthProvider({ children }) {
       return
     }
 
-    api.get("/auth/me/")
+    api.get("/auth/me")
       .then((res) => setUser(res.data))
       .catch(() => {
         // Token expired atau invalid

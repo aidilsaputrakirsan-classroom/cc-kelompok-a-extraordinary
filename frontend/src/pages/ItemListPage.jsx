@@ -6,34 +6,35 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge"
 import { SearchFilter } from "@/components/items/SearchFilter"
 import { StatusBadge } from "@/components/ui/StatusBadge"
+import PageState from "@/components/PageState"
 
 export default function ItemListPage() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState("all")
 
-  useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const response = await api.get('/items/')
-        // Handle both response.data.data and response.data directly
-        const itemsData = response.data?.data || response.data || []
-        if (Array.isArray(itemsData)) {
-          setItems(itemsData)
-        }
-      } catch (err) {
-        console.error("Error fetching items:", err)
-        // Mock fallback data for development
-        setItems([
-          { id: 1, type: "lost", title: "KTM a/n Budi", status: "open", description: "Jatuh di sekitar GSG" },
-          { id: 2, type: "found", title: "Kunci Lemari Eiger", status: "open", description: "Ditemukan di kantin kampus, saya serahkan ke satpam" },
-          { id: 3, type: "lost", title: "Botol Tupperware Hitam", status: "open", description: "Ketinggalan di G-201" }
-        ])
-      } finally {
-        setLoading(false)
+  const fetchItems = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await api.get('/items/')
+      const itemsData = response.data?.data || response.data || []
+      if (Array.isArray(itemsData)) {
+        setItems(itemsData)
+      } else {
+        setItems([])
       }
+    } catch (err) {
+      console.error("Error fetching items:", err)
+      setError(err.response?.data?.detail || "Gagal memuat daftar barang.")
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     fetchItems()
   }, [])
 
@@ -59,19 +60,18 @@ export default function ItemListPage() {
         onStatusChange={setStatus}
       />
 
-      {loading ? (
-        <div className="py-20 text-center">
-          <p className="text-muted-foreground animate-pulse">Memuat daftar barang...</p>
-        </div>
-      ) : items.length === 0 ? (
-        <div className="py-20 text-center border rounded-lg bg-card">
-          <p className="text-muted-foreground">Belum ada barang yang didata.</p>
-        </div>
-      ) : filteredItems.length === 0 ? (
-        <div className="py-20 text-center border rounded-lg bg-card">
-          <p className="text-muted-foreground">Tidak ada barang yang sesuai dengan pencarian Anda.</p>
-        </div>
-      ) : (
+      {loading && <PageState state="loading" loadingText="Memuat daftar barang..." />}
+      {!loading && error && <PageState state="error" errorText={error} onRetry={fetchItems} />}
+      
+      {!loading && !error && items.length === 0 && (
+        <PageState state="empty" emptyText="Belum ada barang yang didata." />
+      )}
+      
+      {!loading && !error && items.length > 0 && filteredItems.length === 0 && (
+        <PageState state="empty" emptyText="Tidak ada barang yang sesuai dengan pencarian Anda." />
+      )}
+
+      {!loading && !error && filteredItems.length > 0 && (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredItems.map((item) => (
             <Card key={item.id} className="flex flex-col">
@@ -88,6 +88,11 @@ export default function ItemListPage() {
               </CardHeader>
               <CardContent className="flex-1">
                 <p className="text-sm text-muted-foreground line-clamp-2">{item.description}</p>
+                {item.images && item.images.length > 0 && (
+                  <div className="mt-4">
+                    <img src={item.images[0].image_url || item.images[0].image_data} alt="Preview" className="w-full h-32 object-cover rounded-md border" />
+                  </div>
+                )}
               </CardContent>
               <CardFooter>
                 <Button variant="secondary" className="w-full" asChild>

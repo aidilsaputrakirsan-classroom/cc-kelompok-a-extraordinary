@@ -18,9 +18,9 @@ Menstabilkan flow inti di Docker, menambah halaman admin penting, dan menyiapkan
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
 | FE-4.0 | Hapus Firebase Auth, buat form register/login email+password | High | 3h | - | in_progress | - | Issue #47. Rewrite providers, login page, buat register page, hapus firebase.js |
-| FE-4.1 | Buat halaman admin claim list dan claim detail | High | 4h | FE-3.2, BE-3.2 | todo | - | - |
-| FE-4.2 | Buat halaman admin master data | Medium | 4h | FE-3.3, BE-3.4 | todo | - | - |
-| FE-4.3 | Tambah toast, empty state, dan error state penting | Medium | 3h | FE-4.1, FE-4.2 | todo | - | - |
+| FE-4.1 | Buat halaman admin claim list dan claim detail | High | 4h | FE-3.2, BE-3.2 | done | feat/frontend/sprint-04-admin-claims | Admin claims created |
+| FE-4.2 | Buat halaman admin master data | Medium | 4h | FE-3.3, BE-3.4 | done | feat/frontend/sprint-04-admin-claims | Master data CRUD done |
+| FE-4.3 | Tambah toast, empty state, dan error state penting | Medium | 3h | FE-4.1, FE-4.2 | done | feat/frontend/sprint-04-admin-claims | Mock removed, PageState added |
 | FE-4.4 | Rapikan responsivitas untuk flow demo UTS | Medium | 2h | FE-4.3 | todo | - | - |
 
 ## Lead DevOps (@PangeranSilaen)

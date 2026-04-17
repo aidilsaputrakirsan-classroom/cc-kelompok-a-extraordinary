@@ -2,79 +2,53 @@ import { useState, useEffect } from "react"
 import { api } from "@/config/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import PageState from "@/components/PageState"
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await api.get('/notifications/me')
+      const notifData = response.data?.data || response.data || []
+      if (Array.isArray(notifData)) {
+        setNotifications(notifData)
+      } else {
+        setNotifications([])
+      }
+    } catch (err) {
+      console.error("Error fetching notifications:", err)
+      setError(err.response?.data?.detail || "Gagal memuat notifikasi Anda.")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const response = await api.get('/notifications/me/')
-        // Handle both response.data.data and response.data directly
-        const notifData = response.data?.data || response.data || []
-        if (Array.isArray(notifData)) {
-          setNotifications(notifData)
-        }
-      } catch (err) {
-        console.error("Error fetching notifications:", err)
-        // Mock fallback data for development
-        setNotifications([
-          {
-            id: 1,
-            title: "Klaim Anda Diverifikasi",
-            message: "Klaim untuk 'Kunci Lemari Eiger' telah diverifikasi oleh admin.",
-            type: "claim_verified",
-            is_read: false,
-            created_at: new Date().toISOString()
-          },
-          {
-            id: 2,
-            title: "Barang Baru Ditemukan",
-            message: "Ada barang temuan baru yang cocok dengan laporan Anda. Silakan cek!",
-            type: "new_item",
-            is_read: false,
-            created_at: new Date(Date.now() - 3600000).toISOString()
-          },
-          {
-            id: 3,
-            title: "Notifikasi Sistem",
-            message: "Sistem telah diperbarui dengan fitur pencarian yang lebih baik.",
-            type: "system",
-            is_read: true,
-            created_at: new Date(Date.now() - 86400000).toISOString()
-          }
-        ])
-      } finally {
-        setLoading(false)
-      }
-    }
     fetchNotifications()
   }, [])
 
   const handleMarkAsRead = async (id) => {
     try {
-      await api.put(`/notifications/${id}/read/`)
+      await api.put(`/notifications/${id}/read`)
       setNotifications(prev =>
         prev.map(notif => notif.id === id ? { ...notif, is_read: true } : notif)
       )
     } catch (error) {
       console.error("Error marking notification as read:", error)
-      // Fallback: update local state anyway
-      setNotifications(prev =>
-        prev.map(notif => notif.id === id ? { ...notif, is_read: true } : notif)
-      )
     }
   }
 
   const handleMarkAllAsRead = async () => {
     try {
-      await api.put('/notifications/read-all/')
+      await api.put('/notifications/read-all')
       setNotifications(prev => prev.map(notif => ({ ...notif, is_read: true })))
     } catch (error) {
       console.error("Error marking all as read:", error)
-      // Fallback: update local state anyway
-      setNotifications(prev => prev.map(notif => ({ ...notif, is_read: true })))
     }
   }
 
@@ -90,7 +64,7 @@ export default function NotificationsPage() {
       case 'system':
         return 'bg-yellow-50 border-yellow-200'
       default:
-        return 'bg-gray-50 border-gray-200'
+        return 'bg-card border-border'
     }
   }
 
@@ -110,57 +84,54 @@ export default function NotificationsPage() {
         )}
       </div>
 
-      {loading ? (
-        <div className="py-20 text-center">
-          <p className="text-muted-foreground animate-pulse">Memuat notifikasi Anda...</p>
-        </div>
-      ) : notifications.length === 0 ? (
-        <Card>
-          <CardContent className="pt-6 text-center py-12">
-            <p className="text-muted-foreground">Anda tidak memiliki notifikasi.</p>
-          </CardContent>
-        </Card>
+      {loading && <PageState state="loading" loadingText="Memuat notifikasi Anda..." />}
+      {!loading && error && <PageState state="error" errorText={error} onRetry={fetchNotifications} />}
+
+      {!loading && !error && notifications.length === 0 ? (
+        <PageState state="empty" emptyText="Anda tidak memiliki notifikasi." />
       ) : (
-        <div className="space-y-3">
-          {notifications.map((notification) => (
-            <Card
-              key={notification.id}
-              className={`cursor-pointer transition-all border ${getNotificationColor(notification.type)} ${
-                !notification.is_read ? 'ring-2 ring-ring ring-offset-2' : ''
-              }`}
-              onClick={() => !notification.is_read && handleMarkAsRead(notification.id)}
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <CardTitle className="text-base line-clamp-1">
-                      {notification.title}
-                      {!notification.is_read && (
-                        <span className="ml-2 inline-block w-2 h-2 bg-blue-600 rounded-full"></span>
-                      )}
-                    </CardTitle>
-                    <CardDescription className="mt-1 line-clamp-2">
-                      {notification.message}
-                    </CardDescription>
-                  </div>
-                  {!notification.is_read && (
-                    <div className="flex-shrink-0">
-                      <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+        !loading && !error && (
+          <div className="space-y-3">
+            {notifications.map((notification) => (
+              <Card
+                key={notification.id}
+                className={`cursor-pointer transition-all border ${getNotificationColor(notification.type)} ${
+                  !notification.is_read ? 'ring-2 ring-ring ring-offset-2' : ''
+                }`}
+                onClick={() => !notification.is_read && handleMarkAsRead(notification.id)}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <CardTitle className="text-base line-clamp-1">
+                        {notification.title}
+                        {!notification.is_read && (
+                          <span className="ml-2 inline-block w-2 h-2 bg-blue-600 rounded-full"></span>
+                        )}
+                      </CardTitle>
+                      <CardDescription className="mt-1 line-clamp-2 text-foreground/80">
+                        {notification.message}
+                      </CardDescription>
                     </div>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs text-muted-foreground">
-                  {new Date(notification.created_at).toLocaleDateString("id-ID", {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                    {!notification.is_read && (
+                      <div className="flex-shrink-0 mt-1">
+                        <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                      </div>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(notification.created_at).toLocaleDateString("id-ID", {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )
       )}
     </div>
   )

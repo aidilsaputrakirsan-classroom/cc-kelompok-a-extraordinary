@@ -1,44 +1,69 @@
 import { useState, useEffect } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, Link } from "react-router-dom"
 import { api } from "@/config/api"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ClaimForm } from "@/components/items/ClaimForm"
 import { StatusBadge } from "@/components/ui/StatusBadge"
+import PageState from "@/components/PageState"
+import { useAuth } from "@/app/providers"
 import { toast } from "sonner"
 
 export default function ItemDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user } = useAuth()
+  
   const [item, setItem] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  
   const [showClaimForm, setShowClaimForm] = useState(false)
   const [claimLoading, setClaimLoading] = useState(false)
+  
+  const [claims, setClaims] = useState([])
+  const [claimsLoading, setClaimsLoading] = useState(false)
+
+  const fetchItemAndClaims = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      // Gunakan tanpa trailing slash /items/{id} ? Wait, sebelumnya /items/${id}/. Saya akan gunakan yang sebelumnya tapi periksa kalau backend gagal.
+      // Di PR #51, mereka memastikan /items/ (koleksi) dan /claims/ (koleksi). Untuk by ID biasanya /items/{id}.
+      const response = await api.get(`/items/${id}`)
+      const itemData = response.data?.data || response.data
+      setItem(itemData)
+
+      // Fetch claims jika admin atau owner
+      if (itemData && user && (user.role === 'admin' || user.role === 'superadmin' || user.id === itemData.user_id)) {
+        fetchClaims(itemData.id)
+      }
+    } catch (err) {
+      console.error("Error fetching item:", err)
+      setError(err.response?.data?.detail || "Gagal memuat detail barang.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchClaims = async (itemId) => {
+    try {
+      setClaimsLoading(true)
+      const res = await api.get(`/claims/`)
+      const allClaims = res.data?.data || res.data || []
+      const itemClaims = allClaims.filter(c => c.item_id === itemId)
+      setClaims(itemClaims)
+    } catch (err) {
+      console.error("Error fetching claims for item:", err)
+    } finally {
+      setClaimsLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchItem = async () => {
-      try {
-        const response = await api.get(`/items/${id}/`)
-        // Handle both response.data.data and response.data directly
-        const itemData = response.data?.data || response.data
-        if (itemData) setItem(itemData)
-      } catch (err) {
-        console.error("Error fetching item:", err)
-        // Mock fallback data for development
-        setItem({
-          id,
-          type: "found",
-          title: "Kunci Lemari Eiger (Mock)",
-          status: "open",
-          description: "Ditemukan di meja kantin utara. Sudah saya amankan dan titipkan ke post satpam depan.",
-          created_at: new Date().toISOString()
-        })
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchItem()
-  }, [id])
+    fetchItemAndClaims()
+  }, [id, user])
 
   const handleClaimSubmit = async (claimData) => {
     try {
@@ -47,13 +72,7 @@ export default function ItemDetailPage() {
       if (response.status === 201 || response.status === 200) {
         toast.success("Klaim berhasil diajukan! Admin akan segera memverifikasi.")
         setShowClaimForm(false)
-        // Refresh item data
-        try {
-          const updatedItem = await api.get(`/items/${id}/`)
-          if (updatedItem.data) setItem(updatedItem.data)
-        } catch (refreshError) {
-          console.error("Error refreshing item:", refreshError)
-        }
+        fetchItemAndClaims() // Refresh
       }
     } catch (error) {
       console.error("Error submitting claim:", error)
@@ -64,8 +83,12 @@ export default function ItemDetailPage() {
     }
   }
 
-  if (loading) return <div className="py-20 text-center"><p className="animate-pulse">Sedang mengambil detail barang...</p></div>
-  if (!item) return <div className="py-20 text-center font-semibold">Barang tidak ditemukan.</div>
+  if (loading) return <PageState state="loading" loadingText="Memuat detail barang..." />
+  if (error) return <PageState state="error" errorText={error} onRetry={fetchItemAndClaims} />
+  if (!item) return <PageState state="empty" emptyText="Barang tidak ditemukan." />
+
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'
+  const isOwner = user?.id === item.user_id
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
@@ -78,6 +101,7 @@ export default function ItemDetailPage() {
           <h2 className="text-3xl font-bold">{item.title}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Dilaporkan pada {new Date(item.created_at).toLocaleDateString("id-ID")}
+            {item.user_id && ` oleh User #${item.user_id.slice(0, 8)}`}
           </p>
         </div>
         <div className="flex items-center gap-2 sm:flex-col sm:items-end">
@@ -89,12 +113,28 @@ export default function ItemDetailPage() {
       </div>
 
       <div className="space-y-6">
+        {item.images && item.images.length > 0 && (
+          <div>
+            <h3 className="mb-2 text-lg font-semibold">Foto Barang</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {item.images.map((img, idx) => (
+                <img 
+                  key={idx} 
+                  src={img.image_url || img.image_data} 
+                  alt={`Foto ${idx+1}`} 
+                  className="object-cover w-full h-32 rounded-md border" 
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
         <div>
           <h3 className="mb-2 text-lg font-semibold">Keterangan / Deskripsi</h3>
           <p className="leading-relaxed text-muted-foreground">{item.description}</p>
         </div>
 
-        {item.type === 'found' && item.status === 'open' && (
+        {item.type === 'found' && item.status === 'open' && !isOwner && !isAdmin && (
           <div className="pt-6 space-y-4">
             {!showClaimForm && (
               <Button size="lg" className="w-full sm:w-auto" onClick={() => setShowClaimForm(true)}>
@@ -125,6 +165,34 @@ export default function ItemDetailPage() {
             <p className="text-sm text-blue-800">
               Barang ini telah dikembalikan kepada pemiliknya.
             </p>
+          </div>
+        )}
+
+        {(isAdmin || isOwner) && claims.length > 0 && (
+          <div className="pt-6">
+            <h3 className="mb-4 text-lg font-semibold">Daftar Klaim Terkait</h3>
+            <div className="space-y-4">
+              {claims.map((claim) => (
+                <Card key={claim.id}>
+                  <CardHeader className="py-3">
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="text-base">Klaim #{claim.id.slice(0, 8)}</CardTitle>
+                      <StatusBadge type="claim" status={claim.status} />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="py-2 text-sm">
+                    <p className="text-muted-foreground mb-2">Oleh User: {claim.user_id}</p>
+                    <p className="font-medium">Jawaban:</p>
+                    <p className="whitespace-pre-wrap">{claim.ownership_answer}</p>
+                    {isAdmin && (
+                      <Button variant="outline" size="sm" asChild className="mt-4">
+                        <Link to={`/admin/claims/${claim.id}`}>Lihat Detail Klaim</Link>
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         )}
       </div>
