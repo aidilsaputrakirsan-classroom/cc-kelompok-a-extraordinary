@@ -1,11 +1,19 @@
 from datetime import datetime, timedelta, timezone
-from jose import jwt
-from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
+from jose import jwt
+from passlib.context import CryptContext
+from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.models.user import User
-from app.auth.firebase import verify_firebase_token
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
@@ -17,51 +25,77 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
-def sync_user(db: Session, id_token: str) -> str:
-    # Verify Firebase token
-    decoded_token = verify_firebase_token(id_token)
-    
-    email = decoded_token.get("email")
-    if not email:
+def validate_password(password: str) -> None:
+    if len(password) < 8:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="Email is required from identity provider"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password minimal 8 karakter"
         )
-        
-    # Validasi domain itk.ac.id
-    if not email.endswith("itk.ac.id"):
+
+    if not any(char.isalpha() for char in password) or not any(char.isdigit() for char in password):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, 
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password harus mengandung huruf dan angka"
+        )
+
+def validate_itk_email(email: str) -> str:
+    normalized_email = email.strip().lower()
+    if not normalized_email.endswith("itk.ac.id"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="Hanya email itk.ac.id yang diizinkan"
         )
-        
-    firebase_uid = decoded_token.get("uid")
-    # Nama biasanya ada di dalam token google sign in
-    name = decoded_token.get("name", email.split("@")[0])
-    
-    user = db.query(User).filter(User.firebase_uid == firebase_uid).first()
-    if not user:
-        # Check by email in case we want to support multiple providers linking 
-        # or fixing past account states
-        user = db.query(User).filter(User.email == email).first()
-        
-        if not user:
-            # Create new user internal
-            user = User(
-                firebase_uid=firebase_uid,
-                email=email,
-                name=name,
-                role="user"
+    return normalized_email
+
+def register_user(db: Session, email: str, password: str, name: str) -> str:
+    normalized_email = validate_itk_email(email)
+    validate_password(password)
+
+    existing = db.query(User).filter(User.email == normalized_email).first()
+    if existing:
+        if existing.password_hash is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email sudah terdaftar"
             )
-            db.add(user)
-            db.commit()
-            db.refresh(user)
-        else:
-            # Link existing email to this firebase UID
-            user.firebase_uid = firebase_uid
-            db.commit()
-            db.refresh(user)
-            
-    # Generate internal JWT
-    access_token = create_access_token(data={"sub": user.email, "role": user.role, "id": user.id})
-    return access_token
+
+        existing.password_hash = hash_password(password)
+        existing.name = name
+        db.commit()
+        db.refresh(existing)
+        user = existing
+    else:
+        user = User(
+            email=normalized_email,
+            name=name,
+            password_hash=hash_password(password),
+            role="user"
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    return create_access_token(data={"sub": user.email, "role": user.role, "id": user.id})
+
+def login_user(db: Session, email: str, password: str) -> str:
+    normalized_email = email.strip().lower()
+    user = db.query(User).filter(User.email == normalized_email).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Email atau password salah"
+        )
+
+    if not user.password_hash:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Akun ini belum memiliki password. Silakan register terlebih dahulu."
+        )
+
+    if not verify_password(password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Email atau password salah"
+        )
+
+    return create_access_token(data={"sub": user.email, "role": user.role, "id": user.id})

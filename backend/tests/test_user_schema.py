@@ -19,6 +19,7 @@ class UserSchemaTest(unittest.TestCase):
 
         self.assertEqual(columns.get("id"), "character varying")
         self.assertIn("firebase_uid", columns)
+        self.assertIn("password_hash", columns)
         self.assertIn("role", columns)
         self.assertIn("phone", columns)
 

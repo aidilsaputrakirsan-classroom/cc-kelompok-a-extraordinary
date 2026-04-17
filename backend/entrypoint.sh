@@ -37,13 +37,6 @@ else
     echo "WARNING: Alembic migration failed. Starting app anyway..."
 fi
 
-# --- Check Firebase credentials ---
-if [ -f "/app/serviceAccountKey.json" ]; then
-    echo "Firebase credentials found."
-else
-    echo "WARNING: serviceAccountKey.json not found. Firebase auth will not work."
-fi
-
 # --- Start Uvicorn ---
 echo "Starting uvicorn on 0.0.0.0:8000..."
 exec uvicorn app.main:app --host 0.0.0.0 --port 8000

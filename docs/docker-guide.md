@@ -38,10 +38,8 @@ Images sudah tersedia di Docker Hub — kebanyakan anggota tim **tidak perlu bui
    cp .env.docker .env          # Linux/Mac
    ```
 
-2. **Edit `.env`** — isi Firebase config dari Firebase Console (opsional, app tetap jalan tanpa ini tapi login tidak bisa)
-
-3. **Firebase credentials** (opsional):
-   Taruh `serviceAccountKey.json` di folder `backend/`. File ini sudah di-`.gitignore`. Jika tidak ada, script akan membuat placeholder kosong dan app tetap start (tapi Firebase auth tidak berfungsi).
+2. **Edit `.env`** — pastikan `SECRET_KEY` dan konfigurasi database sesuai kebutuhan lokal.
+3. Frontend existing masih membawa konfigurasi Firebase lama. Docker stack backend tetap bisa jalan tanpa file credential Firebase apa pun.
 
 ## Workflow: Anggota Tim (Backend/Frontend Dev)
 
@@ -75,7 +73,7 @@ Hanya DevOps lead (@PangeranSilaen) yang build dan push images ke Docker Hub.
 
 | Command          | Fungsi                                                                                                            |
 |------------------|-------------------------------------------------------------------------------------------------------------------|
-| `start`          | Buat `.env` jika belum ada, buat placeholder `serviceAccountKey.json` jika belum ada, start db → backend → frontend |
+| `start`          | Buat `.env` jika belum ada, start db → backend → frontend |
 | `stop`           | Stop semua container. Data **tetap tersimpan** di volume                                                          |
 | `restart`        | Stop + start                                                                                                      |
 | `reset`          | Full clean restart: stop, hapus volume DB, pull images terbaru, start ulang. **MENGHAPUS semua data!**            |
@@ -110,7 +108,6 @@ Hanya DevOps lead (@PangeranSilaen) yang build dan push images ke Docker Hub.
 ## Troubleshooting
 
 - **Port conflict**: Edit `DB_PORT` di `.env` jika port 5434 sudah terpakai
-- **Firebase error**: Pastikan `serviceAccountKey.json` ada di `backend/`. Tanpa file ini, login tidak bisa tapi endpoint lain tetap jalan
 - **DB connection error**: Tunggu beberapa detik setelah start, PostgreSQL butuh waktu init
 - **Frontend env berubah**: Jalankan `build` ulang karena `VITE_*` di-bake saat build
 - **Mau reset database**: Jalankan `.\scripts\temuin.ps1 reset` (akan hapus DB, pull images terbaru, dan start ulang)
