@@ -3,7 +3,7 @@
 # ============================================================
 # Usage: .\scripts\temuin.ps1 [command]
 # Commands: start, stop, restart, reset, status, logs, build,
-#           pull, migrate, seed, help
+#           pull, migrate, seed, make-admin, help
 # ============================================================
 
 param(
@@ -168,6 +168,26 @@ function Invoke-Seed {
     Write-Color "Seed complete." "Green"
 }
 
+function Invoke-MakeAdmin {
+    Write-Color "=== Make User Admin ===" "Cyan"
+    Test-Docker
+
+    if ($Service -eq "") {
+        Write-Color "Error: Email is required." "Red"
+        Write-Host "Usage: .\scripts\temuin.ps1 make-admin user@student.itk.ac.id"
+        exit 1
+    }
+
+    $email = $Service
+    Write-Host "Setting role=admin for: $email"
+    docker compose exec db psql -U postgres -d temuin_db -c "UPDATE users SET role = 'admin' WHERE email = '$email';"
+    if ($LASTEXITCODE -eq 0) {
+        Write-Color "Done. $email is now admin." "Green"
+    } else {
+        Write-Color "Failed. Make sure the user has registered first." "Red"
+    }
+}
+
 function Invoke-Help {
     Write-Color "============================================================" "Cyan"
     Write-Color "  Temuin - Docker Runner" "Cyan"
@@ -186,12 +206,14 @@ function Invoke-Help {
     Write-Host "  " -NoNewline; Write-Color "pull" "Green" -NoNewline; Write-Host "               Pull images from Docker Hub"
     Write-Host "  " -NoNewline; Write-Color "migrate" "Green" -NoNewline; Write-Host "            Run Alembic database migrations"
     Write-Host "  " -NoNewline; Write-Color "seed" "Green" -NoNewline; Write-Host "               Seed database with initial data"
+    Write-Host "  " -NoNewline; Write-Color "make-admin" "Green" -NoNewline; Write-Host " <email>  Promote a user to admin role"
     Write-Host "  " -NoNewline; Write-Color "help" "Green" -NoNewline; Write-Host "               Show this help message"
     Write-Host ""
     Write-Host "Examples:"
     Write-Host "  .\scripts\temuin.ps1 start          # Start everything"
     Write-Host "  .\scripts\temuin.ps1 logs backend    # Tail backend logs"
     Write-Host "  .\scripts\temuin.ps1 seed            # Seed the database"
+    Write-Host "  .\scripts\temuin.ps1 make-admin nim@student.itk.ac.id"
     Write-Host "  .\scripts\temuin.ps1 reset           # Nuke DB + pull latest + start fresh"
     Write-Host ""
 }
@@ -211,6 +233,7 @@ switch ($Command.ToLower()) {
     "pull"    { Invoke-Pull }
     "migrate" { Invoke-Migrate }
     "seed"    { Invoke-Seed }
+    "make-admin" { Invoke-MakeAdmin }
     "help"    { Invoke-Help }
     default {
         Write-Color "Unknown command: $Command" "Red"

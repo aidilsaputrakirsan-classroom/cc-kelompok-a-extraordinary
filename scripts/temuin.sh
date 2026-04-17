@@ -4,7 +4,7 @@
 # ============================================================
 # Usage: ./scripts/temuin.sh [command]
 # Commands: start, stop, restart, reset, status, logs, build,
-#           pull, migrate, seed, help
+#           pull, migrate, seed, make-admin, help
 # ============================================================
 
 set -e
@@ -153,6 +153,26 @@ cmd_seed() {
     echo -e "${GREEN}Seed complete.${NC}"
 }
 
+cmd_make_admin() {
+    echo -e "${CYAN}=== Make User Admin ===${NC}"
+    check_docker
+
+    EMAIL="$1"
+    if [ -z "$EMAIL" ]; then
+        echo -e "${RED}Error: Email is required.${NC}"
+        echo "Usage: ./scripts/temuin.sh make-admin user@student.itk.ac.id"
+        exit 1
+    fi
+
+    echo "Setting role=admin for: $EMAIL"
+    docker compose exec db psql -U postgres -d temuin_db -c "UPDATE users SET role = 'admin' WHERE email = '$EMAIL';"
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}Done. $EMAIL is now admin.${NC}"
+    else
+        echo -e "${RED}Failed. Make sure the user has registered first.${NC}"
+    fi
+}
+
 cmd_help() {
     echo -e "${CYAN}============================================================${NC}"
     echo -e "${CYAN}  Temuin - Docker Runner${NC}"
@@ -171,12 +191,14 @@ cmd_help() {
     echo -e "  ${GREEN}pull${NC}               Pull images from Docker Hub"
     echo -e "  ${GREEN}migrate${NC}            Run Alembic database migrations"
     echo -e "  ${GREEN}seed${NC}               Seed database with initial data"
+    echo -e "  ${GREEN}make-admin${NC} <email>  Promote a user to admin role"
     echo -e "  ${GREEN}help${NC}               Show this help message"
     echo ""
     echo -e "Examples:"
     echo -e "  ./scripts/temuin.sh start          # Start everything"
     echo -e "  ./scripts/temuin.sh logs backend    # Tail backend logs"
     echo -e "  ./scripts/temuin.sh seed            # Seed the database"
+    echo -e "  ./scripts/temuin.sh make-admin nim@student.itk.ac.id"
     echo -e "  ./scripts/temuin.sh reset           # Nuke DB + pull latest + start fresh"
     echo ""
 }
@@ -198,6 +220,7 @@ case "$COMMAND" in
     pull)     cmd_pull ;;
     migrate)  cmd_migrate ;;
     seed)     cmd_seed ;;
+    make-admin) cmd_make_admin "$2" ;;
     help)     cmd_help ;;
     *)
         echo -e "${RED}Unknown command: $COMMAND${NC}"
