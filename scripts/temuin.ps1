@@ -54,7 +54,7 @@ function Test-EnvFile {
         Write-Host "Copying from .env.docker template..."
         Copy-Item ".env.docker" ".env"
         Write-Color ".env created from .env.docker" "Green"
-        Write-Color "Please edit .env with your actual values (especially Firebase config)." "Yellow"
+        Write-Color "Please edit .env with your actual values (especially SECRET_KEY)." "Yellow"
     }
 }
 
@@ -62,25 +62,10 @@ function Test-EnvFile {
 # Commands
 # ============================================================
 
-function Test-FirebaseCreds {
-    if (-not (Test-Path "backend/serviceAccountKey.json")) {
-        Write-Color "WARNING: backend/serviceAccountKey.json not found." "Yellow"
-        Write-Host "Creating empty placeholder. Firebase auth will NOT work until you add the real file."
-        '{}' | Set-Content "backend/serviceAccountKey.json" -Encoding UTF8
-    } else {
-        $content = (Get-Content "backend/serviceAccountKey.json" -Raw).Trim()
-        if ($content -eq '{}' -or $content.Length -lt 50) {
-            Write-Color "WARNING: backend/serviceAccountKey.json appears to be a placeholder." "Yellow"
-            Write-Color "Firebase auth will NOT work. Replace with the real credentials file." "Yellow"
-        }
-    }
-}
-
 function Invoke-Start {
     Write-Color "=== Starting Temuin ===" "Cyan"
     Test-Docker
     Test-EnvFile
-    Test-FirebaseCreds
     docker compose up -d
     Write-Host ""
     Invoke-Status
@@ -110,7 +95,6 @@ function Invoke-Reset {
     }
     Test-Docker
     Test-EnvFile
-    Test-FirebaseCreds
     Write-Host "Stopping containers and removing volumes..."
     docker compose down -v
     Write-Host "Pulling latest images..."
@@ -169,34 +153,16 @@ function Invoke-Seed {
     Write-Color "=== Seeding Database ===" "Cyan"
     Test-Docker
 
-    $dbRunning = docker compose ps db 2>&1 | Select-String "running"
-    if (-not $dbRunning) {
-        Write-Color "Error: Database container is not running. Run '.\scripts\temuin.ps1 start' first." "Red"
+    $backendRunning = docker compose ps backend 2>&1 | Select-String "running"
+    if (-not $backendRunning) {
+        Write-Color "Error: Backend container is not running. Run '.\scripts\temuin.ps1 start' first." "Red"
         exit 1
     }
 
-    Write-Host "Creating seed data..."
-    $seedSQL = @"
-        INSERT INTO categories (id, name) VALUES
-            ('cat-elektronik', 'Elektronik'),
-            ('cat-dokumen', 'Dokumen'),
-            ('cat-aksesoris', 'Aksesoris'),
-            ('cat-pakaian', 'Pakaian'),
-            ('cat-lainnya', 'Lainnya')
-        ON CONFLICT DO NOTHING;
-
-        INSERT INTO buildings (id, name) VALUES
-            ('bld-gkb', 'Gedung Kuliah Bersama'),
-            ('bld-rek', 'Gedung Rektorat'),
-            ('bld-lib', 'Perpustakaan'),
-            ('bld-if', 'Gedung Teknik Informatika'),
-            ('bld-kan', 'Kantin Pusat')
-        ON CONFLICT DO NOTHING;
-"@
-
-    docker compose exec db psql -U postgres -d temuin_db -c $seedSQL 2>$null
+    Write-Host "Running seed script via backend container..."
+    docker compose exec backend python -m app.utils.seed
     if ($LASTEXITCODE -ne 0) {
-        Write-Color "Note: Some seed data may already exist or tables not yet created." "Yellow"
+        Write-Color "Note: Seed may have partially failed. Check backend logs." "Yellow"
     }
 
     Write-Color "Seed complete." "Green"

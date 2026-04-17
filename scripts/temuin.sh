@@ -41,23 +41,7 @@ check_env() {
         echo -e "Copying from .env.docker template..."
         cp .env.docker .env
         echo -e "${GREEN}.env created from .env.docker${NC}"
-        echo -e "${YELLOW}Please edit .env with your actual values (especially Firebase config).${NC}"
-    fi
-}
-
-# Check Firebase credentials exist
-check_firebase() {
-    if [ ! -f "backend/serviceAccountKey.json" ]; then
-        echo -e "${YELLOW}WARNING: backend/serviceAccountKey.json not found.${NC}"
-        echo "Creating empty placeholder. Firebase auth will NOT work until you add the real file."
-        echo '{}' > backend/serviceAccountKey.json
-    else
-        local content
-        content=$(cat backend/serviceAccountKey.json | tr -d '[:space:]')
-        if [ "$content" = "{}" ] || [ ${#content} -lt 50 ]; then
-            echo -e "${YELLOW}WARNING: backend/serviceAccountKey.json appears to be a placeholder.${NC}"
-            echo -e "${YELLOW}Firebase auth will NOT work. Replace with the real credentials file.${NC}"
-        fi
+        echo -e "${YELLOW}Please edit .env with your actual values (especially SECRET_KEY).${NC}"
     fi
 }
 
@@ -69,7 +53,6 @@ cmd_start() {
     echo -e "${CYAN}=== Starting Temuin ===${NC}"
     check_docker
     check_env
-    check_firebase
     docker compose up -d
     echo ""
     cmd_status
@@ -99,7 +82,6 @@ cmd_reset() {
     fi
     check_docker
     check_env
-    check_firebase
     echo "Stopping containers and removing volumes..."
     docker compose down -v
     echo "Pulling latest images..."
@@ -158,32 +140,15 @@ cmd_seed() {
     echo -e "${CYAN}=== Seeding Database ===${NC}"
     check_docker
 
-    # Check if db container is running
-    if ! docker compose ps db | grep -q "running"; then
-        echo -e "${RED}Error: Database container is not running. Run './scripts/temuin.sh start' first.${NC}"
+    # Check if backend container is running
+    if ! docker compose ps backend | grep -q "running"; then
+        echo -e "${RED}Error: Backend container is not running. Run './scripts/temuin.sh start' first.${NC}"
         exit 1
     fi
 
-    echo "Creating seed data..."
-    docker compose exec db psql -U postgres -d temuin_db -c "
-        -- Insert default categories (model: id String PK, name String)
-        INSERT INTO categories (id, name) VALUES
-            ('cat-elektronik', 'Elektronik'),
-            ('cat-dokumen', 'Dokumen'),
-            ('cat-aksesoris', 'Aksesoris'),
-            ('cat-pakaian', 'Pakaian'),
-            ('cat-lainnya', 'Lainnya')
-        ON CONFLICT DO NOTHING;
-
-        -- Insert default buildings (model: id String PK, name String)
-        INSERT INTO buildings (id, name) VALUES
-            ('bld-gkb', 'Gedung Kuliah Bersama'),
-            ('bld-rek', 'Gedung Rektorat'),
-            ('bld-lib', 'Perpustakaan'),
-            ('bld-if', 'Gedung Teknik Informatika'),
-            ('bld-kan', 'Kantin Pusat')
-        ON CONFLICT DO NOTHING;
-    " 2>/dev/null || echo -e "${YELLOW}Note: Some seed data may already exist or tables not yet created.${NC}"
+    echo "Running seed script via backend container..."
+    docker compose exec backend python -m app.utils.seed || \
+        echo -e "${YELLOW}Note: Seed may have partially failed. Check backend logs.${NC}"
 
     echo -e "${GREEN}Seed complete.${NC}"
 }
