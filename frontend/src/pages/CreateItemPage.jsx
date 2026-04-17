@@ -1,25 +1,74 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { api } from "@/config/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { X } from "lucide-react"
+import PageState from "@/components/PageState"
 import { toast } from "sonner"
 
 export default function CreateItemPage() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
+  
   const [formData, setFormData] = useState({
     type: "lost",
     title: "",
     description: "",
+    category_id: "",
+    building_id: "",
+    location_id: "",
     security_officer_id: ""
   })
   const [images, setImages] = useState([])
 
+  // Master data state
+  const [masterDataLoading, setMasterDataLoading] = useState(true)
+  const [masterDataError, setMasterDataError] = useState(null)
+  
+  const [categories, setCategories] = useState([])
+  const [buildings, setBuildings] = useState([])
+  const [locations, setLocations] = useState([])
+  const [securityOfficers, setSecurityOfficers] = useState([])
+
+  const fetchMasterData = async () => {
+    try {
+      setMasterDataLoading(true)
+      setMasterDataError(null)
+      
+      const [catRes, buildRes, locRes, soRes] = await Promise.all([
+        api.get('/master-data/categories'),
+        api.get('/master-data/buildings'),
+        api.get('/master-data/locations'),
+        api.get('/master-data/security-officers'),
+      ])
+      
+      setCategories(catRes.data?.data || catRes.data || [])
+      setBuildings(buildRes.data?.data || buildRes.data || [])
+      setLocations(locRes.data?.data || locRes.data || [])
+      setSecurityOfficers(soRes.data?.data || soRes.data || [])
+    } catch (err) {
+      console.error("Error fetching master data:", err)
+      setMasterDataError("Gagal memuat data referensi. Silakan coba lagi.")
+      toast.error("Gagal memuat data referensi.")
+    } finally {
+      setMasterDataLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchMasterData()
+  }, [])
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
+
+  const handleSelectChange = (name, value) => {
+    setFormData({ ...formData, [name]: value === "_none" ? "" : value })
   }
 
   // Kompresi image ke base64 (< 2MB)
@@ -57,10 +106,14 @@ export default function CreateItemPage() {
     })
   }
 
+  const removeImage = (index) => {
+    setImages(prev => prev.filter((_, i) => i !== index))
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (formData.type === 'found' && !formData.security_officer_id) {
-      toast.error("Untuk barang temuan, wajib mengisi ID atau Nama Satpam Penitipan.")
+      toast.error("Untuk barang temuan, wajib memilih Satpam Penitipan.")
       return
     }
 
@@ -70,6 +123,9 @@ export default function CreateItemPage() {
         type: formData.type,
         title: formData.title,
         description: formData.description || undefined,
+        category_id: formData.category_id || undefined,
+        building_id: formData.building_id || undefined,
+        location_id: formData.location_id || undefined,
         security_officer_id: formData.security_officer_id || undefined,
         images: images.map((img, idx) => ({ image_data: img, display_order: idx }))
       }
@@ -86,6 +142,9 @@ export default function CreateItemPage() {
       setLoading(false)
     }
   }
+
+  if (masterDataLoading) return <PageState state="loading" loadingText="Memuat formulir..." />
+  if (masterDataError) return <PageState state="error" errorText={masterDataError} onRetry={fetchMasterData} />
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -104,16 +163,17 @@ export default function CreateItemPage() {
             
             <div className="space-y-2">
               <Label htmlFor="type">Tipe Laporan</Label>
-              <select 
-                id="type"
-                name="type" 
-                value={formData.type} 
-                onChange={handleChange}
-                className="w-full h-10 px-3 py-2 text-sm border rounded-md border-input bg-background focus-visible:outline-none focus:ring-2 focus:ring-ring"
-              >
-                <option value="lost">Laporan Barang Hilang</option>
-                <option value="found">Laporan Barang Temuan</option>
-              </select>
+              <Select value={formData.type} onValueChange={(v) => handleSelectChange("type", v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih tipe laporan">
+                    {formData.type === "lost" ? "Laporan Barang Hilang" : "Laporan Barang Temuan"}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="lost">Laporan Barang Hilang</SelectItem>
+                  <SelectItem value="found">Laporan Barang Temuan</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -134,19 +194,69 @@ export default function CreateItemPage() {
               />
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Kategori (Opsional)</Label>
+                <Select value={formData.category_id || "_none"} onValueChange={(v) => handleSelectChange("category_id", v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih Kategori">
+                      {formData.category_id ? categories.find(c => c.id === formData.category_id)?.name || "Pilih Kategori" : "-- Tidak Ada --"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">-- Tidak Ada --</SelectItem>
+                    {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Gedung (Opsional)</Label>
+                <Select value={formData.building_id || "_none"} onValueChange={(v) => handleSelectChange("building_id", v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih Gedung">
+                      {formData.building_id ? buildings.find(b => b.id === formData.building_id)?.name || "Pilih Gedung" : "-- Tidak Ada --"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">-- Tidak Ada --</SelectItem>
+                    {buildings.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label>Lokasi Area (Opsional)</Label>
+                <Select value={formData.location_id || "_none"} onValueChange={(v) => handleSelectChange("location_id", v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih Lokasi">
+                      {formData.location_id ? locations.find(l => l.id === formData.location_id)?.name || "Pilih Lokasi" : "-- Tidak Ada --"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">-- Tidak Ada --</SelectItem>
+                    {locations.map(l => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             {formData.type === 'found' && (
               <div className="space-y-2 p-4 border rounded-md bg-secondary/30">
-                <Label htmlFor="security_officer_id" className="text-destructive font-semibold">
+                <Label className="text-destructive font-semibold">
                   Satpam Penitipan (Wajib Untuk Barang Temuan)
                 </Label>
-                <Input 
-                  id="security_officer_id" 
-                  name="security_officer_id" 
-                  required={formData.type === 'found'} 
-                  value={formData.security_officer_id} 
-                  onChange={handleChange} 
-                  placeholder="Masukkan Nama atau ID Satpam Penerima Titipan" 
-                />
+                <Select value={formData.security_officer_id || "_none"} onValueChange={(v) => handleSelectChange("security_officer_id", v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih Satpam">
+                      {formData.security_officer_id ? securityOfficers.find(s => s.id === formData.security_officer_id)?.name || "Pilih Satpam" : "-- Pilih Satpam --"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">-- Pilih Satpam --</SelectItem>
+                    {securityOfficers.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
             )}
 
@@ -155,9 +265,18 @@ export default function CreateItemPage() {
               <Input id="images" type="file" accept="image/*" multiple onChange={handleImageUpload} />
               
               {images.length > 0 && (
-                <div className="grid grid-cols-4 gap-2 mt-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                   {images.map((src, idx) => (
-                    <img key={`img-${idx}-${Date.now()}`} src={src} alt={`Preview ${idx+1}`} className="object-cover w-full h-24 rounded-md border" />
+                    <div key={`img-${idx}`} className="relative group">
+                      <img src={src} alt={`Preview ${idx+1}`} className="object-cover w-full h-24 rounded-md border" />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(idx)}
+                        className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
                   ))}
                 </div>
               )}
