@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { api } from "@/config/api"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { SearchFilter } from "@/components/items/SearchFilter"
@@ -48,9 +48,9 @@ export default function ItemListPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Daftar Barang</h2>
-        <Button asChild>
-          <Link to="/items/create">Buat Laporan</Link>
-        </Button>
+        <Link to="/items/create" className={buttonVariants()}>
+          Buat Laporan
+        </Link>
       </div>
 
       <SearchFilter
@@ -90,14 +90,14 @@ export default function ItemListPage() {
                 <p className="text-sm text-muted-foreground line-clamp-2">{item.description}</p>
                 {item.images && item.images.length > 0 && (
                   <div className="mt-4">
-                    <img src={item.images[0].image_url || item.images[0].image_data} alt="Preview" className="w-full h-32 object-cover rounded-md border" />
+                    <img src={item.images[0].image_data} alt="Preview" className="w-full h-32 object-cover rounded-md border" />
                   </div>
                 )}
               </CardContent>
               <CardFooter>
-                <Button variant="secondary" className="w-full" asChild>
-                  <Link to={`/items/${item.id}`}>Lihat Detail</Link>
-                </Button>
+                <Link to={`/items/${item.id}`} className={buttonVariants({ variant: "secondary", className: "w-full" })}>
+                  Lihat Detail
+                </Link>
               </CardFooter>
             </Card>
           ))}

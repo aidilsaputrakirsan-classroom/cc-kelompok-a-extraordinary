@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import { api } from "@/config/api"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ClaimForm } from "@/components/items/ClaimForm"
@@ -29,14 +29,12 @@ export default function ItemDetailPage() {
     try {
       setLoading(true)
       setError(null)
-      // Gunakan tanpa trailing slash /items/{id} ? Wait, sebelumnya /items/${id}/. Saya akan gunakan yang sebelumnya tapi periksa kalau backend gagal.
-      // Di PR #51, mereka memastikan /items/ (koleksi) dan /claims/ (koleksi). Untuk by ID biasanya /items/{id}.
       const response = await api.get(`/items/${id}`)
       const itemData = response.data?.data || response.data
       setItem(itemData)
 
       // Fetch claims jika admin atau owner
-      if (itemData && user && (user.role === 'admin' || user.role === 'superadmin' || user.id === itemData.user_id)) {
+      if (itemData && user && (user.role === 'admin' || user.role === 'superadmin' || user.id === itemData.created_by)) {
         fetchClaims(itemData.id)
       }
     } catch (err) {
@@ -50,9 +48,8 @@ export default function ItemDetailPage() {
   const fetchClaims = async (itemId) => {
     try {
       setClaimsLoading(true)
-      const res = await api.get(`/claims/`)
-      const allClaims = res.data?.data || res.data || []
-      const itemClaims = allClaims.filter(c => c.item_id === itemId)
+      const res = await api.get(`/claims/?item_id=${itemId}`)
+      const itemClaims = res.data?.data || res.data || []
       setClaims(itemClaims)
     } catch (err) {
       console.error("Error fetching claims for item:", err)
@@ -88,7 +85,7 @@ export default function ItemDetailPage() {
   if (!item) return <PageState state="empty" emptyText="Barang tidak ditemukan." />
 
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'
-  const isOwner = user?.id === item.user_id
+  const isOwner = user?.id === item.created_by
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
@@ -101,7 +98,7 @@ export default function ItemDetailPage() {
           <h2 className="text-3xl font-bold">{item.title}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Dilaporkan pada {new Date(item.created_at).toLocaleDateString("id-ID")}
-            {item.user_id && ` oleh User #${item.user_id.slice(0, 8)}`}
+            {item.created_by && ` oleh User #${item.created_by.slice(0, 8)}`}
           </p>
         </div>
         <div className="flex items-center gap-2 sm:flex-col sm:items-end">
@@ -120,7 +117,7 @@ export default function ItemDetailPage() {
               {item.images.map((img, idx) => (
                 <img 
                   key={idx} 
-                  src={img.image_url || img.image_data} 
+                  src={img.image_data} 
                   alt={`Foto ${idx+1}`} 
                   className="object-cover w-full h-32 rounded-md border" 
                 />
@@ -185,9 +182,9 @@ export default function ItemDetailPage() {
                     <p className="font-medium">Jawaban:</p>
                     <p className="whitespace-pre-wrap">{claim.ownership_answer}</p>
                     {isAdmin && (
-                      <Button variant="outline" size="sm" asChild className="mt-4">
-                        <Link to={`/admin/claims/${claim.id}`}>Lihat Detail Klaim</Link>
-                      </Button>
+                      <Link to={`/admin/claims/${claim.id}`} className={buttonVariants({ variant: "outline", size: "sm", className: "mt-4" })}>
+                        Lihat Detail Klaim
+                      </Link>
                     )}
                   </CardContent>
                 </Card>

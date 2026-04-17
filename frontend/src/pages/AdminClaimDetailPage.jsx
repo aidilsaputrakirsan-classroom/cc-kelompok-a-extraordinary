@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useParams, Link, useNavigate } from "react-router-dom"
 import { api } from "@/config/api"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { StatusBadge } from "@/components/ui/StatusBadge"
 import PageState from "@/components/PageState"
@@ -174,17 +174,17 @@ export default function AdminClaimDetailPage() {
               <p><strong>Judul:</strong> {item.title}</p>
               <p><strong>Tipe:</strong> {item.type === 'found' ? 'Barang Temuan' : 'Barang Hilang'}</p>
               <p><strong>Deskripsi:</strong> {item.description}</p>
-              <Button variant="outline" size="sm" asChild className="mt-4">
-                <Link to={`/items/${item.id}`}>Lihat Halaman Barang</Link>
-              </Button>
+              <Link to={`/items/${item.id}`} className={buttonVariants({ variant: "outline", size: "sm", className: "mt-4" })}>
+                Lihat Halaman Barang
+              </Link>
             </div>
           ) : (
             <div className="text-sm text-muted-foreground">
               <p>ID Barang: {claim.item_id}</p>
               <p>Data barang tidak dapat dimuat secara lengkap.</p>
-              <Button variant="outline" size="sm" asChild className="mt-4">
-                <Link to={`/items/${claim.item_id}`}>Coba Lihat Halaman Barang</Link>
-              </Button>
+              <Link to={`/items/${claim.item_id}`} className={buttonVariants({ variant: "outline", size: "sm", className: "mt-4" })}>
+                Coba Lihat Halaman Barang
+              </Link>
             </div>
           )}
         </CardContent>

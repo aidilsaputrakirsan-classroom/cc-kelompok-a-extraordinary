@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 
 export default function HomePage() {
   return (
@@ -11,12 +11,12 @@ export default function HomePage() {
         Platform resmi untuk melaporkan barang hilang dan mengumumkan penemuan barang di lingkungan Institut Teknologi Kalimantan.
       </p>
       <div className="flex flex-col w-full gap-4 sm:w-auto sm:flex-row">
-        <Button size="lg" asChild>
-          <Link to="/items/create">Buat Laporan</Link>
-        </Button>
-        <Button size="lg" variant="outline" asChild>
-          <Link to="/items">Lihat Direktori Barang</Link>
-        </Button>
+        <Link to="/items/create" className={buttonVariants({ size: "lg" })}>
+          Buat Laporan
+        </Link>
+        <Link to="/items" className={buttonVariants({ size: "lg", variant: "outline" })}>
+          Lihat Direktori Barang
+        </Link>
       </div>
     </div>
   )

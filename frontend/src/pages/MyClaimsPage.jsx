@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { api } from "@/config/api"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { StatusBadge } from "@/components/ui/StatusBadge"
 import PageState from "@/components/PageState"
@@ -50,9 +50,9 @@ export default function MyClaimsPage() {
         <Card>
           <CardContent className="pt-6 text-center py-12">
             <p className="text-muted-foreground mb-4">Anda belum mengajukan klaim apapun.</p>
-            <Button asChild>
-              <Link to="/items">Jelajahi Barang Temuan</Link>
-            </Button>
+            <Link to="/items" className={buttonVariants()}>
+              Jelajahi Barang Temuan
+            </Link>
           </CardContent>
         </Card>
       ) : (
@@ -81,9 +81,9 @@ export default function MyClaimsPage() {
                   </p>
                 </CardContent>
                 <CardFooter>
-                  <Button variant="outline" className="w-full" asChild>
-                    <Link to={`/items/${claim.item_id}`}>Lihat Barang</Link>
-                  </Button>
+                  <Link to={`/items/${claim.item_id}`} className={buttonVariants({ variant: "outline", className: "w-full" })}>
+                    Lihat Barang
+                  </Link>
                 </CardFooter>
               </Card>
             ))}

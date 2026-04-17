@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { api } from "@/config/api"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { StatusBadge } from "@/components/ui/StatusBadge"
@@ -99,9 +99,9 @@ export default function AdminClaimsPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" size="sm" asChild>
-                  <Link to={`/admin/claims/${claim.id}`}>Lihat Detail</Link>
-                </Button>
+                <Link to={`/admin/claims/${claim.id}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
+                  Lihat Detail
+                </Link>
               </CardContent>
             </Card>
           ))}

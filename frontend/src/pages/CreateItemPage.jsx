@@ -165,7 +165,9 @@ export default function CreateItemPage() {
               <Label htmlFor="type">Tipe Laporan</Label>
               <Select value={formData.type} onValueChange={(v) => handleSelectChange("type", v)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih tipe laporan" />
+                  <SelectValue placeholder="Pilih tipe laporan">
+                    {formData.type === "lost" ? "Laporan Barang Hilang" : "Laporan Barang Temuan"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="lost">Laporan Barang Hilang</SelectItem>
@@ -197,7 +199,9 @@ export default function CreateItemPage() {
                 <Label>Kategori (Opsional)</Label>
                 <Select value={formData.category_id || "_none"} onValueChange={(v) => handleSelectChange("category_id", v)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Pilih Kategori" />
+                    <SelectValue placeholder="Pilih Kategori">
+                      {formData.category_id ? categories.find(c => c.id === formData.category_id)?.name || "Pilih Kategori" : "-- Tidak Ada --"}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="_none">-- Tidak Ada --</SelectItem>
@@ -210,7 +214,9 @@ export default function CreateItemPage() {
                 <Label>Gedung (Opsional)</Label>
                 <Select value={formData.building_id || "_none"} onValueChange={(v) => handleSelectChange("building_id", v)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Pilih Gedung" />
+                    <SelectValue placeholder="Pilih Gedung">
+                      {formData.building_id ? buildings.find(b => b.id === formData.building_id)?.name || "Pilih Gedung" : "-- Tidak Ada --"}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="_none">-- Tidak Ada --</SelectItem>
@@ -223,7 +229,9 @@ export default function CreateItemPage() {
                 <Label>Lokasi Area (Opsional)</Label>
                 <Select value={formData.location_id || "_none"} onValueChange={(v) => handleSelectChange("location_id", v)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Pilih Lokasi" />
+                    <SelectValue placeholder="Pilih Lokasi">
+                      {formData.location_id ? locations.find(l => l.id === formData.location_id)?.name || "Pilih Lokasi" : "-- Tidak Ada --"}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="_none">-- Tidak Ada --</SelectItem>
@@ -240,7 +248,9 @@ export default function CreateItemPage() {
                 </Label>
                 <Select value={formData.security_officer_id || "_none"} onValueChange={(v) => handleSelectChange("security_officer_id", v)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Pilih Satpam" />
+                    <SelectValue placeholder="Pilih Satpam">
+                      {formData.security_officer_id ? securityOfficers.find(s => s.id === formData.security_officer_id)?.name || "Pilih Satpam" : "-- Pilih Satpam --"}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="_none">-- Pilih Satpam --</SelectItem>
