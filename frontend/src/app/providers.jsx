@@ -1,46 +1,42 @@
 import { createContext, useContext, useState, useEffect } from "react"
-import { auth } from "@/config/firebase"
-import { onAuthStateChanged, signOut } from "firebase/auth"
+import { api } from "@/config/api"
 
 const AuthContext = createContext()
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  const [internalToken, setInternalTokenState] = useState(() => localStorage.getItem("internalToken"))
   const [loading, setLoading] = useState(true)
 
-  const setInternalToken = (token) => {
-    if (token) {
-      localStorage.setItem("internalToken", token)
-      setInternalTokenState(token)
+  // Cek token saat app load - fetch user profile dari backend
+  useEffect(() => {
+    const token = localStorage.getItem("internalToken")
+    if (!token) {
+      setLoading(false)
       return
     }
 
-    localStorage.removeItem("internalToken")
-    setInternalTokenState(null)
+    api.get("/auth/me/")
+      .then((res) => setUser(res.data))
+      .catch(() => {
+        // Token expired atau invalid
+        localStorage.removeItem("internalToken")
+        setUser(null)
+      })
+      .finally(() => setLoading(false))
+  }, [])
+
+  const login = (token, userData) => {
+    localStorage.setItem("internalToken", token)
+    setUser(userData)
   }
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      // Validasi: Harus login firebase dan ada internal JWT token
-      if (firebaseUser && internalToken) {
-        setUser(firebaseUser)
-      } else {
-        setUser(null)
-      }
-      setLoading(false)
-    })
-    return unsubscribe
-  }, [internalToken])
-
-  const logout = async () => {
-    await signOut(auth)
-    setInternalToken(null)
+  const logout = () => {
+    localStorage.removeItem("internalToken")
     setUser(null)
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, logout, setInternalToken }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   )
