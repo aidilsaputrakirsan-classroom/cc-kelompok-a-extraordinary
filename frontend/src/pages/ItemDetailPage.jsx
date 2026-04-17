@@ -43,7 +43,7 @@ export default function ItemDetailPage() {
     if (!item || (!isOwner && !isAdmin)) return
     const fetchClaims = async () => {
       try {
-        const response = await api.get(`/claims?item_id=${item.id}`)
+        const response = await api.get(`/claims/?item_id=${item.id}`)
         const claimsData = response.data?.data || response.data || []
         if (Array.isArray(claimsData)) setClaims(claimsData)
       } catch (err) {
@@ -56,7 +56,7 @@ export default function ItemDetailPage() {
   const handleClaimSubmit = async (claimData) => {
     try {
       setClaimLoading(true)
-      const response = await api.post('/claims', claimData)
+      const response = await api.post('/claims/', claimData)
       if (response.status === 201 || response.status === 200) {
         toast.success("Klaim berhasil diajukan! Admin akan segera memverifikasi.")
         setShowClaimForm(false)
@@ -85,7 +85,7 @@ export default function ItemDetailPage() {
       // Refresh item and claims
       const [itemRes, claimsRes] = await Promise.all([
         api.get(`/items/${id}`),
-        api.get(`/claims?item_id=${id}`)
+        api.get(`/claims/?item_id=${id}`)
       ])
       const itemData = itemRes.data?.data || itemRes.data
       if (itemData) setItem(itemData)

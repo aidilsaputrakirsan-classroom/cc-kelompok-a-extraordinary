@@ -15,7 +15,7 @@ export default function AdminClaimsPage() {
   const fetchClaims = async () => {
     try {
       setLoading(true)
-      const response = await api.get('/claims')
+      const response = await api.get('/claims/')
       const claimsData = response.data?.data || response.data || []
       if (Array.isArray(claimsData)) setClaims(claimsData)
     } catch (err) {
