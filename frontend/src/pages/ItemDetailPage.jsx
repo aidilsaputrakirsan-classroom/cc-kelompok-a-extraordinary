@@ -9,6 +9,8 @@ import { StatusBadge } from "@/components/ui/StatusBadge"
 import PageState from "@/components/PageState"
 import { useAuth } from "@/app/providers"
 import { toast } from "sonner"
+import { EditItemDialog } from "@/components/items/EditItemDialog"
+import { Pencil, Trash2 } from "lucide-react"
 
 export default function ItemDetailPage() {
   const { id } = useParams()
@@ -24,6 +26,10 @@ export default function ItemDetailPage() {
   
   const [claims, setClaims] = useState([])
   const [claimsLoading, setClaimsLoading] = useState(false)
+
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [statusUpdateLoading, setStatusUpdateLoading] = useState(false)
 
   const fetchItemAndClaims = async () => {
     try {
@@ -80,6 +86,35 @@ export default function ItemDetailPage() {
     }
   }
 
+  const handleDelete = async () => {
+    if (!window.confirm("Yakin ingin menghapus laporan ini?")) return
+
+    try {
+      setDeleteLoading(true)
+      await api.delete(`/items/${item.id}`)
+      toast.success("Laporan berhasil dihapus!")
+      navigate("/my-items")
+    } catch (error) {
+      console.error("Error deleting item:", error)
+      toast.error("Gagal menghapus laporan.")
+      setDeleteLoading(false)
+    }
+  }
+
+  const handleUpdateStatus = async (newStatus) => {
+    try {
+      setStatusUpdateLoading(true)
+      await api.put(`/items/${item.id}`, { status: newStatus })
+      toast.success("Status berhasil diperbarui!")
+      fetchItemAndClaims()
+    } catch (error) {
+      console.error("Error updating status:", error)
+      toast.error("Gagal memperbarui status.")
+    } finally {
+      setStatusUpdateLoading(false)
+    }
+  }
+
   if (loading) return <PageState state="loading" loadingText="Memuat detail barang..." />
   if (error) return <PageState state="error" errorText={error} onRetry={fetchItemAndClaims} />
   if (!item) return <PageState state="empty" emptyText="Barang tidak ditemukan." />
@@ -89,9 +124,23 @@ export default function ItemDetailPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
-      <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
-        Kembali
-      </Button>
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
+          Kembali
+        </Button>
+        {isOwner && (
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setShowEditDialog(true)}>
+              <Pencil className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+            <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleteLoading}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              {deleteLoading ? "Menghapus..." : "Hapus"}
+            </Button>
+          </div>
+        )}
+      </div>
 
       <div className="flex flex-col gap-4 pb-6 border-b sm:flex-row sm:items-start sm:justify-between">
         <div>
@@ -130,6 +179,50 @@ export default function ItemDetailPage() {
           <h3 className="mb-2 text-lg font-semibold">Keterangan / Deskripsi</h3>
           <p className="leading-relaxed text-muted-foreground">{item.description}</p>
         </div>
+
+        {isAdmin && item.status !== 'closed' && (
+          <div className="pt-6 space-y-4 border-t">
+            <h3 className="text-lg font-semibold">Aksi Admin</h3>
+            <div className="flex flex-wrap gap-2">
+              {item.status === 'open' && (
+                <>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => handleUpdateStatus('returned')}
+                    disabled={statusUpdateLoading}
+                  >
+                    Tandai Dikembalikan
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => handleUpdateStatus('closed')}
+                    disabled={statusUpdateLoading}
+                  >
+                    Tutup Laporan
+                  </Button>
+                </>
+              )}
+              {item.status === 'in_claim' && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => handleUpdateStatus('closed')}
+                  disabled={statusUpdateLoading}
+                >
+                  Tutup Laporan
+                </Button>
+              )}
+              {item.status === 'returned' && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => handleUpdateStatus('closed')}
+                  disabled={statusUpdateLoading}
+                >
+                  Tutup Laporan
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
 
         {item.type === 'found' && item.status === 'open' && !isOwner && !isAdmin && (
           <div className="pt-6 space-y-4">
@@ -193,6 +286,19 @@ export default function ItemDetailPage() {
           </div>
         )}
       </div>
+
+      {showEditDialog && (
+        <EditItemDialog
+          isOpen={showEditDialog}
+          onClose={() => setShowEditDialog(false)}
+          item={item}
+          onSuccess={() => {
+            toast.success("Laporan berhasil diperbarui!")
+            setShowEditDialog(false)
+            fetchItemAndClaims()
+          }}
+        />
+      )}
     </div>
   )
 }

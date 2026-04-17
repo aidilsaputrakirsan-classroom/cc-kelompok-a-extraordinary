@@ -23,6 +23,7 @@ class ItemUpdate(BaseModel):
     building_id: Optional[str] = None
     location_id: Optional[str] = None
     security_officer_id: Optional[str] = None
+    status: Optional[str] = Field(None, pattern="^(open|in_claim|returned|closed)$")
     # Assuming update images can be complex, skipping image updates in basic CRUD
     
 class ImageResponse(BaseModel):
