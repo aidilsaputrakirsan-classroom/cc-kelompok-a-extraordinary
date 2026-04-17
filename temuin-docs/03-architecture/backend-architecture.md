@@ -10,24 +10,24 @@
 
 ## Auth Architecture
 
-Temuin memakai **Firebase untuk Google Sign-In** dan **PostgreSQL untuk penyimpanan data internal aplikasi**.
+Temuin memakai **email + password** untuk autentikasi dan **PostgreSQL untuk penyimpanan data internal aplikasi**.
 
 Artinya:
-- Firebase dipakai untuk menjalankan login Google dan menghasilkan Firebase ID token
-- Backend memverifikasi token itu dengan Firebase Admin SDK
-- Setelah token valid, backend melakukan create atau sync user internal di PostgreSQL
-- Backend lalu mengeluarkan JWT internal aplikasi untuk request selanjutnya
+- User mendaftar dan login dengan email kampus (`itk.ac.id`) dan password
+- Backend memverifikasi password dengan bcrypt (via `passlib`)
+- Backend menyimpan `password_hash` di tabel `users` di PostgreSQL
+- Backend mengeluarkan JWT internal aplikasi untuk request selanjutnya
 
-Firebase **bukan** source of truth untuk data domain Temuin. Data seperti items, claims, master data, notifications, audit log, dan role internal tetap berada di PostgreSQL.
+PostgreSQL adalah satu-satunya source of truth untuk data user dan seluruh data domain Temuin.
 
 ## Auth Flow Singkat
 
-1. Frontend login lewat Firebase Auth SDK
-2. Frontend menerima Firebase ID token
-3. Frontend mengirim token itu ke backend
-4. Backend memverifikasi token dengan Firebase Admin SDK
-5. Backend cek email kampus dan aturan internal
-6. Backend create atau sync record user di PostgreSQL
+1. User register via form dengan email `itk.ac.id`, password, dan nama
+2. Backend validasi domain email dan password policy
+3. Backend hash password dengan bcrypt dan simpan user di PostgreSQL
+4. Backend mengembalikan JWT internal ke frontend
+5. Untuk login, user kirim email + password
+6. Backend verifikasi password terhadap hash di database
 7. Backend mengembalikan JWT internal ke frontend
 8. Frontend memakai JWT internal untuk semua request API berikutnya
 
@@ -64,7 +64,7 @@ backend/
 
 ## Boundary Per Modul
 
-- `auth` menangani login Google, user sync, dan JWT internal
+- `auth` menangani register, login email+password, dan JWT internal
 - `items` menangani laporan lost/found dan item status
 - `claims` menangani alur klaim
 - `master_data` menangani kategori, gedung, lokasi, dan satpam
@@ -83,7 +83,7 @@ Pada Sprint 6:
 - Business rule utama wajib mengikuti `decision-log.md`
 - Soft delete untuk item milik user
 - History dan audit log tidak dicampur ke tabel utama
-- Firebase hanya menangani external authentication, bukan penyimpanan data bisnis aplikasi
+- Autentikasi ditangani langsung oleh backend (email+password dengan bcrypt), tanpa dependency eksternal
 
 ## Dokumen Terkait
 

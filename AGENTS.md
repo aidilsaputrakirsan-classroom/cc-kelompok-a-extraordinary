@@ -44,4 +44,4 @@ Setiap AI coding agent wajib mulai dari file ini sebelum mengerjakan apa pun di 
 - Skill project-level berada di `.agents/skills/`
 - Skill router proyek: `temuin-router`
 - Skill role-specific: `temuin-backend`, `temuin-frontend`, `temuin-devops`, `temuin-qa-docs`
-- Skill pendukung yang sudah tersedia di workspace ini: `firebase-auth-basics`, `web-design-guidelines`, `design-taste-frontend`, `shadcn`
+- Skill pendukung yang sudah tersedia di workspace ini: `web-design-guidelines`, `design-taste-frontend`, `shadcn`

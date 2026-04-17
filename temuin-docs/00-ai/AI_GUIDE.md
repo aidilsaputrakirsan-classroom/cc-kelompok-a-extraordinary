@@ -56,7 +56,6 @@ Jika agent mendukung skill project-level, gunakan layer berikut:
 - `temuin-qa-docs` untuk task QA dan dokumentasi
 
 Skill pendukung workspace yang sudah tersedia:
-- `firebase-auth-basics`
 - `web-design-guidelines`
 - `design-taste-frontend`
 - `shadcn`
