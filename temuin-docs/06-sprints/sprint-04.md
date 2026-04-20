@@ -36,10 +36,10 @@ Menstabilkan flow inti di Docker, menambah halaman admin penting, dan menyiapkan
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| QA-4.1 | Blackbox full flow di Docker: login hingga returned | High | 2h | DO-4.3 | todo | - | - |
-| QA-4.2 | Blackbox admin pages utama | Medium | 2h | FE-4.2, BE-3.4 | todo | - | - |
-| QA-4.3 | Simpan screenshot flow utama untuk persiapan demo UTS | Medium | 1h | QA-4.1, QA-4.2 | todo | - | - |
-| QA-4.4 | Update langkah demo atau dokumen terkait bila flow berubah | Medium | 1h | QA-4.1 | todo | - | - |
+| QA-4.1 | Blackbox full flow di Docker: login hingga returned | High | 2h | DO-4.3 | done | - | - |
+| QA-4.2 | Blackbox admin pages utama | Medium | 2h | FE-4.2, BE-3.4 | done | - | - |
+| QA-4.3 | Simpan screenshot flow utama untuk persiapan demo UTS | Medium | 1h | QA-4.1, QA-4.2 | done | - | - |
+| QA-4.4 | Update langkah demo atau dokumen terkait bila flow berubah | Medium | 1h | QA-4.1 | done | - | - |
 
 ## Quick Links
 
