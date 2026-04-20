@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
+
 import { api } from "@/config/api"
 import { buttonVariants } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { StatusBadge } from "@/components/ui/StatusBadge"
@@ -17,17 +19,12 @@ export default function AdminClaimsPage() {
     try {
       setLoading(true)
       setError(null)
-      // Gunakan trailing slash
-      const response = await api.get('/claims/')
+      const response = await api.get("/claims/")
       const claimsData = response.data?.data || response.data || []
-      if (Array.isArray(claimsData)) {
-        setClaims(claimsData)
-      } else {
-        setClaims([])
-      }
+      setClaims(Array.isArray(claimsData) ? claimsData : [])
     } catch (err) {
       console.error("Error fetching claims:", err)
-      setError("Gagal memuat daftar klaim. " + (err.response?.data?.detail || ""))
+      setError(`Gagal memuat daftar klaim. ${err.response?.data?.detail || ""}`)
     } finally {
       setLoading(false)
     }
@@ -37,75 +34,101 @@ export default function AdminClaimsPage() {
     fetchClaims()
   }, [])
 
-  const filteredClaims = claims.filter(claim => {
-    if (filter === "all") return true
-    return claim.status === filter
-  })
+  const filteredClaims = useMemo(() => {
+    return claims.filter((claim) => filter === "all" || claim.status === filter)
+  }, [claims, filter])
+
+  const summary = useMemo(() => [
+    { label: "Total Klaim", value: claims.length, tone: "bg-brand-soft text-brand" },
+    { label: "Menunggu", value: claims.filter((claim) => claim.status === "pending").length, tone: "bg-warning-soft text-warning-foreground" },
+    { label: "Selesai", value: claims.filter((claim) => claim.status === "completed").length, tone: "bg-success-soft text-success-foreground" },
+  ], [claims])
 
   return (
-    <div className="space-y-6">
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold tracking-tight">Kelola Klaim</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Daftar klaim dari user yang membutuhkan verifikasi admin.
-        </p>
-      </div>
+    <div className="flex flex-col gap-6 md:gap-8">
+      <section className="rounded-[2rem] border border-brand/10 bg-surface-elevated/85 p-6 shadow-[0_22px_60px_-34px_rgba(83,40,190,0.32)] backdrop-blur md:p-8">
+        <div className="flex flex-col gap-3">
+          <Badge variant="secondary" className="w-fit bg-brand-soft text-brand">
+            Workspace Admin
+          </Badge>
+          <h2 className="text-balance text-3xl font-semibold tracking-tight md:text-4xl">Kelola semua klaim dengan tampilan yang lebih terstruktur.</h2>
+          <p className="max-w-3xl text-base leading-7 text-muted-foreground">
+            Halaman admin sengaja dibuat sedikit lebih rapat dan presisi agar verifikasi klaim, pencarian status, dan tindak lanjut item bisa diproses lebih efisien.
+          </p>
+        </div>
+      </section>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-full sm:w-[200px]">
-            <SelectValue placeholder="Filter status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Semua Status</SelectItem>
-            <SelectItem value="pending">Menunggu</SelectItem>
-            <SelectItem value="approved">Disetujui</SelectItem>
-            <SelectItem value="rejected">Ditolak</SelectItem>
-            <SelectItem value="completed">Selesai</SelectItem>
-            <SelectItem value="cancelled">Dibatalkan</SelectItem>
-          </SelectContent>
-        </Select>
-        <p className="text-sm text-muted-foreground">
-          {filteredClaims.length} klaim ditemukan
-        </p>
-      </div>
+      <section className="grid gap-4 md:grid-cols-3">
+        {summary.map((item) => (
+          <Card key={item.label} className="bg-surface-elevated/75">
+            <CardHeader className="gap-2">
+              <CardDescription>{item.label}</CardDescription>
+              <CardTitle className="text-3xl font-semibold tracking-tight">{item.value}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Badge className={item.tone}>{item.label}</Badge>
+            </CardContent>
+          </Card>
+        ))}
+      </section>
 
-      {loading && <PageState state="loading" loadingText="Memuat daftar klaim..." />}
+      <Card className="bg-surface-elevated/80">
+        <CardHeader>
+          <CardTitle>Filter Klaim</CardTitle>
+          <CardDescription>Pilih status tertentu untuk mempersempit daftar klaim yang perlu diperiksa.</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger className="md:max-w-[220px]" aria-label="Filter status klaim">
+              <SelectValue placeholder="Filter status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Status</SelectItem>
+              <SelectItem value="pending">Menunggu</SelectItem>
+              <SelectItem value="approved">Disetujui</SelectItem>
+              <SelectItem value="rejected">Ditolak</SelectItem>
+              <SelectItem value="completed">Selesai</SelectItem>
+              <SelectItem value="cancelled">Dibatalkan</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-sm text-muted-foreground">{filteredClaims.length} klaim ditemukan</p>
+        </CardContent>
+      </Card>
+
+      {loading && <PageState state="loading" loadingText="Memuat daftar klaim…" />}
       {!loading && error && <PageState state="error" errorText={error} onRetry={fetchClaims} />}
-      
+
       {!loading && !error && filteredClaims.length === 0 && (
-        <PageState 
-          state="empty" 
-          emptyText={filter === "all" ? "Belum ada klaim yang masuk." : `Tidak ada klaim dengan status "${filter}".`} 
+        <PageState
+          state="empty"
+          emptyText={filter === "all" ? "Belum ada klaim yang masuk." : `Tidak ada klaim dengan status \"${filter}\".`}
         />
       )}
 
       {!loading && !error && filteredClaims.length > 0 && (
-        <div className="space-y-4">
+        <section className="grid gap-4">
           {filteredClaims.map((claim) => (
-            <Card key={claim.id}>
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <CardTitle className="text-base">
-                      Klaim #{claim.id?.slice(0, 8)}
-                    </CardTitle>
-                    <CardDescription className="mt-1 space-y-1">
-                      <span className="block">Barang: #{claim.item_id?.slice(0, 8)}</span>
-                      <span className="block">User: {claim.user_id?.slice(0, 8)}</span>
+            <Card key={claim.id} className="bg-surface-elevated/80">
+              <CardHeader>
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <CardTitle>Klaim #{claim.id?.slice(0, 8)}</CardTitle>
+                      <StatusBadge type="claim" status={claim.status} />
+                    </div>
+                    <CardDescription className="mt-3 flex flex-col gap-1 md:flex-row md:flex-wrap md:gap-4">
+                      <span>Barang: #{claim.item_id?.slice(0, 8)}</span>
+                      <span>User: {claim.user_id?.slice(0, 8)}</span>
                     </CardDescription>
                   </div>
-                  <StatusBadge type="claim" status={claim.status} />
+                  <Link to={`/admin/claims/${claim.id}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
+                    Lihat Detail
+                  </Link>
                 </div>
               </CardHeader>
-              <CardContent>
-                <Link to={`/admin/claims/${claim.id}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
-                  Lihat Detail
-                </Link>
-              </CardContent>
             </Card>
           ))}
-        </div>
+        </section>
       )}
     </div>
   )
