@@ -121,6 +121,7 @@ export default function ItemDetailPage() {
 
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'
   const isOwner = user?.id === item.created_by
+  const canCloseItem = isAdmin && ['open', 'in_claim', 'returned'].includes(item.status)
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
@@ -185,33 +186,15 @@ export default function ItemDetailPage() {
             <h3 className="text-lg font-semibold">Aksi Admin</h3>
             <div className="flex flex-wrap gap-2">
               {item.status === 'open' && (
-                <>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handleUpdateStatus('returned')}
-                    disabled={statusUpdateLoading}
-                  >
-                    Tandai Dikembalikan
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handleUpdateStatus('closed')}
-                    disabled={statusUpdateLoading}
-                  >
-                    Tutup Laporan
-                  </Button>
-                </>
-              )}
-              {item.status === 'in_claim' && (
                 <Button 
                   variant="outline" 
-                  onClick={() => handleUpdateStatus('closed')}
+                  onClick={() => handleUpdateStatus('returned')}
                   disabled={statusUpdateLoading}
                 >
-                  Tutup Laporan
+                  Tandai Dikembalikan
                 </Button>
               )}
-              {item.status === 'returned' && (
+              {canCloseItem && (
                 <Button 
                   variant="outline" 
                   onClick={() => handleUpdateStatus('closed')}

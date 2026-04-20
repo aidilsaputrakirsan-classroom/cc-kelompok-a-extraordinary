@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import PageState from "@/components/PageState"
+import { toast } from "sonner"
 
 export function EditItemDialog({ isOpen, onClose, item, onSuccess }) {
   const [loading, setLoading] = useState(false)
@@ -48,10 +49,10 @@ export function EditItemDialog({ isOpen, onClose, item, onSuccess }) {
       setMasterDataError(null)
       
       const [catRes, buildRes, locRes, soRes] = await Promise.all([
-        api.get('/master-data/categories'),
-        api.get('/master-data/buildings'),
-        api.get('/master-data/locations'),
-        api.get('/master-data/security-officers'),
+        api.get('/master-data/categories/'),
+        api.get('/master-data/buildings/'),
+        api.get('/master-data/locations/'),
+        api.get('/master-data/security-officers/'),
       ])
       
       setCategories(catRes.data?.data || catRes.data || [])
@@ -90,13 +91,12 @@ export function EditItemDialog({ isOpen, onClose, item, onSuccess }) {
       
       const response = await api.put(`/items/${item.id}`, payload)
       if (response.status === 200) {
-        onSuccess()
+        await onSuccess?.()
       }
     } catch (error) {
       console.error("Error updating item:", error)
       const errorMsg = error.response?.data?.detail || error.response?.data?.message || "Gagal mengupdate laporan. Silakan coba lagi."
-      // Assuming parent will show toast based on error, or we can toast here if we pass toast function
-      throw errorMsg
+      toast.error(errorMsg)
     } finally {
       setLoading(false)
     }

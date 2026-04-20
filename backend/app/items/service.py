@@ -102,6 +102,9 @@ def update_item(db: Session, item_id: str, user_id: str, user_role: str, item_da
         raise HTTPException(status_code=403, detail="Not authorized to update this item")
         
     update_data_dict = item_data.model_dump(exclude_unset=True)
+    if "status" in update_data_dict and user_role not in ["admin", "superadmin"]:
+        raise HTTPException(status_code=403, detail="Not authorized to update item status")
+
     for key, value in update_data_dict.items():
         setattr(item, key, value)
         
