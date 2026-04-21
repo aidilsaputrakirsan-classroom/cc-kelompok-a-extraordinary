@@ -57,10 +57,10 @@ Temuin menyediakan platform web terpusat dengan:
 Berikut adalah seluruh fitur MVP yang tersedia di dalam platform Temuin:
 
 ### 1. 🔐 Autentikasi & Akses
-- Login via **Google OAuth** dengan validasi domain `@itk.ac.id`
-- Auto-create akun internal saat pertama kali login
+- Login menggunakan **Email & Password** dengan validasi domain `@itk.ac.id`
+- Registrasi mandiri akun internal ITK
 - Sistem **role-based access control**: `user`, `admin`, `superadmin`
-- Session berbasis JWT yang aman
+- Pengamanan session berbasis **internal JWT** dan password hashing (Bcrypt)
 
 ### 2. 📦 Pelaporan Barang (Item Reporting)
 - Buat laporan **barang hilang** (`lost`) dengan deskripsi lengkap
@@ -102,7 +102,7 @@ Berikut adalah seluruh fitur MVP yang tersedia di dalam platform Temuin:
 
 | # | Fitur | Keterangan |
 |---|-------|------------|
-| 1 | Login dengan akun Google kampus | Autentikasi via OAuth, validasi `@itk.ac.id` |
+| 1 | Registrasi & Login akun ITK | Gunakan email @itk.ac.id dan password |
 | 2 | Buat laporan barang hilang | Isi form dengan judul, deskripsi, kategori, lokasi, dan foto |
 | 3 | Buat laporan barang temuan | Pilih titik titipan satpam yang bertugas |
 | 4 | Lihat daftar & detail item | Browse seluruh laporan yang tercatat di sistem |
@@ -207,56 +207,121 @@ graph TD
 
 ---
 
-## 📊 Desain Database (ERD)
+### Detail Atribut Database (Data Dictionary)
 
-Berikut adalah skema relasi antar tabel yang mendukung seluruh operasional platform Temuin.
+#### 1. Tabel: `users`
+Menyimpan informasi identitas pengguna dan kredensial login.
+| Atribut | Tipe Data | Constraint | Keterangan |
+|---------|-----------|------------|------------|
+| `id` | UUID | PK | Identifier unik user. |
+| `email` | String | UK, Not Null | Email institusi (@itk.ac.id). |
+| `password_hash` | String | Not Null | Password yang sudah di-hash (Bcrypt). |
+| `role` | String | Not Null | Peran user (`user`, `admin`, `superadmin`). |
+| `name` | String | Not Null | Nama lengkap pengguna. |
+| `phone` | String | Nullable | Nomor WhatsApp untuk koordinasi klaim. |
+| `firebase_uid` | String | Nullable | (Legacy) ID dari Firebase Auth terdahulu. |
+| `created_at` | DateTime | Default: Now | Waktu pendaftaran akun. |
+
+#### 2. Tabel: `items`
+Menyimpan data laporan barang hilang (`lost`) dan barang temuan (`found`).
+| Atribut | Tipe Data | Constraint | Keterangan |
+|---------|-----------|------------|------------|
+| `id` | UUID | PK | Identifier unik item. |
+| `type` | String | Not Null | Tipe laporan (`lost` atau `found`). |
+| `status` | String | Not Null | Status: `open`, `in_claim`, `returned`, `closed`. |
+| `title` | String | Not Null | Judul singkat barang. |
+| `description` | Text | Not Null | Deskripsi detail ciri-ciri barang. |
+| `category_id` | UUID | FK | Relasi ke tabel `categories`. |
+| `building_id` | UUID | FK | Relasi ke tabel `buildings`. |
+| `location_id` | UUID | FK | Relasi ke tabel `locations`. |
+| `created_by` | UUID | FK | Relasi ke `users.id` (si pelapor). |
+| `created_at` | DateTime | Default: Now | Waktu laporan dibuat. |
+| `deleted_at` | DateTime | Nullable | Timestamp untuk fitur Soft Delete. |
+
+#### 3. Tabel: `claims`
+Menyimpan data pengajuan kepemilikan barang oleh pengguna.
+| Atribut | Tipe Data | Constraint | Keterangan |
+|---------|-----------|------------|------------|
+| `id` | UUID | PK | Identifier unik klaim. |
+| `item_id` | UUID | FK | Barang temuan yang diklaim. |
+| `user_id` | UUID | FK | User yang mengajukan klaim. |
+| `status` | String | Not Null | `pending`, `approved`, `rejected`, `completed`. |
+| `ownership_answer` | Text | Not Null | Jawaban user untuk membuktikan kepemilikan. |
+| `created_at` | DateTime | Default: Now | Waktu pengajuan klaim. |
+
+#### 4. Tabel Pendukung (Master & Log)
+*   **`item_images`**: Menyimpan foto barang dalam format Base64 (Relasi 1:M ke `items`).
+*   **`notifications`**: Menyimpan pesan in-app untuk user (Relasi 1:M ke `users`).
+*   **`status_histories`**: Mencatat setiap perubahan status pada `items` atau `claims` untuk keperluan audit trail.
+*   **Master Tables**: Tabel `categories`, `buildings`, `locations`, dan `security_officers` menggunakan skema standar (`id` PK & `name` String).
+
+---
 
 ```mermaid
 erDiagram
-    USERS ||--o{ ITEMS : "membuat laporan"
-    USERS ||--o{ CLAIMS : "mengajukan klaim"
-    ITEMS ||--o{ CLAIMS : "item yang diklaim"
-    ITEMS ||--o{ ITEM_IMAGES : "foto barang"
-    CATEGORIES ||--o{ ITEMS : "kategori barang"
-    BUILDINGS ||--o{ ITEMS : "gedung lokasi"
-    LOCATIONS ||--o{ ITEMS : "ruangan detail"
-    SECURITY_OFFICERS ||--o{ ITEMS : "petugas penerima"
+    USERS ||--o{ ITEMS : "dilaporkan oleh"
+    USERS ||--o{ CLAIMS : "diajukan oleh"
+    USERS ||--o{ NOTIFICATIONS : "menerima"
+    USERS ||--o{ AUDIT_LOGS : "aksi (admin)"
+    
+    ITEMS ||--o{ CLAIMS : "memiliki"
+    ITEMS ||--o{ ITEM_IMAGES : "memiliki foto"
+    ITEMS ||--o{ ITEM_STATUS_HISTORIES : "riwayat status"
+    
+    CLAIMS ||--o{ CLAIM_STATUS_HISTORIES : "riwayat status"
+
+    CATEGORIES ||--o{ ITEMS : "kategori"
+    BUILDINGS ||--o{ ITEMS : "gedung"
+    LOCATIONS ||--o{ ITEMS : "detail lokasi"
+    SECURITY_OFFICERS ||--o{ ITEMS : "petugas penitipan"
 
     USERS {
         string id PK "UUID"
         string email UK "Email @itk.ac.id"
         string password_hash "Bcrypt Hash"
         string role "user / admin / superadmin"
-        string name "Nama Lengkap"
-        string phone "No. HP"
+        string firebase_uid "Legacy/Deprecated"
+        string name
         datetime created_at
     }
     ITEMS {
         string id PK "UUID"
         string type "lost / found"
         string status "open / in_claim / returned / closed"
-        string title "Nama Barang"
-        string description "Keterangan Detail"
+        string title
         string category_id FK
-        string building_id FK
-        string location_id FK
-        string security_officer_id FK
         string created_by FK
         datetime created_at
+        datetime deleted_at "Soft Delete"
     }
     CLAIMS {
         string id PK "UUID"
         string item_id FK
         string user_id FK
-        string status "pending / approved / rejected / completed / cancelled"
-        string ownership_answer "Jawaban Verifikasi Kepemilikan"
+        string status "pending / approved / rejected / completed"
+        string ownership_answer
         datetime created_at
     }
     ITEM_IMAGES {
         string id PK "UUID"
         string item_id FK
         text image_data "Base64"
-        integer display_order
+        datetime created_at
+    }
+    NOTIFICATIONS {
+        string id PK
+        string user_id FK
+        string title
+        string message
+        boolean is_read
+        datetime created_at
+    }
+    ITEM_STATUS_HISTORIES {
+        string id PK
+        string item_id FK
+        string status "status terbaru"
+        string changed_by FK "User ID"
+        datetime created_at
     }
 ```
 
@@ -267,22 +332,27 @@ erDiagram
 | Modul | Method | Endpoint | Deskripsi |
 |-------|--------|----------|-----------|
 | **Auth** | `POST` | `/auth/register` | Pendaftaran akun user baru |
-| | `POST` | `/auth/login` | Autentikasi & pemberian JWT |
-| | `GET` | `/auth/me` | Ambil profil user yang sedang login |
-| **Items** | `GET` | `/items` | Daftar semua barang (dengan filter & search) |
+| | `POST` | `/auth/login` | Autentikasi untuk mendapatkan JWT |
+| | `GET` | `/auth/me` | Ambil profil user aktif |
+| | `PUT` | `/auth/me` | Update profil (Nama/No HP) |
+| **Items** | `GET` | `/items` | Daftar semua barang (filter & search) |
 | | `POST` | `/items` | Buat laporan baru (lost / found) |
-| | `GET` | `/items/{id}` | Detail satu item |
-| | `PUT` | `/items/{id}` | Edit laporan |
+| | `GET` | `/items/me` | Daftar barang milik user aktif |
+| | `GET` | `/items/{id}` | Detail informasi satu item |
+| | `PUT` | `/items/{id}` | Edit laporan barang |
 | | `DELETE` | `/items/{id}` | Hapus laporan (soft delete) |
 | **Claims** | `POST` | `/claims` | Ajukan klaim kepemilikan |
+| | `GET` | `/claims/me` | Riwayat klaim user aktif |
 | | `GET` | `/claims/{id}` | Detail satu klaim |
+| | `GET` | `/claims` | List klaim (Filter by item/Admin all) |
 | | `PUT` | `/claims/{id}/status` | Admin proses klaim (approve/reject/completed) |
-| **Notifications** | `GET` | `/notifications` | Notifikasi in-app user |
-| | `PUT` | `/notifications/{id}/read` | Tandai notifikasi sudah dibaca |
-| **Master Data** | `GET` | `/master-data/categories` | Daftar kategori |
-| | `GET` | `/master-data/buildings` | Daftar gedung |
-| | `GET` | `/master-data/locations` | Daftar lokasi / ruangan |
-| | `GET` | `/master-data/security-officers` | Daftar petugas keamanan |
+| **Notifications** | `GET` | `/notifications/me` | Notifikasi in-app user aktif |
+| | `PUT` | `/notifications/read-all` | Tandai semua notifikasi terbaca |
+| | `PUT` | `/notifications/{id}/read` | Tandai satu notifikasi terbaca |
+| **Master Data** | `GET` | `/master-data/{type}` | Ambil data (categories/buildings/etc) |
+| | `POST` | `/master-data/{type}` | Admin: Tambah data master baru |
+| | `PUT` | `/master-data/{type}/{id}` | Admin: Edit data master |
+| | `DELETE` | `/master-data/{type}/{id}` | Admin: Hapus data master |
 
 > 📄 Dokumentasi interaktif tersedia di: `http://localhost:8000/docs` (Swagger UI)
 
@@ -298,16 +368,32 @@ git clone https://github.com/aidilsaputrakirsan-classroom/cc-kelompok-a-extraord
 cd cc-kelompok-a-extraordinary
 ```
 
-### 2. Menjalankan via Docker (Paling Cepat & Stabil)
-Sistem ini telah dilengkapi dengan script otomasi `temuin.ps1` untuk mempermudah manajemen container.
+### 2. Menjalankan via Docker (Rekomendasi)
+Sistem ini menggunakan Docker untuk menyatukan Frontend, Backend, dan Database agar dapat berjalan secara konsisten di semua perangkat.
 
-| Aksi | Perintah PowerShell | Keterangan |
-|------|---------------------|------------|
-| **Setup Env** | `copy .env.docker .env` | Salin konfigurasi environment awal |
-| **Start** | `.\scripts\temuin.ps1 start` | Membangun dan menjalankan seluruh service |
-| **Status** | `.\scripts\temuin.ps1 status` | Mengecek status container dan URL akses |
-| **Stop** | `.\scripts\temuin.ps1 stop` | Menghentikan seluruh service yang berjalan |
-| **Clean** | `docker compose down -v` | Menghentikan dan menghapus volume database |
+#### 🐳 Docker Compose Commands (Standard)
+Jika Anda ingin menggunakan perintah Docker standar, berikut adalah tabel referensinya:
+| Command | Keterangan |
+|---------|------------|
+| `docker compose up` | Menjalankan semua service di terminal (log terlihat). |
+| `docker compose up -d` | Menjalankan service di background (*detached mode*). |
+| `docker compose down` | Menghentikan dan menghapus seluruh container. |
+| `docker compose logs -f` | Melihat log aktivitas dari seluruh service. |
+| `docker compose ps` | Menampilkan status dan port seluruh container. |
+| `docker compose up -d --build` | Membangun ulang image lalu menjalankan ulang service. |
+
+#### 🚀 Temuin Orchestration Script (Automation)
+Untuk mempermudah tim pengembang, kami telah menyediakan script **`temuin.ps1`** (Windows) dan **`temuin.sh`** (Linux/Mac). Script ini adalah *wrapper* cerdas yang membungkus perintah Docker di atas dengan fitur tambahan.
+
+| Perintah | Fungsi Utama | Kelebihan dibanding Docker Standar |
+|----------|--------------|------------------------------------|
+| `.\scripts\temuin.ps1 start` | **Start System** | Otomatis cek `.env`, nyalakan Docker, dan tampilkan link akses URL. |
+| `.\scripts\temuin.ps1 status` | **Check Health** | Menampilkan status container beserta URL Frontend/Backend/Docs. |
+| `.\scripts\temuin.ps1 seed` | **Isi Data** | Menjalankan script pengisian data contoh ke dalam database. |
+| `.\scripts\temuin.ps1 reset` | **Factory Reset** | Menghapus database, *pull* image terbaru, dan mulai dari nol. |
+| `.\scripts\temuin.ps1 stop` | **Stop System** | Mematikan seluruh service dengan aman. |
+
+> 💡 **Rekomendasi:** Selalu gunakan `.\scripts\temuin.ps1 start` sebagai pengganti `docker compose up` untuk menghindari kesalahan konfigurasi `.env`.
 
 ### 3. Menjalankan Secara Manual (Development Mode)
 Jika Anda ingin melakukan pengembangan aktif, jalankan service secara terpisah:
@@ -411,12 +497,24 @@ Kami adalah kelompok mahasiswa dari program studi **Sistem Informasi**, Institut
 
 ---
 
+---
+
 ## 📚 Referensi Dokumentasi
 
-- [`temuin-docs/`](./temuin-docs/) — Source of truth: arsitektur, PRD, sprint, dan role guide
-- [`docs/`](./docs/) — Laporan QA sprint dan panduan teknis setup
-- [`docs/docker-guide.md`](./docs/docker-guide.md) — Panduan lengkap menjalankan Docker
-- [`AGENTS.md`](./AGENTS.md) — Entry point untuk AI coding agent
+### 🛠️ Panduan Teknis & Setup
+- [**Setup Guide**](./docs/setup-guide.md) — Panduan instalasi awal dan konfigurasi environment.
+- [**Docker Guide**](./docs/docker-guide.md) — Panduan lengkap menjalankan sistem menggunakan Docker.
+- [**API Testing Guide**](./docs/api-testing-guide.md) — Instruksi cara menguji backend API secara manual.
+
+### 🧪 Laporan Blackbox Testing (Lead QA & Docs)
+- [**API Blackbox Testing Report**](./docs/api-blackbox-testing.md) — Laporan lengkap pengujian endpoint backend via Swagger.
+- [**Frontend Blackbox Testing Report**](./docs/frontend-blackbox-testing.md) — Laporan lengkap pengujian antarmuka pengguna (UI/UX) dan alur sistem.
+
+---
+
+### 🗺️ Sumber Arsitektur (Source of Truth)
+- [`temuin-docs/`](./temuin-docs/) — Dokumentasi arsitektur, PRD, sprint, dan role guide.
+- [`AGENTS.md`](./AGENTS.md) — Entry point untuk AI coding agent.
 
 ---
 
