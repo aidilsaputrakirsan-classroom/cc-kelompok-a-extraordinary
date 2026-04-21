@@ -249,11 +249,55 @@ Menyimpan data pengajuan kepemilikan barang oleh pengguna.
 | `ownership_answer` | Text | Not Null | Jawaban user untuk membuktikan kepemilikan. |
 | `created_at` | DateTime | Default: Now | Waktu pengajuan klaim. |
 
-#### 4. Tabel Pendukung (Master & Log)
-*   **`item_images`**: Menyimpan foto barang dalam format Base64 (Relasi 1:M ke `items`).
-*   **`notifications`**: Menyimpan pesan in-app untuk user (Relasi 1:M ke `users`).
-*   **`status_histories`**: Mencatat setiap perubahan status pada `items` atau `claims` untuk keperluan audit trail.
-*   **Master Tables**: Tabel `categories`, `buildings`, `locations`, dan `security_officers` menggunakan skema standar (`id` PK & `name` String).
+#### 4. Tabel: `item_images`
+Menyimpan data visual barang (maks 2MB per gambar).
+| Atribut | Tipe Data | Constraint | Keterangan |
+|---------|-----------|------------|------------|
+| `id` | UUID | PK | Identifier unik gambar. |
+| `item_id` | UUID | FK | Relasi ke `items.id`. |
+| `image_data` | Text | Not Null | Data gambar dalam format Base64. |
+| `display_order` | Integer | Default: 0 | Urutan tampilan gambar di galeri. |
+| `created_at` | DateTime | Default: Now | Waktu upload gambar. |
+
+#### 5. Tabel: `notifications`
+Sistem notifikasi real-time untuk memberitahukan perubahan status klaim/barang.
+| Atribut | Tipe Data | Constraint | Keterangan |
+|---------|-----------|------------|------------|
+| `id` | UUID | PK | Identifier unik notifikasi. |
+| `user_id` | UUID | FK | Penerima notifikasi (`users.id`). |
+| `title` | String | Not Null | Judul notifikasi. |
+| `message` | Text | Not Null | Isi pesan notifikasi. |
+| `is_read` | Boolean | Default: False| Status apakah sudah dibaca user. |
+| `created_at` | DateTime | Default: Now | Waktu pengiriman notifikasi. |
+
+#### 6. Tabel: `item_status_histories` / `claim_status_histories`
+Audit trail untuk melacak setiap perpindahan status data.
+| Atribut | Tipe Data | Constraint | Keterangan |
+|---------|-----------|------------|------------|
+| `id` | UUID | PK | Identifier unik riwayat. |
+| `item_id` / `claim_id`| UUID | FK | Relasi ke entitas induk terkait. |
+| `status` | String | Not Null | Status baru setelah perubahan dilakukan. |
+| `changed_by` | UUID | FK | Pelaku perubahan status (`users.id`). |
+| `created_at` | DateTime | Default: Now | Waktu kejadian perubahan. |
+
+#### 7. Tabel: `audit_logs`
+Mencatat aksi administratif krusial yang dilakukan oleh Admin/Superadmin.
+| Atribut | Tipe Data | Constraint | Keterangan |
+|---------|-----------|------------|------------|
+| `id` | UUID | PK | Identifier unik log. |
+| `user_id` | UUID | FK | Aktor yang melakukan aksi (`users.id`). |
+| `action` | String | Not Null | Jenis aksi (misal: "DELETE_USER", "RESET_DB"). |
+| `target_table`| String | Not Null | Tabel yang terdampak aksi tersebut. |
+| `details` | JSON | Nullable | Detail teknis mengenai parameter aksi. |
+| `created_at` | DateTime | Default: Now | Waktu eksekusi aksi. |
+
+#### 8. Tabel Master Data (Support Tables)
+Tabel referensi yang digunakan untuk drop-down menu pada form pelaporan.
+*   **`categories`**: Daftar kategori barang (Elektronik, Dokumen, dll).
+*   **`buildings`**: Daftar gedung di lingkungan ITK.
+*   **`locations`**: Detail titik lokasi (Lobby, Lab, Kantin, dll).
+*   **`security_officers`**: Daftar satpam yang berjaga di titik penitipan `found` items.
+*(Setiap tabel master memiliki atribut minimal: `id` (PK) dan `name` (String, Not Null)).*
 
 ---
 
