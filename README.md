@@ -431,36 +431,33 @@ npm run dev
 cc-kelompok-a-extraordinary/
 ├── backend/                  # FastAPI backend
 │   ├── app/
-│   │   ├── auth/             # Modul autentikasi
-│   │   ├── items/            # Modul item (lost & found)
-│   │   ├── claims/           # Modul klaim
-│   │   ├── notifications/    # Modul notifikasi
-│   │   ├── master_data/      # Modul data master
-│   │   ├── models/           # SQLAlchemy models
-│   │   └── main.py           # Entry point FastAPI
-│   ├── alembic/              # Database migrations
+│   │   ├── auth/             # Modul autentikasi (Login/Register)
+│   │   ├── items/            # Modul item (Lost & Found CRUD)
+│   │   ├── claims/           # Modul klaim & verifikasi kepemilikan
+│   │   ├── notifications/    # Modul notifikasi in-app
+│   │   ├── master_data/      # Modul data referensi (Gedung/Lokasi/etc)
+│   │   └── models/           # Definisi tabel database (SQLAlchemy)
+│   ├── alembic/              # Migrasi skema database
 │   └── requirements.txt
 ├── frontend/                 # React + Vite frontend
 │   ├── src/
-│   │   ├── pages/            # Halaman utama
-│   │   ├── components/       # Komponen UI reusable
-│   │   ├── lib/              # Utility & config
-│   │   └── main.jsx          # Entry point React
+│   │   ├── pages/            # View utama (Dashboard, Login, Detail)
+│   │   ├── components/       # UI Components (shadcn/ui)
+│   │   └── lib/              # Konfigurasi Axios & API client
 │   └── package.json
-├── temuin-docs/              # Source of truth: arsitektur & sprint docs
-│   ├── 00-ai/                # AI guide & role router
-│   ├── 01-concept/           # Glossary & decision log
-│   ├── 02-prd/               # Product Requirements Document
-│   ├── 03-architecture/      # Arsitektur sistem per layer
-│   ├── 04-implementation-plan/ # Definition of Done & env setup
-│   ├── 05-roles/             # Role guide per anggota tim
-│   └── 06-sprints/           # Sprint files & active sprint
-├── docs/                     # Laporan QA sprint & panduan teknis
-├── image/                    # Screenshot bukti QA per sprint
-├── scripts/                  # Skrip otomasi Docker Compose
-├── docker-compose.yml
-├── .env.docker
-└── AGENTS.md                 # Entry point AI coding agent
+├── temuin-docs/              # Source of Truth (Arsitektur & Konsep)
+├── docs/                     # Dokumentasi Teknis & Laporan Testing
+│   ├── api-blackbox-testing.md      # Laporan pengujian backend
+│   ├── frontend-blackbox-testing.md # Laporan pengujian UI/UX
+│   ├── setup-guide.md               # Cara instalasi manual
+│   └── docker-guide.md              # Cara penggunaan Docker
+├── image/                    # Aset Visual & Bukti QA
+│   ├── Testing Swagger/      # Bukti screenshot pengujian API
+│   ├── sprint-01 s/d 04/     # Evidence pengerjaan per tahap
+│   └── system-architecture.png
+├── scripts/                  # Helper automation (Powershell/Bash)
+├── docker-compose.yml        # Orchestration container
+└── AGENTS.md                 # Dokumentasi untuk AI Assistant
 ```
 
 ---
@@ -518,6 +515,3 @@ Kami adalah kelompok mahasiswa dari program studi **Sistem Informasi**, Institut
 
 ---
 
-<div align="center">
-  <sub>Built with ❤️ by Kelompok A Extraordinary — Institut Teknologi Kalimantan</sub>
-</div>
