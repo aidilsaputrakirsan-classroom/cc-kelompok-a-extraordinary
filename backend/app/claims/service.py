@@ -3,6 +3,8 @@ from fastapi import HTTPException, status
 from app.models.claim import Claim, ClaimStatusHistory
 from app.models.item import Item, ItemStatusHistory
 from app.models.user import User
+from app.notifications.schemas import NotificationCreate
+from app.notifications.service import create_notification
 from typing import Optional
 from app.claims.schemas import ClaimCreate, ClaimStatusUpdate
 
@@ -46,6 +48,29 @@ def create_claim(db: Session, user_id: str, claim_in: ClaimCreate) -> Claim:
     db.add(history)
     db.commit()
     db.refresh(new_claim)
+
+    if item.created_by != user_id:
+        create_notification(
+            db,
+            NotificationCreate(
+                user_id=item.created_by,
+                title="Klaim Baru pada Barang Anda",
+                message=f'Seseorang mengajukan klaim untuk "{item.title}".',
+            ),
+        )
+
+    admins = db.query(User).filter(User.role.in_(["admin", "superadmin"])).all()
+    for admin in admins:
+        if admin.id == user_id:
+            continue
+        create_notification(
+            db,
+            NotificationCreate(
+                user_id=admin.id,
+                title="Klaim Baru Masuk",
+                message=f'Ada pengajuan klaim baru untuk item "{item.title}".',
+            ),
+        )
     
     return new_claim
 
@@ -141,4 +166,47 @@ def update_claim_status(db: Session, claim_id: str, payload: ClaimStatusUpdate, 
         
     db.commit()
     db.refresh(claim)
+
+    status_messages = {
+        "approved": (
+            "Klaim Disetujui",
+            f'Klaim Anda untuk "{item.title}" telah disetujui. Silakan ambil barang Anda.',
+        ),
+        "rejected": (
+            "Klaim Ditolak",
+            f'Klaim Anda untuk "{item.title}" ditolak. Hubungi admin untuk informasi lebih lanjut.',
+        ),
+        "completed": (
+            "Barang Dikembalikan",
+            f'Proses klaim untuk "{item.title}" telah selesai. Barang telah dikembalikan.',
+        ),
+        "cancelled": (
+            "Klaim Dibatalkan",
+            f'Klaim untuk "{item.title}" telah dibatalkan.',
+        ),
+    }
+
+    if payload.status in status_messages:
+        title, message = status_messages[payload.status]
+
+        if claim.user_id != user_id:
+            create_notification(
+                db,
+                NotificationCreate(
+                    user_id=claim.user_id,
+                    title=title,
+                    message=message,
+                ),
+            )
+
+        if item and item.created_by != user_id:
+            create_notification(
+                db,
+                NotificationCreate(
+                    user_id=item.created_by,
+                    title="Update Status Klaim",
+                    message=f'Status klaim untuk "{item.title}" berubah menjadi {payload.status}.',
+                ),
+            )
+
     return claim
