@@ -531,8 +531,8 @@ Kami adalah kelompok mahasiswa dari program studi **Sistem Informasi**, Institut
 
 | Profile | Nama | Role | Fokus Area |
 |:-------:|------|------|------------|
-| <img src="https://github.com/disnejy.png" width="60" style="border-radius:50%"/> | **Disne Jayaprana**<br/>[@disnejy](https://github.com/disnejy) | **Lead Backend** | Arsitektur API, Database Design, Service Logic, & JWT Security |
-| <img src="https://github.com/nicholasmnrng.png" width="60" style="border-radius:50%"/> | **Nicholas Meinhard**<br/>[@nicholasmnrng](https://github.com/nicholasmnrng) | **Lead Frontend** | UI/UX Implementation, React Hooks, shadcn/ui, & API Integration |
+| <img src="https://github.com/disnejy.png" width="60" style="border-radius:50%"/> | **Disnejy**<br/>[@disnejy](https://github.com/disnejy) | **Lead Backend** | Arsitektur API, Database Design, Service Logic, & JWT Security |
+| <img src="https://github.com/nicholasmnrng.png" width="60" style="border-radius:50%"/> | **Nicholas**<br/>[@nicholasmnrng](https://github.com/nicholasmnrng) | **Lead Frontend** | UI/UX Implementation, React Hooks, shadcn/ui, & API Integration |
 | <img src="https://github.com/PangeranSilaen.png" width="60" style="border-radius:50%"/> | **Pangeran Silaen**<br/>[@PangeranSilaen](https://github.com/PangeranSilaen) | **Lead DevOps** | Dockerization, CI/CD Pipelines, Environment Setup, & Automation |
 | <img src="https://github.com/raniayudewi.png" width="60" style="border-radius:50%"/> | **Rani Ayu Dewi**<br/>[@raniayudewi](https://github.com/raniayudewi) | **Lead QA & Docs** | Blackbox Testing, Sprint Reporting, Documentation, & Knowledge Management |
 
