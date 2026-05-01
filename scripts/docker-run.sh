@@ -1,39 +1,32 @@
 #!/bin/bash
 
 # ============================================================
-# Docker Management Script
+# Docker Compose Management Script
 # ============================================================
-# Script untuk mengelola container backend dan database
+# Wrapper untuk mengelola stack Temuin via docker compose.
 #
 # Usage:
-#   ./docker-run.sh start   - Start semua container
-#   ./docker-run.sh stop    - Stop semua container
-#   ./docker-run.sh restart - Restart semua container
-#   ./docker-run.sh status  - Cek status container
-#   ./docker-run.sh logs    - Lihat logs semua container
-#   ./docker-run.sh logs db - Lihat logs database saja
-#   ./docker-run.sh logs backend - Lihat logs backend saja
+#   ./scripts/docker-run.sh start   - Start semua services
+#   ./scripts/docker-run.sh build   - Build ulang image lalu start
+#   ./scripts/docker-run.sh stop    - Stop & remove containers/network
+#   ./scripts/docker-run.sh restart - Restart semua services
+#   ./scripts/docker-run.sh status  - Cek status services
+#   ./scripts/docker-run.sh logs    - Lihat logs semua services
+#   ./scripts/docker-run.sh logs db|backend|frontend
+#   ./scripts/docker-run.sh push    - Push backend/frontend image
 # ============================================================
 
-set -e  # Exit on error
+set -e
 
-# Colors untuk output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Container names
-DB_CONTAINER="db"
-BACKEND_CONTAINER="backend"
-NETWORK_NAME="cloudnet"
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT_DIR"
 
-# Docker Hub images
-DB_IMAGE="postgres:16-alpine"
-BACKEND_IMAGE="pangeransilaen/cloudapp-backend:alpine"
-
-# Function: Print colored message
 print_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
@@ -50,7 +43,6 @@ print_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
-# Function: Check if Docker is running
 check_docker() {
     if ! docker info > /dev/null 2>&1; then
         print_error "Docker tidak running. Jalankan Docker Desktop terlebih dahulu."
@@ -58,187 +50,137 @@ check_docker() {
     fi
 }
 
-# Function: Check if network exists
-check_network() {
-    if ! docker network ls | grep -q "$NETWORK_NAME"; then
-        print_warning "Network '$NETWORK_NAME' tidak ditemukan. Membuat network..."
-        docker network create "$NETWORK_NAME"
-        print_success "Network '$NETWORK_NAME' berhasil dibuat"
-    fi
+compose() {
+    docker compose "$@"
 }
 
-# Function: Start containers
-start_containers() {
-    print_info "Starting containers..."
+start_services() {
     check_docker
-    check_network
-
-    # Start database container
-    if docker ps -a | grep -q "$DB_CONTAINER"; then
-        if docker ps | grep -q "$DB_CONTAINER"; then
-            print_warning "Container '$DB_CONTAINER' sudah running"
-        else
-            print_info "Starting container '$DB_CONTAINER'..."
-            docker start "$DB_CONTAINER"
-            print_success "Container '$DB_CONTAINER' started"
-        fi
-    else
-        print_info "Creating and starting container '$DB_CONTAINER'..."
-        docker run -d \
-            --name "$DB_CONTAINER" \
-            --network "$NETWORK_NAME" \
-            -e POSTGRES_USER=postgres \
-            -e POSTGRES_PASSWORD=postgres123 \
-            -e POSTGRES_DB=cloudapp \
-            -p 5433:5432 \
-            -v pgdata:/var/lib/postgresql/data \
-            "$DB_IMAGE"
-        print_success "Container '$DB_CONTAINER' created and started"
-    fi
-
-    # Wait for database to be ready
-    print_info "Waiting for database to be ready..."
-    sleep 3
-
-    # Start backend container
-    if docker ps -a | grep -q "$BACKEND_CONTAINER"; then
-        if docker ps | grep -q "$BACKEND_CONTAINER"; then
-            print_warning "Container '$BACKEND_CONTAINER' sudah running"
-        else
-            print_info "Starting container '$BACKEND_CONTAINER'..."
-            docker start "$BACKEND_CONTAINER"
-            print_success "Container '$BACKEND_CONTAINER' started"
-        fi
-    else
-        print_info "Creating and starting container '$BACKEND_CONTAINER'..."
-        cd "$(dirname "$0")/../backend"
-        docker run -d \
-            --name "$BACKEND_CONTAINER" \
-            --network "$NETWORK_NAME" \
-            --env-file .env.docker \
-            -p 8000:8000 \
-            "$BACKEND_IMAGE"
-        print_success "Container '$BACKEND_CONTAINER' created and started"
-    fi
-
-    print_success "Semua container berhasil dijalankan!"
-    echo ""
+    print_info "Starting Temuin services via Docker Compose..."
+    compose up -d
+    print_success "Services started."
     show_status
 }
 
-# Function: Stop containers
-stop_containers() {
-    print_info "Stopping containers..."
+build_services() {
     check_docker
-
-    # Stop backend first
-    if docker ps | grep -q "$BACKEND_CONTAINER"; then
-        print_info "Stopping container '$BACKEND_CONTAINER'..."
-        docker stop "$BACKEND_CONTAINER"
-        print_success "Container '$BACKEND_CONTAINER' stopped"
-    else
-        print_warning "Container '$BACKEND_CONTAINER' tidak running"
-    fi
-
-    # Stop database
-    if docker ps | grep -q "$DB_CONTAINER"; then
-        print_info "Stopping container '$DB_CONTAINER'..."
-        docker stop "$DB_CONTAINER"
-        print_success "Container '$DB_CONTAINER' stopped"
-    else
-        print_warning "Container '$DB_CONTAINER' tidak running"
-    fi
-
-    print_success "Semua container berhasil dihentikan!"
+    print_info "Building and starting Temuin services..."
+    compose up --build -d
+    print_success "Services built and started."
+    show_status
 }
 
-# Function: Restart containers
-restart_containers() {
-    print_info "Restarting containers..."
-    stop_containers
-    echo ""
-    start_containers
+stop_services() {
+    check_docker
+    print_info "Stopping and removing Temuin containers/network..."
+    compose down
+    print_success "Services stopped. Volume cloudapp-pgdata tetap tersimpan."
 }
 
-# Function: Show status
+clean_services() {
+    check_docker
+    print_warning "Menghapus containers, network, dan volume cloudapp-pgdata..."
+    compose down -v
+    print_success "Stack dan volume berhasil dihapus."
+}
+
+restart_services() {
+    check_docker
+    print_info "Restarting Temuin services..."
+    compose restart
+    print_success "Services restarted."
+    show_status
+}
+
 show_status() {
-    print_info "Status containers:"
+    check_docker
+    print_info "Status services:"
     echo ""
-    docker ps -a --filter "name=$DB_CONTAINER" --filter "name=$BACKEND_CONTAINER" \
-        --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+    compose ps
     echo ""
-
-    # Check if containers are healthy
-    if docker ps | grep -q "$DB_CONTAINER" && docker ps | grep -q "$BACKEND_CONTAINER"; then
-        print_success "Semua container running!"
-        echo ""
-        print_info "Akses aplikasi:"
-        echo "  - Backend API: http://localhost:8000"
-        echo "  - API Docs: http://localhost:8000/docs"
-        echo "  - Database: localhost:5433"
-    else
-        print_warning "Beberapa container tidak running. Jalankan './docker-run.sh start'"
-    fi
+    print_info "Akses aplikasi:"
+    echo "  - Frontend: http://localhost:3000"
+    echo "  - Backend API: http://localhost:8000"
+    echo "  - API Docs: http://localhost:8000/docs"
+    echo "  - Database: localhost:5433"
 }
 
-# Function: Show logs
 show_logs() {
     check_docker
 
     if [ -z "$1" ]; then
-        # Show logs for all containers
-        print_info "Logs untuk semua container (Ctrl+C untuk keluar):"
-        echo ""
-        docker logs -f --tail=50 "$DB_CONTAINER" &
-        docker logs -f --tail=50 "$BACKEND_CONTAINER" &
-        wait
-    elif [ "$1" == "db" ]; then
-        print_info "Logs untuk container '$DB_CONTAINER' (Ctrl+C untuk keluar):"
-        echo ""
-        docker logs -f --tail=100 "$DB_CONTAINER"
-    elif [ "$1" == "backend" ]; then
-        print_info "Logs untuk container '$BACKEND_CONTAINER' (Ctrl+C untuk keluar):"
-        echo ""
-        docker logs -f --tail=100 "$BACKEND_CONTAINER"
+        print_info "Logs untuk semua services (Ctrl+C untuk keluar):"
+        compose logs -f
+    elif [ "$1" = "db" ] || [ "$1" = "backend" ] || [ "$1" = "frontend" ]; then
+        print_info "Logs untuk service '$1' (Ctrl+C untuk keluar):"
+        compose logs -f "$1"
     else
-        print_error "Container tidak dikenal: $1"
-        print_info "Gunakan: logs [db|backend]"
+        print_error "Service tidak dikenal: $1"
+        print_info "Gunakan: logs [db|backend|frontend]"
         exit 1
     fi
 }
 
-# Function: Show help
+push_images() {
+    check_docker
+    print_info "Pushing backend dan frontend images ke Docker Hub..."
+    compose push backend frontend
+    print_success "Images pushed."
+}
+
+show_images() {
+    check_docker
+    docker images pangeransilaen/temuin-backend
+    docker images pangeransilaen/temuin-frontend
+}
+
 show_help() {
-    echo "Docker Management Script"
+    echo "Docker Compose Management Script"
     echo ""
     echo "Usage:"
-    echo "  ./docker-run.sh start           - Start semua container"
-    echo "  ./docker-run.sh stop            - Stop semua container"
-    echo "  ./docker-run.sh restart         - Restart semua container"
-    echo "  ./docker-run.sh status          - Cek status container"
-    echo "  ./docker-run.sh logs            - Lihat logs semua container"
-    echo "  ./docker-run.sh logs db         - Lihat logs database saja"
-    echo "  ./docker-run.sh logs backend    - Lihat logs backend saja"
-    echo "  ./docker-run.sh help            - Tampilkan help ini"
+    echo "  ./scripts/docker-run.sh start             - Start semua services"
+    echo "  ./scripts/docker-run.sh build             - Build ulang image lalu start"
+    echo "  ./scripts/docker-run.sh stop              - Stop & remove containers/network"
+    echo "  ./scripts/docker-run.sh clean             - Stop & remove containers/network/volume"
+    echo "  ./scripts/docker-run.sh restart           - Restart semua services"
+    echo "  ./scripts/docker-run.sh status            - Cek status services"
+    echo "  ./scripts/docker-run.sh logs              - Lihat logs semua services"
+    echo "  ./scripts/docker-run.sh logs db           - Lihat logs database"
+    echo "  ./scripts/docker-run.sh logs backend      - Lihat logs backend"
+    echo "  ./scripts/docker-run.sh logs frontend     - Lihat logs frontend"
+    echo "  ./scripts/docker-run.sh images            - Lihat image Temuin lokal"
+    echo "  ./scripts/docker-run.sh push              - Push backend/frontend image"
+    echo "  ./scripts/docker-run.sh help              - Tampilkan help ini"
     echo ""
 }
 
-# Main script
 case "$1" in
-    start)
-        start_containers
+    start|up)
+        start_services
         ;;
-    stop)
-        stop_containers
+    build)
+        build_services
+        ;;
+    stop|down)
+        stop_services
+        ;;
+    clean)
+        clean_services
         ;;
     restart)
-        restart_containers
+        restart_services
         ;;
-    status)
+    status|ps)
         show_status
         ;;
     logs)
         show_logs "$2"
+        ;;
+    images)
+        show_images
+        ;;
+    push)
+        push_images
         ;;
     help|--help|-h)
         show_help

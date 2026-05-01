@@ -1,238 +1,216 @@
-# 🚀 Cara Menggunakan docker-run.sh
+# Cara Menggunakan docker-run.sh
 
-## 📍 Lokasi Eksekusi
+`scripts/docker-run.sh` sekarang menjadi wrapper untuk Docker Compose. Script ini tetap bisa dipakai untuk demo atau workflow harian, tetapi semua operasi container mengikuti konfigurasi utama di `docker-compose.yml`.
 
-**PENTING:** Script harus dijalankan dari **root directory praktikum**, bukan dari subdirectory!
+Untuk Modul 7, command utama yang direkomendasikan tetap:
 
 ```bash
-# ✅ BENAR
+docker compose up -d
+```
+
+atau via Makefile:
+
+```bash
+make up
+```
+
+Script ini disediakan sebagai shortcut alternatif untuk anggota tim yang sudah terbiasa memakai `scripts/docker-run.sh` dari modul sebelumnya.
+
+## Lokasi Eksekusi
+
+Script bisa dijalankan dari root project:
+
+```bash
 cd /path/to/praktikum
 ./scripts/docker-run.sh start
-
-# ❌ SALAH
-cd /path/to/praktikum/backend
-../scripts/docker-run.sh start  # Akan error!
 ```
 
----
+Script akan otomatis berpindah ke root project, sehingga aman juga dipanggil dari folder lain selama path script benar.
 
-## 🎯 Commands Available
+## Commands Available
 
-### 1. Start Containers
+| Command | Alias | Fungsi |
+|---------|-------|--------|
+| `start` | `up` | Start semua services dengan `docker compose up -d` |
+| `build` | - | Build ulang image lalu start semua services |
+| `stop` | `down` | Stop dan remove containers/network, volume tetap ada |
+| `clean` | - | Stop dan remove containers/network/volume |
+| `restart` | - | Restart semua services |
+| `status` | `ps` | Tampilkan status services |
+| `logs` | - | Follow logs semua services |
+| `logs db` | - | Follow logs database |
+| `logs backend` | - | Follow logs backend |
+| `logs frontend` | - | Follow logs frontend |
+| `images` | - | Tampilkan image Temuin lokal |
+| `push` | - | Push backend dan frontend image ke Docker Hub |
+| `help` | `--help`, `-h` | Tampilkan bantuan |
+
+## Start Services
+
 ```bash
 ./scripts/docker-run.sh start
 ```
-**Apa yang terjadi:**
-- Cek Docker running
-- Buat network `cloudnet` (jika belum ada)
-- Pull & start PostgreSQL container (jika belum ada)
-- Pull & start backend container (jika belum ada)
-- Tampilkan status
 
-**Output:**
-```
-[INFO] Starting containers...
-[INFO] Creating and starting container 'db'...
-[SUCCESS] Container 'db' created and started
-[INFO] Waiting for database to be ready...
-[INFO] Creating and starting container 'backend'...
-[SUCCESS] Container 'backend' created and started
-[SUCCESS] Semua container berhasil dijalankan!
+Yang terjadi:
 
-[INFO] Status containers:
-NAMES     STATUS                    PORTS
-backend   Up 3 seconds (healthy)    0.0.0.0:8000->8000/tcp
-db        Up 6 seconds              0.0.0.0:5433->5432/tcp
+1. Script memastikan Docker Desktop running.
+2. Menjalankan `docker compose up -d`.
+3. Compose membuat network `cloudapp-network` jika belum ada.
+4. Compose membuat volume `cloudapp-pgdata` jika belum ada.
+5. Compose menjalankan services `db`, `backend`, dan `frontend`.
+6. Backend menunggu database healthy sebelum start.
+7. Frontend menunggu backend healthy sebelum start.
 
-[SUCCESS] Semua container running!
-[INFO] Akses aplikasi:
-  - Backend API: http://localhost:8000
-  - API Docs: http://localhost:8000/docs
-  - Database: localhost:5433
+## Build & Start
+
+Gunakan command ini setelah ada perubahan Dockerfile, dependency, atau source yang perlu masuk image:
+
+```bash
+./scripts/docker-run.sh build
 ```
 
----
+Command ini setara dengan:
 
-### 2. Check Status
+```bash
+docker compose up --build -d
+```
+
+Image yang dihasilkan:
+
+| Service | Image |
+|---------|-------|
+| Backend | `pangeransilaen/temuin-backend:latest` |
+| Frontend | `pangeransilaen/temuin-frontend:latest` |
+| Database | `postgres:16-alpine` |
+
+## Check Status
+
 ```bash
 ./scripts/docker-run.sh status
 ```
-Menampilkan status semua container dan info akses.
 
----
+Output yang diharapkan:
 
-### 3. View Logs
-```bash
-# Logs semua container
-./scripts/docker-run.sh logs
-
-# Logs database saja
-./scripts/docker-run.sh logs db
-
-# Logs backend saja
-./scripts/docker-run.sh logs backend
+```text
+NAME                IMAGE                                   STATUS
+cloudapp-db         postgres:16-alpine                      Up (healthy)
+cloudapp-backend    pangeransilaen/temuin-backend:latest    Up (healthy)
+cloudapp-frontend   pangeransilaen/temuin-frontend:latest   Up (healthy)
 ```
 
-**Tips:** Tekan `Ctrl+C` untuk keluar dari logs.
+## View Logs
 
----
+```bash
+# Logs semua services
+./scripts/docker-run.sh logs
 
-### 4. Stop Containers
+# Logs database
+./scripts/docker-run.sh logs db
+
+# Logs backend
+./scripts/docker-run.sh logs backend
+
+# Logs frontend
+./scripts/docker-run.sh logs frontend
+```
+
+Tekan `Ctrl+C` untuk keluar dari follow logs.
+
+## Stop Services
+
 ```bash
 ./scripts/docker-run.sh stop
 ```
-Stop semua container (data tetap tersimpan di volume).
 
----
+Command ini menjalankan `docker compose down`. Containers dan network akan dihapus, tetapi volume database tetap tersimpan.
 
-### 5. Restart Containers
+## Clean Services
+
+```bash
+./scripts/docker-run.sh clean
+```
+
+Command ini menjalankan `docker compose down -v`. Data PostgreSQL di volume `cloudapp-pgdata` akan hilang.
+
+## Restart Services
+
 ```bash
 ./scripts/docker-run.sh restart
 ```
-Stop lalu start ulang semua container.
 
----
+## Push Images
 
-### 6. Help
+Pastikan sudah login ke Docker Hub dengan akun yang punya akses ke repository `pangeransilaen`.
+
 ```bash
-./scripts/docker-run.sh help
+./scripts/docker-run.sh push
 ```
-Tampilkan bantuan dan daftar commands.
 
----
-
-## 🐳 Docker Images
-
-### Backend Image
-- **Repository:** `pangeransilaen/cloudapp-backend`
-- **Tag:** `alpine` (157 MB)
-- **Status:** Custom image, di-push ke Docker Hub
-- **Auto-pull:** Ya, script akan pull otomatis jika belum ada
-
-### Database Image
-- **Repository:** `postgres` (official)
-- **Tag:** `16-alpine` (~240 MB)
-- **Status:** Official image dari Docker Hub
-- **Auto-pull:** Ya, Docker akan pull otomatis jika belum ada
-- **Tidak perlu push:** Image official, siapa pun bisa pull langsung
-
----
-
-## 🔄 Workflow Pertama Kali
-
-Ketika menjalankan script pertama kali di mesin baru:
+Command ini setara dengan:
 
 ```bash
-cd /path/to/praktikum
+docker compose push backend frontend
+```
+
+## Data Persistence
+
+Database memakai named volume `cloudapp-pgdata`.
+
+```bash
+docker volume ls | grep cloudapp-pgdata
+docker volume inspect cloudapp-pgdata
+```
+
+Data tetap ada setelah:
+
+```bash
+./scripts/docker-run.sh stop
 ./scripts/docker-run.sh start
 ```
 
-**Yang terjadi:**
-1. Script cek Docker running ✅
-2. Script cek network `cloudnet` → tidak ada → **buat baru** ✅
-3. Script cek container `db` → tidak ada → **pull image** `postgres:16-alpine` → **create & start** ✅
-4. Script tunggu 3 detik (database initialization)
-5. Script cek container `backend` → tidak ada → **pull image** `pangeransilaen/cloudapp-backend:alpine` → **create & start** ✅
-6. Tampilkan status ✅
-
-**Total waktu:** ~30-60 detik (tergantung kecepatan internet untuk pull images)
-
----
-
-## 🔄 Workflow Selanjutnya
-
-Setelah pertama kali, container sudah ada (meskipun stopped):
+Data hilang jika menjalankan:
 
 ```bash
-./scripts/docker-run.sh start
+./scripts/docker-run.sh clean
 ```
 
-**Yang terjadi:**
-1. Script cek Docker running ✅
-2. Script cek network `cloudnet` → sudah ada ✅
-3. Script cek container `db` → sudah ada → **start saja** (tidak pull lagi) ✅
-4. Script tunggu 3 detik
-5. Script cek container `backend` → sudah ada → **start saja** (tidak pull lagi) ✅
-6. Tampilkan status ✅
+## Access URLs
 
-**Total waktu:** ~5-10 detik
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- Swagger UI: http://localhost:8000/docs
+- Database: `localhost:5433`
 
----
+## Troubleshooting
 
-## 🗂️ Data Persistence
+### Docker tidak running
 
-### Volume PostgreSQL
-Data database disimpan di Docker volume `pgdata`:
-```bash
-# Lihat volume
-docker volume ls | grep pgdata
-
-# Inspect volume
-docker volume inspect pgdata
-```
-
-**Data tetap ada** meskipun:
-- Container di-stop
-- Container di-remove
-- Docker Desktop di-restart
-
-**Data hilang** jika:
-- Volume di-delete: `docker volume rm pgdata`
-
----
-
-## 🛠️ Troubleshooting
-
-### Error: "Docker tidak running"
-```bash
-# Start Docker Desktop
-# Windows: Buka Docker Desktop dari Start Menu
-# Mac: Buka Docker Desktop dari Applications
-# Linux: sudo systemctl start docker
-```
-
-### Error: "Container name already in use"
-```bash
-# Stop & remove container lama
-docker stop backend db
-docker rm backend db
-
-# Jalankan script lagi
-./scripts/docker-run.sh start
-```
-
-### Error: "Network already exists"
-Ini bukan error, script akan skip create network.
-
-### Container tidak healthy
-```bash
-# Cek logs
-./scripts/docker-run.sh logs backend
-
-# Restart container
-./scripts/docker-run.sh restart
-```
+Jalankan Docker Desktop terlebih dahulu, lalu ulangi command.
 
 ### Port sudah digunakan
+
+Port yang dipakai Compose:
+
+| Port | Service |
+|------|---------|
+| `3000` | Frontend |
+| `8000` | Backend |
+| `5433` | PostgreSQL |
+
+Stop aplikasi lain yang memakai port tersebut atau ubah mapping port di `docker-compose.yml`.
+
+### Service tidak healthy
+
 ```bash
-# Cek apa yang pakai port 8000
-# Windows:
-netstat -ano | findstr :8000
-
-# Linux/Mac:
-lsof -i :8000
-
-# Stop aplikasi yang pakai port tersebut
+./scripts/docker-run.sh status
+./scripts/docker-run.sh logs backend
+./scripts/docker-run.sh logs db
+./scripts/docker-run.sh logs frontend
 ```
 
----
+## Referensi
 
-## 📚 Referensi
-
-- Docker Hub Backend: https://hub.docker.com/r/pangeransilaen/cloudapp-backend
+- Docker Hub Backend: https://hub.docker.com/r/pangeransilaen/temuin-backend
+- Docker Hub Frontend: https://hub.docker.com/r/pangeransilaen/temuin-frontend
 - Docker Hub PostgreSQL: https://hub.docker.com/_/postgres
 - Repository: https://github.com/aidilsaputrakirsan-classroom/cc-kelompok-a-extraordinary
-
----
-
-**Last Updated:** 2026-04-10
