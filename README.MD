@@ -93,7 +93,7 @@ PostgreSQL Database berfungsi untuk menyimpan data terstruktur seperti data peng
 ### Prasyarat
 
 - Python 3.10+
-- Node.js 18+
+- Node.js 20.19+
 - Git
 - PostgreSQL
 
@@ -203,10 +203,94 @@ Frontend tersedia di: http://localhost:5173
 
 ---
 
+## 🐳 Docker Compose Quick Start (Modul 7)
+
+Docker Compose menjalankan seluruh aplikasi Temuin dalam 3 container: PostgreSQL, FastAPI backend, dan React frontend yang diserve Nginx.
+
+### Prasyarat
+
+- Docker Desktop sudah running
+- Port `3000`, `8000`, dan `5433` tidak sedang dipakai aplikasi lain
+
+### Start Semua Services
+
+```bash
+# Build image backend + frontend, lalu start semua services
+make build
+
+# Atau tanpa Makefile:
+docker compose up --build -d
+```
+
+### Cek Status
+
+```bash
+make ps
+
+# Atau:
+docker compose ps
+```
+
+Status yang diharapkan:
+
+| Service | Container | Port | Status |
+|---------|-----------|------|--------|
+| Database | `cloudapp-db` | `localhost:5433` -> `5432` | `healthy` |
+| Backend | `cloudapp-backend` | `localhost:8000` | `healthy` |
+| Frontend | `cloudapp-frontend` | `localhost:3000` | `healthy` |
+
+Images yang dipakai:
+
+| Service | Image |
+|---------|-------|
+| Backend | `pangeransilaen/temuin-backend:latest` |
+| Frontend | `pangeransilaen/temuin-frontend:latest` |
+| Database | `postgres:16-alpine` |
+
+### Akses Aplikasi
+
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- Swagger UI: http://localhost:8000/docs
+- Health Check: http://localhost:8000/health
+
+### Compose Commands
+
+| Command | Fungsi |
+|---------|--------|
+| `make up` | Start semua services tanpa rebuild |
+| `make build` | Build ulang image lalu start semua services |
+| `make push` | Push image backend dan frontend ke Docker Hub |
+| `make down` | Stop dan remove containers/network, volume tetap ada |
+| `make restart` | Restart semua services |
+| `make logs` | Follow logs semua services |
+| `make logs-backend` | Follow logs backend |
+| `make ps` | Lihat status services |
+| `make images` | Lihat ukuran image Temuin lokal |
+| `make clean` | Stop services, hapus volume, dan prune Docker cache |
+
+### Data Persistence
+
+Database memakai named volume `cloudapp-pgdata`, sehingga data tetap ada setelah:
+
+```bash
+make down
+make up
+```
+
+Data baru hilang jika menjalankan:
+
+```bash
+make clean
+```
+
 ## 📁 Struktur Project
 
 ```
 cc-kelompok-a-extraordinary/
+│
+├── docker-compose.yml       ← Orkestrasi 3 services (DB, backend, frontend)
+├── Makefile                 ← Shortcut command Docker Compose
 │
 ├── backend/
 │   ├── main.py              ← Entry point FastAPI & semua endpoints (Updated)
@@ -273,7 +357,7 @@ cc-kelompok-a-extraordinary/
 | 2 | REST API + Database | ✅ |
 | 3 | React Frontend | ✅ |
 | 4 | Full-Stack Integration | ✅ |
-| 5–7 | Docker & Compose | ⬜ |
+| 5–7 | Docker & Compose | ✅ |
 | 8 | UTS Demo | ⬜ |
 | 9–11 | CI/CD Pipeline | ⬜ |
 | 12–14 | Microservices | ⬜ |
@@ -304,7 +388,7 @@ Request body:
 {
   "email": "user@student.itk.ac.id",
   "name": "Nama Lengkap",
-  "password": "password123"
+  "password": "Password123!"
 }
 ```
 
@@ -327,7 +411,7 @@ Request body:
 ```json
 {
   "email": "user@student.itk.ac.id",
-  "password": "password123"
+  "password": "Password123!"
 }
 ```
 
