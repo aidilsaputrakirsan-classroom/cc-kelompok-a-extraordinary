@@ -134,7 +134,7 @@ Contoh request form-encoded yang setara dengan flow Swagger:
 ```bash
 curl -X POST http://127.0.0.1:8000/auth/login \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "username=user@student.itk.ac.id&password=password123"
+  -d "username=user@student.itk.ac.id&password=Password123!"
 ```
 
 Contoh request JSON yang masih didukung:
@@ -142,7 +142,7 @@ Contoh request JSON yang masih didukung:
 ```bash
 curl -X POST http://127.0.0.1:8000/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"user@student.itk.ac.id","password":"password123"}'
+  -d '{"email":"user@student.itk.ac.id","password":"Password123!"}'
 ```
 
 Response sukses akan berisi `access_token`, `token_type`, dan data user.

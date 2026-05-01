@@ -9,19 +9,19 @@ Data database **TIDAK** disimpan di:
 - ❌ Di dalam container (ephemeral)
 
 Data database **DISIMPAN** di:
-- ✅ Docker volume `pgdata` (persistent storage)
+- ✅ Docker Compose volume `cloudapp-pgdata` (persistent storage)
 
 ```bash
 # Cek volume
-docker volume ls | grep pgdata
+docker volume ls | grep cloudapp-pgdata
 
 # Inspect volume
-docker volume inspect pgdata
+docker volume inspect cloudapp-pgdata
 ```
 
 **Lokasi fisik (Windows):**
 ```
-\\wsl$\docker-desktop-data\data\docker\volumes\pgdata\_data
+\\wsl$\docker-desktop-data\data\docker\volumes\cloudapp-pgdata\_data
 ```
 
 ---
@@ -35,7 +35,7 @@ docker volume inspect pgdata
 - Docker Desktop di-restart
 
 ### ❌ Data Hilang Saat:
-- Volume di-delete: `docker volume rm pgdata`
+- Volume di-delete: `docker volume rm cloudapp-pgdata`
 - Docker Desktop di-reset (factory reset)
 
 ---
@@ -84,15 +84,15 @@ Password: password123!
 ### Export ke SQL File
 ```bash
 # Export semua data
-docker exec db pg_dump -U postgres cloudapp > backup.sql
+docker compose exec -T db pg_dump -U postgres cloudapp > backup.sql
 
 # Export dengan timestamp
-docker exec db pg_dump -U postgres cloudapp > backup_$(date +%Y%m%d_%H%M%S).sql
+docker compose exec -T db pg_dump -U postgres cloudapp > backup_$(date +%Y%m%d_%H%M%S).sql
 ```
 
 ### Export ke Custom Format (Compressed)
 ```bash
-docker exec db pg_dump -U postgres -Fc cloudapp > backup.dump
+docker compose exec -T db pg_dump -U postgres -Fc cloudapp > backup.dump
 ```
 
 ---
@@ -102,12 +102,12 @@ docker exec db pg_dump -U postgres -Fc cloudapp > backup.dump
 ### Import dari SQL File
 ```bash
 # Import SQL
-docker exec -i db psql -U postgres cloudapp < backup.sql
+docker compose exec -T db psql -U postgres cloudapp < backup.sql
 ```
 
 ### Import dari Custom Format
 ```bash
-docker exec -i db pg_restore -U postgres -d cloudapp < backup.dump
+docker compose exec -T db pg_restore -U postgres -d cloudapp < backup.dump
 ```
 
 ---
@@ -116,20 +116,16 @@ docker exec -i db pg_restore -U postgres -d cloudapp < backup.dump
 
 ### Option 1: Drop & Recreate Tables
 ```bash
-docker exec db psql -U postgres -d cloudapp -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+docker compose exec db psql -U postgres -d cloudapp -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
 ```
 
 ### Option 2: Delete Volume & Recreate
 ```bash
-# Stop & remove containers
-docker stop backend db
-docker rm backend db
-
-# Delete volume
-docker volume rm pgdata
+# Stop containers dan hapus volume
+docker compose down -v
 
 # Start ulang (akan create volume baru)
-./scripts/docker-run.sh start
+docker compose up -d
 
 # Seed data
 ./scripts/seed-database.sh
@@ -142,7 +138,7 @@ docker volume rm pgdata
 ### Connect ke Database
 ```bash
 # Via psql
-docker exec -it db psql -U postgres -d cloudapp
+docker compose exec db psql -U postgres -d cloudapp
 
 # List tables
 \dt
@@ -199,26 +195,24 @@ Password: postgres123
 **Solusi:**
 ```bash
 # Cek apakah volume ada
-docker volume ls | grep pgdata
+docker volume ls | grep cloudapp-pgdata
 
 # Cek mount point container
-docker inspect db | grep -A 10 Mounts
+docker inspect cloudapp-db | grep -A 10 Mounts
 ```
 
 ### Database Corrupt
 **Solusi:**
 ```bash
 # Backup data (jika bisa)
-docker exec db pg_dump -U postgres cloudapp > emergency_backup.sql
+docker compose exec -T db pg_dump -U postgres cloudapp > emergency_backup.sql
 
 # Reset database
-docker stop db
-docker rm db
-docker volume rm pgdata
+docker compose down -v
 
 # Start ulang & restore
-./scripts/docker-run.sh start
-docker exec -i db psql -U postgres cloudapp < emergency_backup.sql
+docker compose up -d
+docker compose exec -T db psql -U postgres cloudapp < emergency_backup.sql
 ```
 
 ### Disk Space Penuh

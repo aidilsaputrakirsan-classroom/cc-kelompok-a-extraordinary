@@ -1,180 +1,95 @@
-# 🐳 Docker Hub - Backend App
+# Docker Hub Images - Temuin
 
-## Quick Start
+Dokumen ini mencatat image Docker Hub yang dipakai untuk menjalankan aplikasi Temuin via Docker Compose.
 
-### Pull Image dari Docker Hub
+## Repositories
+
+| Service | Image | Tag | Fungsi |
+|---------|-------|-----|--------|
+| Backend | `pangeransilaen/temuin-backend` | `latest` | FastAPI REST API |
+| Frontend | `pangeransilaen/temuin-frontend` | `latest` | React build served by Nginx |
+| Database | `postgres` | `16-alpine` | PostgreSQL database official image |
+
+## Latest Local Build Sizes
+
+| Image | Tag | Size |
+|-------|-----|------|
+| `pangeransilaen/temuin-backend` | `latest` | 157 MB |
+| `pangeransilaen/temuin-frontend` | `latest` | 92.9 MB |
+
+## Pull Images
+
 ```bash
-docker pull pangeransilaen/cloudapp-backend:alpine
+docker pull pangeransilaen/temuin-backend:latest
+docker pull pangeransilaen/temuin-frontend:latest
+docker pull postgres:16-alpine
 ```
 
-### Jalankan dengan Docker Compose (Recommended)
-```bash
-# Clone repository
-git clone <repo-url>
-cd praktikum
+## Build Images Locally
 
-# Start semua container
-./scripts/docker-run.sh start
+Jalankan dari root project:
+
+```bash
+docker compose build backend frontend
 ```
 
-### Jalankan Manual
+Compose akan men-tag hasil build sesuai `image:` di `docker-compose.yml`:
 
-**1. Buat Docker Network**
 ```bash
-docker network create cloudnet
+pangeransilaen/temuin-backend:latest
+pangeransilaen/temuin-frontend:latest
 ```
 
-**2. Jalankan PostgreSQL**
+## Push Images
+
+Pastikan sudah login ke Docker Hub sebagai akun yang punya akses ke repository `pangeransilaen`.
+
 ```bash
-docker run -d \
-  --name db \
-  --network cloudnet \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=postgres123 \
-  -e POSTGRES_DB=cloudapp \
-  -p 5433:5432 \
-  -v pgdata:/var/lib/postgresql/data \
-  postgres:16-alpine
+docker login
+docker compose push backend frontend
 ```
 
-**3. Jalankan Backend**
+Atau gunakan Makefile:
+
 ```bash
-docker run -d \
-  --name backend \
-  --network cloudnet \
-  -e DATABASE_URL=postgresql+psycopg://postgres:postgres123@db:5432/cloudapp \
-  -e SECRET_KEY=your-secret-key \
-  -e ALGORITHM=HS256 \
-  -e ACCESS_TOKEN_EXPIRE_MINUTES=60 \
-  -e ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000 \
-  -p 8000:8000 \
-  pangeransilaen/cloudapp-backend:alpine
+make push
 ```
 
-**4. Akses API**
-- API: http://localhost:8000
-- Docs: http://localhost:8000/docs
-- Health: http://localhost:8000/health
+## Run with Docker Compose
 
----
-
-## 📦 Available Tags
-
-| Tag | Size | Description |
-|-----|------|-------------|
-| `alpine` | 157 MB | Optimized Alpine-based image (recommended) |
-| `latest` | 157 MB | Same as alpine |
-
----
-
-## 🚀 Features
-
-- **FastAPI** - Modern Python web framework
-- **SQLAlchemy** - ORM untuk database
-- **PostgreSQL** - Database (psycopg driver)
-- **JWT Authentication** - Secure auth dengan python-jose
-- **Pydantic** - Data validation
-- **Uvicorn** - ASGI server
-
----
-
-## 🔧 Environment Variables
-
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `DATABASE_URL` | Yes | - | PostgreSQL connection string |
-| `SECRET_KEY` | Yes | - | JWT secret key |
-| `ALGORITHM` | No | HS256 | JWT algorithm |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | No | 60 | Token expiration time |
-| `ALLOWED_ORIGINS` | No | * | CORS allowed origins |
-| `APP_ENV` | No | development | Environment (development/production) |
-| `DEBUG` | No | true | Debug mode |
-
----
-
-## 📊 Image Optimization
-
-Image ini dioptimasi menggunakan multi-stage build dengan Alpine Linux:
-
-- **Before:** 304 MB (python:3.12-slim, single-stage)
-- **After:** 157 MB (python:3.12-alpine, multi-stage)
-- **Reduction:** 147 MB (48.4%)
-
-### Optimization Techniques:
-- Multi-stage build (builder + production)
-- Alpine Linux base image
-- Virtual environment isolation
-- Aggressive cleanup (pip, tests, docs, pycache)
-- Runtime optimization flags
-
----
-
-## 🔒 Security
-
-- Non-root user (`appuser`)
-- Minimal runtime dependencies
-- No build tools in production image
-- Healthcheck enabled
-- Environment-based configuration
-
----
-
-## 📝 API Endpoints
-
-### Authentication
-- `POST /auth/register` - Register user baru
-- `POST /auth/login` - Login & get JWT token
-
-### Items (Protected)
-- `GET /items` - List semua items
-- `POST /items` - Create item baru
-- `GET /items/{id}` - Get item by ID
-- `PUT /items/{id}` - Update item
-- `DELETE /items/{id}` - Delete item
-
-### Health
-- `GET /health` - Health check endpoint
-
----
-
-## 🛠️ Development
-
-### Build Image Locally
 ```bash
-cd backend
-docker build -t cloudapp-backend:alpine .
+docker compose up -d
 ```
 
-### Run Tests
+Jika ingin rebuild dari source sebelum menjalankan:
+
 ```bash
-# TODO: Add test commands
+docker compose up --build -d
 ```
 
----
+## Access URLs
 
-## 📚 Documentation
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- Swagger UI: http://localhost:8000/docs
+- Health Check: http://localhost:8000/health
 
-- Full documentation: [GitHub Repository](https://github.com/aidilsaputrakirsan-classroom/cc-kelompok-a-extraordinary)
-- API Docs: http://localhost:8000/docs (when running)
+## Environment Variables
 
----
+Backend memakai `backend/.env.docker` saat dijalankan lewat Compose.
 
-## 🤝 Contributing
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | PostgreSQL connection string ke service `db` |
+| `SECRET_KEY` | JWT secret key |
+| `ALGORITHM` | JWT algorithm |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Token expiration time |
+| `ALLOWED_ORIGINS` | CORS allowed origins |
 
-Contributions are welcome! Please check the repository for guidelines.
+## Image Size Check
 
----
+Gunakan command berikut setelah build/pull:
 
-## 📄 License
-
-[Add your license here]
-
----
-
-## 👥 Authors
-
-- DevOps Team - Cloud Computing Course
-
----
-
-**Last Updated:** 2026-04-08
+```bash
+docker images pangeransilaen/temuin-backend pangeransilaen/temuin-frontend
+```

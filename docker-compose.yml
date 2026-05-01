@@ -1,0 +1,88 @@
+# ============================================================
+# Docker Compose - Cloud App Temuin
+# Komputasi Awan - SI ITK
+# ============================================================
+# Usage:
+#   docker compose up -d          # Start semua services
+#   docker compose up --build -d  # Rebuild image lalu start
+#   docker compose down           # Stop & remove containers
+#   docker compose logs -f        # Lihat logs
+#   docker compose ps             # Status services
+# ============================================================
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: cloudapp-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: cloudapp
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - cloudnet
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cloudapp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  backend:
+    image: pangeransilaen/temuin-backend:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cloudapp-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env.docker
+    ports:
+      - "8000:8000"
+    networks:
+      - cloudnet
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  frontend:
+    image: pangeransilaen/temuin-frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:8000
+    container_name: cloudapp-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    networks:
+      - cloudnet
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  pgdata:
+    name: cloudapp-pgdata
+
+networks:
+  cloudnet:
+    name: cloudapp-network
+    driver: bridge
