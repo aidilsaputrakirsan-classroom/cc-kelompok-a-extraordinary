@@ -1,0 +1,24 @@
+# =============================================
+# CODEOWNERS — Cloud Team A Extraordinary
+# =============================================
+# Reviewer otomatis ditambahkan saat PR mengubah file terkait
+
+# Backend — Lead Backend
+/backend/                @disnejy
+
+# Frontend — Lead Frontend
+/frontend/               @nicholasmnrng
+
+# Docker & Infrastructure — Lead DevOps
+docker-compose.yml       @PangeranSilaen
+docker-compose.dev.yml   @PangeranSilaen
+docker-compose.prod.yml  @PangeranSilaen
+/backend/Dockerfile      @PangeranSilaen
+/frontend/Dockerfile     @PangeranSilaen
+Makefile                 @PangeranSilaen
+
+# Documentation — Lead QA & Docs
+/docs/                   @raniayudewi
+
+# Scripts — Lead DevOps
+/scripts/                @PangeranSilaen
