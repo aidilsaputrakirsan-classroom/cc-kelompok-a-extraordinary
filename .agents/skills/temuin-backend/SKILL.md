@@ -16,8 +16,7 @@ description: Gunakan saat mengerjakan role backend di project Temuin. Skill ini 
 - Jangan melanggar business rule item dan claim
 - Gunakan env vars, bukan hardcoded config
 - Jaga monolith stabil sebelum split microservices
+- Mulai sprint 05, backend wajib punya pytest tests (min 12)
+- Mulai sprint 06, inter-service calls pakai shared JWT (DEC-017)
+- Mulai sprint 07, implementasi retry dan circuit breaker untuk inter-service calls
 - Update status task sesuai aturan repo
-
-## Companion Skill
-
-- Jika task menyentuh login Google atau Firebase Auth, gunakan juga `firebase-auth-basics` bila tersedia
