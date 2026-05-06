@@ -17,6 +17,8 @@ description: Gunakan saat mengerjakan role QA & Docs di project Temuin. Skill in
 - Simpan screenshot bukti seperlunya
 - Gunakan GitHub Issues untuk tracking sprint completion (lihat skill `temuin-sprint-issue`)
 - Update dokumen aktif hanya jika flow atau langkah berubah
+- Mulai sprint 05, verifikasi CI berjalan di branch yang di-push
+- Mulai sprint 06, smoke test production deployment
 - Update status task sesuai aturan repo
 - Setiap sprint yang sudah selesai di-QA wajib punya satu file report di `docs/`
 
@@ -34,7 +36,7 @@ Setiap akhir sprint, buat file `docs/sprint-XX-qa-report.md` dengan format berik
 
 ### Hasil Temuan
 - Deskripsi singkat hasil blackbox testing
-- Gunakan checklist (✅ / ❌) untuk setiap poin yang diverifikasi
+- Gunakan checklist untuk setiap poin yang diverifikasi
 
 > **Catatan bug yang ditemukan dan diperbaiki:**
 > (Opsional, isi jika ada bug yang ditemukan selama testing)
@@ -50,7 +52,7 @@ Setiap akhir sprint, buat file `docs/sprint-XX-qa-report.md` dengan format berik
 
 | Task ID | Nama Task | Status | Hasil | Bukti (Image Path) |
 |---------|-----------|--------|-------|---------------------|
-| QA-X.1  | ...       | done   | ...   | [link](../image/...) |
+| QA-X.1  | ...       | done   | ...   | [link](../image/..) |
 
 ---
 
@@ -65,6 +67,5 @@ Setiap akhir sprint, buat file `docs/sprint-XX-qa-report.md` dengan format berik
 - **Screenshot disimpan di**: `image/sprint-XX/` (contoh: `image/sprint-01/backend-health-1.png`)
 - **Satu section per task ID** — setiap task QA di sprint harus punya section sendiri
 - **Tabel ringkasan wajib** — di akhir report, buat tabel status semua task QA sprint itu
-- **Checklist pakai emoji** — gunakan ✅ untuk pass dan ❌ untuk fail
 - **Bug yang ditemukan** — catat di blockquote `>` di bawah hasil temuan task yang relevan
 - **Catatan tambahan** — opsional, untuk info yang perlu diketahui role lain
