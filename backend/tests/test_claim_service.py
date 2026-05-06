@@ -110,6 +110,32 @@ class ClaimServiceNotificationTest(unittest.TestCase):
         self.assertEqual(owner_notifications[0].title, "Update Status Klaim")
         self.assertEqual(len(admin_notifications), 0)
 
+    def test_create_claim_skips_duplicate_notification_when_admin_is_item_owner(self):
+        """Admin yang juga item owner tidak boleh dapat 2 notif (owner + admin)."""
+        admin_item = Item(
+            type="found",
+            status="open",
+            title="Laptop di Perpustakaan",
+            description="Laptop ditemukan di perpustakaan",
+            security_officer_id=self.security_officer.id,
+            created_by=self.admin.id,
+        )
+        self.db.add(admin_item)
+        self.db.commit()
+        self.db.refresh(admin_item)
+
+        create_claim(
+            self.db,
+            user_id=self.claimant.id,
+            claim_in=ClaimCreate(item_id=admin_item.id, ownership_answer="Laptop saya warna hitam"),
+        )
+
+        admin_notifications = self._messages_for_user(self.admin.id)
+        # Admin sebagai item owner dapat 1 notif "Klaim Baru pada Barang Anda"
+        # Tapi TIDAK dapat notif tambahan "Klaim Baru Masuk" sebagai admin
+        self.assertEqual(len(admin_notifications), 1)
+        self.assertEqual(admin_notifications[0].title, "Klaim Baru pada Barang Anda")
+
     def test_update_claim_status_skips_self_notification_for_item_owner(self):
         claim = create_claim(
             self.db,

@@ -63,6 +63,8 @@ def create_claim(db: Session, user_id: str, claim_in: ClaimCreate) -> Claim:
     for admin in admins:
         if admin.id == user_id:
             continue
+        if admin.id == item.created_by:
+            continue
         create_notification(
             db,
             NotificationCreate(
