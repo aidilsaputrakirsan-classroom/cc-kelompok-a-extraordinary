@@ -14,16 +14,16 @@ Implementasi final project dimulai dari branch `master` sebagai fresh start. Pra
 
 ## Timeline
 
-| Sprint | Fokus |
-|-------|-------|
-| 1 | Setup scaffold backend, frontend, data awal |
-| 2 | Auth dan core item flow |
-| 3 | Search, claim, master data, notifications |
-| 4 | Docker dan kesiapan UTS |
-| 5 | CI/CD dan test backend |
-| 6 | Deploy dan split microservices |
-| 7 | Gateway, health, logging, audit |
-| 8 | Security hardening dan final polish |
+| Sprint | Fokus | Modul |
+|--------|-------|-------|
+| 1 | Setup scaffold backend, frontend, data awal | 1-4 |
+| 2 | Auth dan core item flow | 5-6 |
+| 3 | Search, claim, master data, notifications | 7 |
+| 4 | Docker dan kesiapan UTS | 8 (UTS) |
+| 5 | Git workflow, CI, dan test backend/frontend | 9-10 |
+| 6 | Deploy (CD) dan split microservices | 11-12 |
+| 7 | Gateway, health, logging, reliability | 13-14 |
+| 8 | Security hardening dan final polish | 15 |
 
 ## Dokumen Terkait
 

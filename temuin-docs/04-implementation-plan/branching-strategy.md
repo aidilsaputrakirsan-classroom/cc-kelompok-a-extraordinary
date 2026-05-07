@@ -9,8 +9,27 @@
 ## Aturan Dasar
 
 - Semua feature branch dibuat dari `master`
-- Jangan commit langsung ke `master`
-- PR ke `master` direkomendasikan, tetapi status task `done` tidak bergantung pada PR merge
+- Jangan commit langsung ke `master` (branch protection aktif)
+- PR ke `master` wajib dengan minimal 1 approval
+- Merge strategy: squash and merge
+- Status task `done` berarti sudah di-commit dan di-push ke remote
+
+## Branch Protection
+
+Branch `master` dilindungi dengan ruleset:
+- Require pull request (1 approval)
+- Block force pushes
+- Restrict deletions
+
+Status checks (CI) akan ditambahkan setelah GitHub Actions aktif (sprint 05).
+
+## CODEOWNERS
+
+File `.github/CODEOWNERS` mengatur automatic reviewer assignment:
+- `/backend/` → @disnejy
+- `/frontend/` → @nicholasmnrng
+- Docker/infra files → @PangeranSilaen
+- `/docs/` → @raniayudewi
 
 ## Format Nama Branch
 
