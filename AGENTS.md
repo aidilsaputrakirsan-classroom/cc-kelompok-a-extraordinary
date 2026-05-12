@@ -15,12 +15,20 @@ Setiap AI coding agent wajib mulai dari file ini sebelum mengerjakan apa pun di 
 - Source of truth aktif hanya ada di `temuin-docs/`
 - Dokumen di `temuin-docs/archive/` adalah arsip, bukan acuan kerja aktif
 - Base branch final project adalah `master`
+- Branch `master` dilindungi: PR wajib 1 approval, force push diblokir
 - Jangan commit langsung ke `master`; buat feature branch dari branch itu
 - Agent wajib tanya persetujuan user sebelum commit dan push
 - PR dibuat sebagai draft; user yang memutuskan kapan ready for review
 - Frontend wajib memakai `React + Vite + Tailwind CSS + shadcn/ui`
 - Saat agent membangun UI, utamakan komponen dan pola shadcn/ui sebelum membuat markup custom
 - `temuin-docs/` hanya untuk dokumen arsitektur, sprint, dan role guide — jangan tambah file baru kecuali benar-benar perlu (seperti update status sprint). Guides, reports, dan dokumen kerja lainnya masuk ke `docs/`
+
+## PR & Review Rules
+- Semua perubahan ke `master` wajib lewat PR
+- Minimal 1 approval sebelum merge
+- Merge strategy: squash and merge
+- CODEOWNERS otomatis assign reviewer berdasarkan file path
+- Agent membuat PR sebagai draft; user yang mark ready for review
 
 ## Task Tracking Rules
 - Status task yang valid hanya `todo`, `in_progress`, `blocked`, `done`

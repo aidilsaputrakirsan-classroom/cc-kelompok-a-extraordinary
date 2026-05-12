@@ -1,0 +1,26 @@
+# ============================================================
+# Temuin - Docker Compose Production Overrides
+# ============================================================
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Overrides for production environment:
+# - Restart policies set to always
+# - Debug disabled
+# - DB port bound to localhost only (security)
+# ============================================================
+
+services:
+  backend:
+    environment:
+      - DEBUG=false
+      - CORS_ORIGINS=https://yourdomain.com
+    restart: always
+
+  frontend:
+    restart: always
+
+  db:
+    restart: always
+    # Production: DB only accessible from localhost (security)
+    ports:
+      - "127.0.0.1:5433:5432"

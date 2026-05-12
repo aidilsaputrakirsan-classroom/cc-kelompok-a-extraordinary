@@ -16,6 +16,8 @@ description: Gunakan saat mengerjakan role frontend di project Temuin. Skill ini
 - Gunakan shadcn/ui sebagai basis komponen
 - Gunakan Tailwind CSS untuk styling utama
 - Jangan bikin sistem UI custom besar sebelum cek komponen shadcn
+- Mulai sprint 05, frontend wajib punya Vitest tests (min 7)
+- Pastikan build stabil sebelum push
 - Update status task sesuai aturan repo
 
 ## Companion Skills
@@ -23,4 +25,3 @@ description: Gunakan saat mengerjakan role frontend di project Temuin. Skill ini
 - Gunakan `shadcn` bila tersedia
 - Gunakan `design-taste-frontend` untuk kualitas visual
 - Gunakan `web-design-guidelines` untuk review UX dan aksesibilitas
-- Jika task menyentuh auth UI Firebase, gunakan juga `firebase-auth-basics` bila tersedia
