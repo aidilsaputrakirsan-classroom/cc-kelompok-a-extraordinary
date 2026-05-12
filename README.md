@@ -542,12 +542,14 @@ Kami adalah kelompok mahasiswa dari program studi **Sistem Informasi**, Institut
 
 ## 📚 Referensi Dokumentasi
 
-### 🛠️ Panduan Teknis & Setup
+### 🛠️ Panduan Teknis & Standar Tim
 - [**Setup Guide**](./docs/setup-guide.md) — Panduan instalasi awal dan konfigurasi environment.
 - [**Docker Guide**](./docs/docker-guide.md) — Panduan lengkap menjalankan sistem menggunakan Docker.
+- [**Git Workflow Guide**](./docs/git-workflow.md) — Panduan standar branching dan kolaborasi tim (**Modul 9**).
 - [**API Testing Guide**](./docs/api-testing-guide.md) — Instruksi cara menguji backend API secara manual.
 
-### 🧪 Laporan Blackbox Testing (Lead QA & Docs)
+### 🧪 Laporan QA & Retrospective
+- [**Milestone 1 Retrospective**](./docs/retrospective-m1.md) — Laporan evaluasi pengerjaan UTS (Milestone 1).
 - [**API Blackbox Testing Report**](./docs/api-blackbox-testing.md) — Laporan lengkap pengujian endpoint backend via Swagger.
 - [**Frontend Blackbox Testing Report**](./docs/frontend-blackbox-testing.md) — Laporan lengkap pengujian antarmuka pengguna (UI/UX) dan alur sistem.
 
