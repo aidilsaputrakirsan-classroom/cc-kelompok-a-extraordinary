@@ -25,7 +25,6 @@ export default function ItemDetailPage() {
   const [claimLoading, setClaimLoading] = useState(false)
   
   const [claims, setClaims] = useState([])
-  const [claimsLoading, setClaimsLoading] = useState(false)
 
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
@@ -53,19 +52,17 @@ export default function ItemDetailPage() {
 
   const fetchClaims = async (itemId) => {
     try {
-      setClaimsLoading(true)
       const res = await api.get(`/claims/?item_id=${itemId}`)
       const itemClaims = res.data?.data || res.data || []
       setClaims(itemClaims)
     } catch (err) {
       console.error("Error fetching claims for item:", err)
-    } finally {
-      setClaimsLoading(false)
     }
   }
 
   useEffect(() => {
     fetchItemAndClaims()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, user])
 
   const handleClaimSubmit = async (claimData) => {

@@ -42,6 +42,7 @@ function MasterDataTable({ entityType, label, singular }) {
 
   useEffect(() => {
     fetchItems()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entityType])
 
   const openCreate = () => {

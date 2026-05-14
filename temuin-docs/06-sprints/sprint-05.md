@@ -22,8 +22,8 @@ Menerapkan git workflow (branch protection, CODEOWNERS, Makefile), menambah test
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| FE-5.1 | Perbaiki bug frontend hasil sprint UTS | High | 3h | QA-4.3 | todo | - | - |
-| FE-5.2 | Tambah route lazy loading dan cleanup state yang perlu | Medium | 2h | FE-5.1 | todo | - | - |
+| FE-5.1 | Perbaiki bug frontend hasil sprint UTS | High | 3h | QA-4.3 | done | feature/fe-5.1-bug-fixes | - |
+| FE-5.2 | Tambah route lazy loading dan cleanup state yang perlu | Medium | 2h | FE-5.1 | in_progress | feature/fe-5.2-lazy-loading | - |
 | FE-5.3 | Pastikan build frontend stabil untuk kebutuhan CI | Medium | 2h | FE-5.2 | todo | - | - |
 | FE-5.4 | Setup Vitest dan tulis min 7 frontend tests | Medium | 3h | FE-5.3 | todo | - | Modul 10: frontend testing dengan Vitest |
 

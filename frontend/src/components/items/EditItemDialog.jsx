@@ -78,6 +78,11 @@ export function EditItemDialog({ isOpen, onClose, item, onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     
+    if (item?.type === 'found' && !formData.security_officer_id) {
+      toast.error("Untuk barang temuan, wajib memilih Satpam Penitipan.")
+      return
+    }
+    
     try {
       setLoading(true)
       const payload = {

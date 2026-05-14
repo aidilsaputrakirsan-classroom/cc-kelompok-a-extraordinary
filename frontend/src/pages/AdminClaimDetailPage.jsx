@@ -46,6 +46,7 @@ export default function AdminClaimDetailPage() {
 
   useEffect(() => {
     fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
   const handleStatusUpdate = async (newStatus) => {

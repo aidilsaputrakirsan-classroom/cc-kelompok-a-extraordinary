@@ -3,6 +3,7 @@ import { api } from "@/config/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import PageState from "@/components/PageState"
+import { toast } from "sonner"
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([])
@@ -40,6 +41,7 @@ export default function NotificationsPage() {
       )
     } catch (error) {
       console.error("Error marking notification as read:", error)
+      toast.error("Gagal menandai notifikasi telah dibaca.")
     }
   }
 
@@ -49,6 +51,7 @@ export default function NotificationsPage() {
       setNotifications(prev => prev.map(notif => ({ ...notif, is_read: true })))
     } catch (error) {
       console.error("Error marking all as read:", error)
+      toast.error("Gagal menandai semua notifikasi telah dibaca.")
     }
   }
 
