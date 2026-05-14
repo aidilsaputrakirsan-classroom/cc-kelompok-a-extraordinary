@@ -10,11 +10,11 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = async (signal) => {
     try {
       setLoading(true)
       setError(null)
-      const response = await api.get('/notifications/me')
+      const response = await api.get('/notifications/me', { signal })
       const notifData = response.data?.data || response.data || []
       if (Array.isArray(notifData)) {
         setNotifications(notifData)
@@ -22,15 +22,18 @@ export default function NotificationsPage() {
         setNotifications([])
       }
     } catch (err) {
+      if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
       console.error("Error fetching notifications:", err)
       setError(err.response?.data?.detail || "Gagal memuat notifikasi Anda.")
     } finally {
-      setLoading(false)
+      if (!signal?.aborted) setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchNotifications()
+    const controller = new AbortController()
+    fetchNotifications(controller.signal)
+    return () => controller.abort()
   }, [])
 
   const handleMarkAsRead = async (id) => {

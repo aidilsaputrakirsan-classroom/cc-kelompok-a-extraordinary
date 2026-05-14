@@ -18,34 +18,38 @@ export default function AdminClaimDetailPage() {
   const [error, setError] = useState(null)
   const [updating, setUpdating] = useState(false)
 
-  const fetchData = async () => {
+  const fetchData = async (signal) => {
     try {
       setLoading(true)
       setError(null)
       
-      const claimRes = await api.get(`/claims/${id}`)
+      const claimRes = await api.get(`/claims/${id}`, { signal })
       const claimData = claimRes.data?.data || claimRes.data
       setClaim(claimData)
 
       if (claimData?.item_id) {
         try {
-          const itemRes = await api.get(`/items/${claimData.item_id}`)
+          const itemRes = await api.get(`/items/${claimData.item_id}`, { signal })
           setItem(itemRes.data?.data || itemRes.data)
         } catch (itemErr) {
+          if (itemErr.name === 'CanceledError' || itemErr.code === 'ERR_CANCELED') throw itemErr;
           console.error("Error fetching item:", itemErr)
           // Tidak memblokir jika item gagal diambil
         }
       }
     } catch (err) {
+      if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
       console.error("Error fetching claim details:", err)
       setError("Gagal memuat detail klaim. " + (err.response?.data?.detail || ""))
     } finally {
-      setLoading(false)
+      if (!signal?.aborted) setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchData()
+    const controller = new AbortController()
+    fetchData(controller.signal)
+    return () => controller.abort()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 

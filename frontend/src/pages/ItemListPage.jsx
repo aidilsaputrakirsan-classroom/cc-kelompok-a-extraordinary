@@ -15,11 +15,11 @@ export default function ItemListPage() {
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState("all")
 
-  const fetchItems = async () => {
+  const fetchItems = async (signal) => {
     try {
       setLoading(true)
       setError(null)
-      const response = await api.get('/items/')
+      const response = await api.get('/items/', { signal })
       const itemsData = response.data?.data || response.data || []
       if (Array.isArray(itemsData)) {
         setItems(itemsData)
@@ -27,15 +27,18 @@ export default function ItemListPage() {
         setItems([])
       }
     } catch (err) {
+      if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
       console.error("Error fetching items:", err)
       setError(err.response?.data?.detail || "Gagal memuat daftar barang.")
     } finally {
-      setLoading(false)
+      if (!signal?.aborted) setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchItems()
+    const controller = new AbortController()
+    fetchItems(controller.signal)
+    return () => controller.abort()
   }, [])
 
   const filteredItems = items.filter(item => {

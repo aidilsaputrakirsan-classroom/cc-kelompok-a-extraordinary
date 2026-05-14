@@ -25,23 +25,26 @@ function MasterDataTable({ entityType, label, singular }) {
   const [name, setName] = useState("")
   const [saving, setSaving] = useState(false)
 
-  const fetchItems = async () => {
+  const fetchItems = async (signal) => {
     try {
       setLoading(true)
       setError(null)
-      const response = await api.get(`/master-data/${entityType}`)
+      const response = await api.get(`/master-data/${entityType}`, { signal })
       const data = response.data?.data || response.data || []
       if (Array.isArray(data)) setItems(data)
     } catch (err) {
+      if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
       console.error(`Error fetching ${entityType}:`, err)
       setError(`Gagal memuat data ${label.toLowerCase()}.`)
     } finally {
-      setLoading(false)
+      if (!signal?.aborted) setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchItems()
+    const controller = new AbortController()
+    fetchItems(controller.signal)
+    return () => controller.abort()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entityType])
 

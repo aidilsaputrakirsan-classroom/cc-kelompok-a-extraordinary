@@ -8,7 +8,6 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // Cek token saat app load - fetch user profile dari backend
   useEffect(() => {
     const token = localStorage.getItem("internalToken")
     if (!token) {
@@ -16,14 +15,22 @@ export function AuthProvider({ children }) {
       return
     }
 
-    api.get("/auth/me")
-      .then((res) => setUser(res.data))
-      .catch(() => {
+    const controller = new AbortController()
+    api.get("/auth/me", { signal: controller.signal })
+      .then((res) => {
+        if (!controller.signal.aborted) setUser(res.data)
+      })
+      .catch((err) => {
+        if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
         // Token expired atau invalid
         localStorage.removeItem("internalToken")
         setUser(null)
       })
-      .finally(() => setLoading(false))
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false)
+      })
+      
+    return () => controller.abort()
   }, [])
 
   const login = (token, userData) => {
