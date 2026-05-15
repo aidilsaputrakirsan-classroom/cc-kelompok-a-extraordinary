@@ -6,6 +6,7 @@ import ItemList from "./components/ItemList"
 import LoginPage from "./components/LoginPage"
 import Toast from "./components/Toast"
 import LoadingSpinner from "./components/LoadingSpinner"
+import AboutPage from "./components/AboutPage"
 import {
   fetchItems, createItem, updateItem, deleteItem,
   checkHealth, login, register, setToken, clearToken, getToken,
@@ -23,6 +24,7 @@ function App() {
   const [isConnected, setIsConnected] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [searchQuery, setSearchQuery] = useState("")
+  const [showAbout, setShowAbout] = useState(false)
 
   // ==================== TOAST STATE ====================
   const [toast, setToast] = useState(null) // { message, type }
@@ -183,6 +185,11 @@ function App() {
     )
   }
 
+  // Jika showAbout bernilai true, render halaman About
+  if (showAbout) {
+    return <AboutPage onBack={() => setShowAbout(false)} />
+  }
+
   // Jika sudah login, tampilkan main app
   return (
     <div style={styles.app}>
@@ -193,6 +200,14 @@ function App() {
           user={user}
           onLogout={handleLogout}
         />
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }}>
+          <button 
+            onClick={() => setShowAbout(true)} 
+            style={{ padding: "8px 16px", cursor: "pointer" }}
+          >
+            ℹ️ About Page
+          </button>
+        </div>
         <ItemForm
           onSubmit={handleSubmit}
           editingItem={editingItem}
