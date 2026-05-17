@@ -1,0 +1,185 @@
+# =============================================================================
+# Temuin CI - Sprint 5 (Modul 10): GitHub Actions Continuous Integration
+# =============================================================================
+# 3-job parallel pipeline: lint, backend-test, frontend-test
+#
+# Triggers:
+#   - push to master   (post-merge verification)
+#   - pull_request to master (pre-merge gate)
+#
+# Status checks (DEC-020):
+#   - lint           : ruff backend + eslint frontend
+#   - backend-test   : pytest with coverage >=60%
+#   - frontend-test  : vitest with coverage >=40% + npm build
+#
+# Note: backend-test and frontend-test use `continue-on-error: true` during
+# the bootstrap window because dependencies (pytest-cov, @vitest/coverage-v8)
+# land in follow-up PRs (BE-5.4, FE-5.4 enhancement). Once those are merged,
+# a follow-up PR will remove `continue-on-error` to enforce the gates.
+# =============================================================================
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+# Cancel superseded runs to save minutes when push happens during pending PR.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint (ruff backend + eslint frontend)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ruff
+        run: pip install ruff==0.8.6
+
+      - name: Run ruff check (backend)
+        run: ruff check backend --output-format=github
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run eslint (frontend)
+        working-directory: frontend
+        run: npm run lint
+
+  backend-test:
+    name: Backend Tests (pytest + coverage)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Bootstrap-window leniency: BE-5.4 PR adds pytest-cov + cov-fail-under=60.
+    # Remove this flag in a follow-up PR once that PR lands on master.
+    continue-on-error: true
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: temuin_user
+          POSTGRES_PASSWORD: temuin_test_pwd
+          POSTGRES_DB: temuin_test_db
+        options: >-
+          --health-cmd "pg_isready -U temuin_user -d temuin_test_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      DATABASE_URL: postgresql://temuin_user:temuin_test_pwd@localhost:5432/temuin_test_db
+      DB_HOST: localhost
+      DB_PORT: "5432"
+      DB_USER: temuin_user
+      DB_PASSWORD: temuin_test_pwd
+      DB_NAME: temuin_test_db
+      SECRET_KEY: ci-test-secret-not-used-in-prod
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: "60"
+      CORS_ORIGINS: '["http://localhost:5173"]'
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install pytest-cov (gracefully if missing in requirements)
+        run: pip install "pytest-cov>=5,<7"
+
+      - name: Run pytest with coverage
+        working-directory: backend
+        # cov-fail-under=60 active per DEC-020. Job tolerated until enforcement
+        # follow-up via continue-on-error above.
+        run: |
+          pytest tests \
+            --cov=app \
+            --cov-report=term-missing \
+            --cov-report=xml \
+            --cov-fail-under=60
+
+      - name: Upload coverage XML artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage-xml
+          path: backend/coverage.xml
+          if-no-files-found: ignore
+          retention-days: 7
+
+  frontend-test:
+    name: Frontend Tests (vitest + build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Bootstrap-window leniency: FE-5.4 PR enhancement adds @vitest/coverage-v8.
+    # Remove this flag in a follow-up PR once that PR lands on master.
+    continue-on-error: true
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run frontend tests
+        working-directory: frontend
+        # vitest run for non-watch mode; coverage step runs separately so
+        # missing @vitest/coverage-v8 in current devDeps does not break tests.
+        run: npm run test -- --run
+
+      - name: Run frontend tests with coverage (best effort)
+        working-directory: frontend
+        # FE-5.4 enhancement adds the script + coverage provider. Until then,
+        # this step may not exist; we don't fail the job.
+        run: |
+          if npm run | grep -q "  test:coverage"; then
+            npm run test:coverage
+          else
+            echo "::warning::test:coverage script missing; will be added by FE-5.4 enhancement PR"
+          fi
+
+      - name: Build production bundle
+        working-directory: frontend
+        run: npm run build
