@@ -1,0 +1,52 @@
+# ===================================================================
+# Temuin - Root Project Configuration
+# ===================================================================
+# This file configures Python tooling at the repository root.
+# Backend service-specific dependencies stay in backend/requirements.txt.
+# Backend pytest config lives in backend/pyproject.toml.
+# ===================================================================
+
+[tool.ruff]
+# Target Python version for syntax-aware checks
+target-version = "py312"
+line-length = 100
+
+# Apply ruff to backend Python source. Frontend is JavaScript (eslint).
+src = ["backend"]
+
+# Skip vendored / generated paths
+extend-exclude = [
+    ".venv",
+    "venv",
+    ".worktrees",
+    "node_modules",
+    "frontend",
+    "image",
+    "docs",
+    "temuin-docs",
+    ".code-review-graph",
+]
+
+[tool.ruff.lint]
+# Sensible defaults aligned with FastAPI / Pydantic projects.
+# E, W = pycodestyle (style), F = pyflakes (errors), I = isort (imports),
+# B = flake8-bugbear (logic bugs), UP = pyupgrade (modern syntax),
+# SIM = flake8-simplify (simplification suggestions)
+select = ["E", "W", "F", "I", "B", "UP", "SIM"]
+
+# Test files frequently use redefined fixtures and broad asserts.
+ignore = [
+    "B008",  # Allow Depends() default in FastAPI signatures
+    "E501",  # Line length: rely on formatter, not lint
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests can have unused imports (fixtures auto-resolved by pytest)
+"backend/tests/**/*.py" = ["F401", "F811"]
+# Migrations have generated boilerplate
+"backend/alembic/**/*.py" = ["F401", "E402"]
+
+[tool.ruff.format]
+# Match black-like formatting; keeps diffs predictable
+quote-style = "double"
+indent-style = "space"
