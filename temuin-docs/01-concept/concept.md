@@ -2,7 +2,7 @@
 
 ## Ringkasan
 
-Temuin adalah platform lost and found internal kampus ITK. Sistem ini hanya bisa diakses oleh civitas kampus dengan akun Google dan email `@itk.ac.id`.
+Temuin adalah platform lost and found internal kampus ITK. Sistem ini hanya bisa diakses oleh civitas kampus dengan email `@itk.ac.id` melalui login email + password (DEC-002).
 
 Temuin dipakai untuk:
 - melaporkan barang hilang

@@ -19,10 +19,11 @@
 - Catatan blackbox per sprint
 - Screenshot bukti untuk flow penting
 - Koreksi dokumen bila ada langkah atau behavior yang berubah
-- Verifikasi CI berjalan di branch yang di-push — sprint 05
-- Production smoke test setelah deploy — sprint 06
-- Reliability testing (service down scenario) — sprint 07
-- Final verification dan comprehensive docs — sprint 08
+- Verifikasi CI 3-job berjalan hijau, CI badge di README, `docs/testing-guide.md` (DEC-020) — sprint 05
+- Production smoke test di `https://temuin.pangeransilaen.net` setelah deploy + `docs/deployment-guide.md` — sprint 06
+- Verifikasi correlation ID end-to-end + `docs/operations-guide.md` + reliability testing (DEC-021, DEC-022) — sprint 07
+- Final regression 20 skenario, `docs/api-contract.md`, `docs/final-checklist.md`, README final + comprehensive — sprint 08
+- Audit konsistensi `temuin-docs/` (no stale modul reference, decision log lengkap) — sprint 08
 
 ## Bacaan Kunci
 
