@@ -68,12 +68,22 @@
 - Soft delete memakai `deleted_at`
 - History tables wajib merekam perubahan penting
 
-## Evolusi Microservices
+## Evolusi Microservices (DEC-019)
 
-- Saat split, `users` dan data auth pindah ke auth DB
-- Tabel item, claim, master data, notification, history, dan audit tetap di item DB
+Pada Sprint 6, monolith dipecah jadi 3 service hybrid. 1 instance Postgres shared dengan 3 logical database (init script `CREATE DATABASE auth_db, item_db, engagement_db`). Tabel di-own oleh masing-masing service:
+
+| Service | Logical DB | Tabel Owned |
+|---------|------------|-------------|
+| `auth-service` | `auth_db` | `users` |
+| `item-service` | `item_db` | `items`, `item_images`, `item_status_histories`, `categories`, `buildings`, `locations`, `security_officers` |
+| `engagement-service` | `engagement_db` | `claims`, `claim_status_histories`, `notifications`, `audit_logs` |
+
+Catatan:
+- Tidak ada foreign key cross-database. Referensi cross-service (misalnya `claims.item_id` ke `items.id`) di-resolve via HTTP call ke service pemilik (`engagement → item`)
+- Migrasi awal: data dari Postgres monolith di-dump per tabel, restore ke logical DB target. Script di `scripts/migrate-to-microservices.sql`
+- Shared Postgres instance hemat RAM (~200 MB total vs 5 instance terpisah). Konfigurasi `shared_buffers` dibatasi 128 MB di compose env
 
 ## Dokumen Terkait
 
 - [backend-architecture.md](./backend-architecture.md)
-- [../01-concept/decision-log.md](../01-concept/decision-log.md)
+- [../01-concept/decision-log.md](../01-concept/decision-log.md) (DEC-016 image storage, DEC-019 microservices granularity)

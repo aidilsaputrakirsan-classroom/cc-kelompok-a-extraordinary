@@ -85,6 +85,56 @@ Dokumen ini mencatat keputusan final yang tidak boleh dilanggar tanpa keputusan 
 - Masing-masing service memvalidasi JWT secara lokal tanpa memanggil service lain
 - Secret disimpan di env vars, bukan hardcoded
 
+## Keputusan Cloud Dan Infrastruktur
+
+### DEC-018: Cloud platform deployment
+- Primary deployment: VPS Tencent Cloud milik @PangeranSilaen di domain `temuin.pangeransilaen.net`
+- Spesifikasi: 2 vCPU, 1.9 GB RAM, 40 GB disk, Ubuntu 22.04, Docker 26.x, swap 2 GB
+- DNS via Cloudflare A record ke IP VPS, SSL via Let's Encrypt + Certbot
+- Arsitektur 2-layer Nginx: host nginx (reverse proxy + SSL termination) → container gateway/frontend
+- Direktori deployment: `/opt/temuin/` dengan `docker-compose.yml` production
+- Fallback: Render free tier untuk versi monolith bila VPS bermasalah atau dosen meminta cloud-managed PaaS
+- Konfirmasi 1× ke dosen apakah VPS dianggap sah sebagai "deploy to cloud" Modul 11 sebelum eksekusi Sprint 6
+
+### DEC-019: Microservices granularity (hybrid 3-service)
+- Sprint 6 split monolith jadi 3 service, bukan 5 granular
+- `auth-service` (port 8001): identity, register, login, JWT issuance
+- `item-service` (port 8002): items, item_images, history, dan master data (categories, buildings, locations, security_officers)
+- `engagement-service` (port 8003): claims, claim history, notifications, audit logs
+- 1 instance Postgres shared dengan 3 logical database: `auth_db`, `item_db`, `engagement_db`
+- Reasoning: 1 BE Lead, timeline 4 sprint sisa, RAM VPS 1.9 GB, hanya 1 jalur cross-service runtime (`engagement → item`) yang fragile
+
+### DEC-020: CI/CD pipeline dan threshold
+- 3 job CI paralel di `.github/workflows/ci.yml`: `lint` (ruff backend + eslint frontend), `backend-test` (pytest), `frontend-test` (vitest)
+- Backend coverage minimal 60% dengan `pytest --cov-fail-under=60`
+- Frontend coverage minimal 40% dengan Vitest threshold di `vitest.config.js`
+- Tambahan job `integration-test` di Sprint 7: spin compose 3-service di GH Actions runner, jalankan `scripts/integration-test.sh`
+- Job `deploy` di Sprint 6+: trigger hanya untuk push ke master (`if: github.ref == 'refs/heads/master'`)
+- Branch protection memerlukan semua status check passing sebelum merge ke master
+
+### DEC-021: Reliability pattern cross-service
+- Retry pada cross-service HTTP call: 3x dengan exponential backoff 0.5s, 1s, 2s
+- Status code retryable: 500, 502, 503, 504, connection error, timeout
+- Status code non-retryable: 400, 401, 403, 404
+- Circuit breaker in-memory per service caller: state CLOSED → OPEN setelah 5 failure dalam 30 detik, cooldown 60 detik sebelum HALF_OPEN
+- Graceful degradation: bila `item-service` down, listing claims tetap return data (tanpa info item enrichment) atau return cached snapshot
+- Berlaku untuk jalur `engagement-service → item-service` (jalur cross-service utama hybrid 3-service)
+
+### DEC-022: Observability stack MVP
+- Structured logging JSON via Python `logging` stdlib + `JSONFormatter` custom (timestamp ISO UTC, level, service name, correlation_id, method, path, status_code, duration_ms, optional exception)
+- `X-Correlation-ID` header: nginx gateway generate UUID 12 karakter bila tidak ada di request, lalu forward ke upstream
+- Backend service forward correlation_id ke outbound HTTP call dan log di setiap response
+- Endpoint `/metrics` per service: format Prometheus text exposition (counter request, histogram latency, counter error) tanpa Prometheus deployment
+- Endpoint aggregator `/api/status`: JSON status 3 service untuk konsumsi StatusPage frontend
+- StatusPage frontend di route `/status`: shadcn `<Card>` + `<Badge>` (variant success/destructive) + `<Skeleton>` saat loading, polling 30 detik
+- Tooling tambahan (Prometheus, Grafana, Loki, Jaeger) di luar scope, hanya disebut sebagai referensi
+
+### DEC-023: Rate limiting di gateway
+- Nginx zone `auth_zone`: 5 req/s burst 10 untuk `POST /api/auth/login` dan `POST /api/auth/register`
+- Nginx zone `general_zone`: 30 req/s burst 50 untuk endpoint lain
+- Response 429 bila exceeded dengan body JSON `{"detail":"Too many requests"}`
+- Threshold dapat ditune via env var bila perlu sebelum demo UAS
+
 ## Dokumen Terkait
 
 - [concept.md](./concept.md)

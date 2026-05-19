@@ -1,14 +1,24 @@
 # PRD User Flows - Temuin
 
+## 0. Register Flow
+
+1. User membuka halaman register
+2. User mengisi form: email kampus (`@itk.ac.id`), password, dan nama
+3. Frontend mengirim `POST /api/auth/register` ke backend
+4. Backend (auth-service) memvalidasi domain email dan password policy (min 8 char, ada huruf + angka)
+5. Backend hash password dengan bcrypt dan simpan user di tabel `users`
+6. Backend mengembalikan JWT internal aplikasi
+7. Frontend menyimpan JWT di `localStorage` dan redirect ke halaman utama
+
 ## 1. Login Flow
 
 1. User membuka halaman login
-2. User klik login Google
-3. Frontend menerima token dari Google
-4. Frontend kirim token ke backend
-5. Backend validasi token dan email kampus
-6. Backend membuat atau sinkronkan user internal
-7. Backend kirim JWT internal ke frontend
+2. User mengisi form: email kampus dan password
+3. Frontend mengirim `POST /api/auth/login` ke backend
+4. Backend (auth-service) memverifikasi password terhadap bcrypt hash di `users`
+5. Backend mengembalikan JWT internal aplikasi
+6. Frontend menyimpan JWT di `localStorage`
+7. Frontend fetch profil via `GET /api/auth/me`
 8. User masuk ke aplikasi
 
 ## 2. Lost Item Flow

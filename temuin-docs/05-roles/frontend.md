@@ -13,9 +13,14 @@
 - Halaman auth, item, claim, profile, notifications, dan admin
 - State auth yang stabil
 - Komponen status, feedback, dan form yang konsisten
-- Frontend tests (Vitest, min 7 tests) — sprint 05
-- Health dashboard / status page — sprint 07
-- Code cleanup dan final polish — sprint 08
+- Frontend tests (Vitest, min 7 tests) dengan coverage ≥40% (DEC-020) — sprint 05
+- Adaptasi base URL via `VITE_API_BASE_URL`, semua path API prefix `/api/*` — sprint 06
+- Toast Sonner saat 503/timeout cross-service — sprint 06
+- Error boundary + banner shadcn `<Alert variant="destructive">` dengan Retry saat 503 — sprint 07
+- StatusPage shadcn (`<Card>` + `<Badge>` + `<Skeleton>`) di route `/status` polling 30s (DEC-022) — sprint 07
+- Axios interceptor log `X-Correlation-ID` — sprint 07
+- Lighthouse audit production (performance ≥80, a11y ≥90, best practices ≥90) — sprint 08
+- XSS audit + code cleanup (no console.log, no dead component) — sprint 08
 
 ## Aturan Wajib Frontend
 
