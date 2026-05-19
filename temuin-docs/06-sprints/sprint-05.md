@@ -22,10 +22,10 @@ Menerapkan git workflow (branch protection, CODEOWNERS, Makefile), menambah test
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| FE-5.1 | Perbaiki bug frontend hasil sprint UTS | High | 3h | QA-4.3 | todo | - | - |
-| FE-5.2 | Tambah route lazy loading dan cleanup state yang perlu | Medium | 2h | FE-5.1 | todo | - | - |
-| FE-5.3 | Pastikan build frontend stabil untuk kebutuhan CI | Medium | 2h | FE-5.2 | todo | - | `npm run build` exit 0, output `dist/` valid |
-| FE-5.4 | Setup Vitest dan tulis min 7 frontend tests dengan coverage ≥40% (DEC-020) | Medium | 3h | FE-5.3 | todo | - | Modul 10: Vitest + @testing-library/react + jsdom. Test minimum: LoginPage, ProtectedRoute, ItemCard, ItemListPage, Header, ItemForm, api client. Threshold di `vitest.config.js` |
+| FE-5.1 | Perbaiki bug frontend hasil sprint UTS | High | 3h | QA-4.3 | in_progress | feature/fe-5.1-bug-fixes | menunggu PR #86 merge ke master |
+| FE-5.2 | Tambah route lazy loading dan cleanup state yang perlu | Medium | 2h | FE-5.1 | in_progress | feature/fe-5.2-lazy-loading | PR #85 ditutup, gabung ke PR #86 |
+| FE-5.3 | Pastikan build frontend stabil untuk kebutuhan CI | Medium | 2h | FE-5.2 | in_progress | feature/fe-5.3-5.4-testing | PR #86 menunggu approval |
+| FE-5.4 | Setup Vitest dan tulis min 7 frontend tests | Medium | 3h | FE-5.3 | in_progress | feature/fe-5.3-5.4-testing | Modul 10: frontend testing dengan Vitest. Coverage 71% (target 40%) |
 
 ## Lead DevOps (@PangeranSilaen)
 
