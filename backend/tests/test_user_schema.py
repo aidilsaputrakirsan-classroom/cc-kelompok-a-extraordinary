@@ -1,43 +1,38 @@
-import os
-import unittest
+"""Schema verification: User table matches Temuin auth design.
 
-os.environ.setdefault("DATABASE_URL", "sqlite+pysqlite:///:memory:")
-os.environ.setdefault("SECRET_KEY", "test-secret-key")
+Refactored to pytest function style per BE-5.1.
+"""
 
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import inspect
 
-from app.database import Base
 from app.models.user import User
 
 
-class UserSchemaTest(unittest.TestCase):
-    def setUp(self):
-        self.engine = create_engine("sqlite+pysqlite:///:memory:")
-        Base.metadata.create_all(bind=self.engine)
+def test_users_table_matches_temuin_auth_schema(engine):
+    inspector = inspect(engine)
+    columns = {column["name"]: column for column in inspector.get_columns("users")}
 
-    def tearDown(self):
-        Base.metadata.drop_all(bind=self.engine)
-        self.engine.dispose()
+    assert "id" in columns
+    assert columns["id"]["type"].__class__.__name__ in {"VARCHAR", "String"}
+    assert "firebase_uid" in columns
+    assert "password_hash" in columns
+    assert "role" in columns
+    assert "phone" in columns
+    assert columns["email"]["nullable"] is False
+    assert columns["name"]["nullable"] is False
+    assert columns["role"]["nullable"] is False
+    assert columns["firebase_uid"]["nullable"] is True
+    assert columns["password_hash"]["nullable"] is True
 
-    def test_users_table_matches_temuin_auth_schema(self):
-        inspector = inspect(self.engine)
-        columns = {column["name"]: column for column in inspector.get_columns("users")}
-
-        self.assertIn("id", columns)
-        self.assertIn(columns["id"]["type"].__class__.__name__, {"VARCHAR", "String"})
-        self.assertIn("firebase_uid", columns)
-        self.assertIn("password_hash", columns)
-        self.assertIn("role", columns)
-        self.assertIn("phone", columns)
-        self.assertFalse(columns["email"]["nullable"])
-        self.assertFalse(columns["name"]["nullable"])
-        self.assertFalse(columns["role"]["nullable"])
-        self.assertTrue(columns["firebase_uid"]["nullable"])
-        self.assertTrue(columns["password_hash"]["nullable"])
-
-        user_columns = {column.name for column in User.__table__.columns}
-        self.assertTrue({"id", "firebase_uid", "password_hash", "email", "name", "role", "phone", "created_at"}.issubset(user_columns))
-
-
-if __name__ == "__main__":
-    unittest.main()
+    user_columns = {column.name for column in User.__table__.columns}
+    expected = {
+        "id",
+        "firebase_uid",
+        "password_hash",
+        "email",
+        "name",
+        "role",
+        "phone",
+        "created_at",
+    }
+    assert expected.issubset(user_columns)

@@ -1,59 +1,27 @@
-import os
-import unittest
+"""Tests for items search sanitization (SQL LIKE wildcard escaping).
 
-os.environ.setdefault("DATABASE_URL", "sqlite+pysqlite:///:memory:")
-os.environ.setdefault("SECRET_KEY", "test-secret-key")
-
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-
-from app.database import Base, get_db
-from app.main import app
+Refactored from unittest.TestCase to pytest function style + fixtures
+per BE-5.1.
+"""
 
 
-class TestSearchSanitization(unittest.TestCase):
-    def setUp(self):
-        self.engine = create_engine(
-            "sqlite+pysqlite:///:memory:",
-            connect_args={"check_same_thread": False},
-            poolclass=StaticPool,
-        )
-        testing_session_local = sessionmaker(
-            autocommit=False,
-            autoflush=False,
-            bind=self.engine,
-        )
-        Base.metadata.create_all(bind=self.engine)
+def test_search_with_wildcards_is_escaped(client):
+    response = client.get("/items/?search=100%_guarantee")
 
-        def override_get_db():
-            db = testing_session_local()
-            try:
-                yield db
-            finally:
-                db.close()
-
-        app.dependency_overrides[get_db] = override_get_db
-        self.client = TestClient(app)
-
-    def tearDown(self):
-        app.dependency_overrides.clear()
-        Base.metadata.drop_all(bind=self.engine)
-        self.engine.dispose()
-
-    def test_search_with_wildcards_is_escaped(self):
-        response = self.client.get("/items/?search=100%_guarantee")
-
-        self.assertEqual(response.status_code, 200)
-        self.assertIsInstance(response.json(), list)
-
-    def test_search_with_backslash_is_escaped(self):
-        response = self.client.get("/items/?search=some\\backslash")
-
-        self.assertEqual(response.status_code, 200)
-        self.assertIsInstance(response.json(), list)
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_search_with_backslash_is_escaped(client):
+    response = client.get("/items/?search=some\\backslash")
+
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+
+
+def test_search_with_special_chars_does_not_crash(client):
+    """Composite test for various special characters in search input."""
+    for search_term in ["%%%", "___", "100%_special\\chars", "'; DROP TABLE items;--"]:
+        response = client.get(f"/items/?search={search_term}")
+        assert response.status_code == 200
+        assert isinstance(response.json(), list)
