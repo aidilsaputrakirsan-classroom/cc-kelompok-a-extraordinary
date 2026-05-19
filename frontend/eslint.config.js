@@ -3,10 +3,23 @@ import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
-export default [
-  { ignores: ['dist'] },
+// eslint-plugin-react-hooks v5 dropped `configs.flat.recommended` in favor
+// of `configs.recommended` (which already exports a flat-config block).
+// Keeping a defensive fallback so older v4-style installs still work.
+const reactHooksRecommended =
+  reactHooks.configs?.['recommended-latest'] ??
+  reactHooks.configs?.recommended ??
+  reactHooks.configs?.flat?.recommended
+
+export default defineConfig([
+  globalIgnores(['dist']),
   {
     files: ['**/*.{js,jsx}'],
+    extends: [
+      js.configs.recommended,
+      reactHooksRecommended,
+      reactRefresh.configs.vite,
+    ],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
