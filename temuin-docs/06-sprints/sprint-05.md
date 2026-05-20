@@ -43,9 +43,9 @@ Menerapkan git workflow (branch protection, CODEOWNERS, Makefile), menambah test
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| QA-5.1 | Blackbox regression setelah bugfix sprint 05 | High | 2h | FE-5.1, BE-5.3 | todo | - | - |
-| QA-5.2 | Verifikasi CI 3-job berjalan hijau dan tambah CI badge di README | Medium | 1h | DO-5.1, DO-5.2 | todo | - | Modul 10: CI badge di README plus screenshot 3 job hijau di `image/sprint-05/` |
-| QA-5.3 | Tulis `docs/testing-guide.md` (cara run test, threshold, troubleshoot) | Medium | 2h | BE-5.4, FE-5.4 | todo | - | Modul 10: prerequisites, run backend tests, run frontend tests, threshold reference (60% backend, 40% frontend), troubleshooting CI failure |
+| QA-5.1 | Blackbox regression setelah bugfix sprint 05 | High | 2h | FE-5.1, BE-5.3 | done | docs/qa/sprint-05-qa-tasks | Selesai diuji 13 alur fungsional dengan sukses. Laporan di docs/sprint-05-qa-report.md |
+| QA-5.2 | Verifikasi CI 3-job berjalan hijau dan tambah CI badge di README | Medium | 1h | DO-5.1, DO-5.2 | done | docs/qa/sprint-05-qa-tasks | Modul 10: CI badge sukses dipasang di README.md, 3-job CI diverifikasi hijau |
+| QA-5.3 | Tulis `docs/testing-guide.md` (cara run test, threshold, troubleshoot) | Medium | 2h | BE-5.4, FE-5.4 | done | docs/qa/sprint-05-qa-tasks | Modul 10: Panduan lengkap dibuat di docs/testing-guide.md |
 
 ## Quick Links
 
