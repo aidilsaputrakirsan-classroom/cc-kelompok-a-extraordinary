@@ -3,17 +3,18 @@ import { api } from "@/config/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import PageState from "@/components/PageState"
+import { toast } from "sonner"
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = async (signal) => {
     try {
       setLoading(true)
       setError(null)
-      const response = await api.get('/notifications/me')
+      const response = await api.get('/notifications/me', { signal })
       const notifData = response.data?.data || response.data || []
       if (Array.isArray(notifData)) {
         setNotifications(notifData)
@@ -21,15 +22,18 @@ export default function NotificationsPage() {
         setNotifications([])
       }
     } catch (err) {
+      if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
       console.error("Error fetching notifications:", err)
       setError(err.response?.data?.detail || "Gagal memuat notifikasi Anda.")
     } finally {
-      setLoading(false)
+      if (!signal?.aborted) setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchNotifications()
+    const controller = new AbortController()
+    fetchNotifications(controller.signal)
+    return () => controller.abort()
   }, [])
 
   const handleMarkAsRead = async (id) => {
@@ -40,6 +44,7 @@ export default function NotificationsPage() {
       )
     } catch (error) {
       console.error("Error marking notification as read:", error)
+      toast.error("Gagal menandai notifikasi telah dibaca.")
     }
   }
 
@@ -49,6 +54,7 @@ export default function NotificationsPage() {
       setNotifications(prev => prev.map(notif => ({ ...notif, is_read: true })))
     } catch (error) {
       console.error("Error marking all as read:", error)
+      toast.error("Gagal menandai semua notifikasi telah dibaca.")
     }
   }
 

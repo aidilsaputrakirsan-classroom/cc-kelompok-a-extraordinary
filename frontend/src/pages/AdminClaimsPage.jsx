@@ -13,12 +13,12 @@ export default function AdminClaimsPage() {
   const [error, setError] = useState(null)
   const [filter, setFilter] = useState("all")
 
-  const fetchClaims = async () => {
+  const fetchClaims = async (signal) => {
     try {
       setLoading(true)
       setError(null)
       // Gunakan trailing slash
-      const response = await api.get('/claims/')
+      const response = await api.get('/claims/', { signal })
       const claimsData = response.data?.data || response.data || []
       if (Array.isArray(claimsData)) {
         setClaims(claimsData)
@@ -26,15 +26,18 @@ export default function AdminClaimsPage() {
         setClaims([])
       }
     } catch (err) {
+      if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
       console.error("Error fetching claims:", err)
       setError("Gagal memuat daftar klaim. " + (err.response?.data?.detail || ""))
     } finally {
-      setLoading(false)
+      if (!signal?.aborted) setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchClaims()
+    const controller = new AbortController()
+    fetchClaims(controller.signal)
+    return () => controller.abort()
   }, [])
 
   const filteredClaims = claims.filter(claim => {

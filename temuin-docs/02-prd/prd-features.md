@@ -3,9 +3,10 @@
 ## Fitur MVP Utama
 
 ### 1. Authentication And Access
-- Login Google
-- Validasi email `@itk.ac.id`
-- Auto-create user internal
+- Login email + password (DEC-002)
+- Register email + password dengan validasi domain `@itk.ac.id`
+- Password bcrypt hashed di backend
+- JWT internal untuk authenticated request
 - Role-based access: user, admin, superadmin
 
 ### 2. Item Reporting

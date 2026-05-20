@@ -25,7 +25,7 @@ Civitas kampus ITK belum memiliki sistem terpusat untuk mengelola barang hilang 
 
 | Kriteria | Target |
 |---------|--------|
-| Login via Google kampus | Berfungsi end-to-end |
+| Login via email kampus | Berfungsi end-to-end (register + login + JWT internal) |
 | Buat posting lost/found | Bisa dilakukan dalam alur yang sederhana |
 | Pencarian dan filter | Bisa dipakai untuk menemukan item relevan |
 | Klaim item found | Bisa berjalan dari pending sampai completed |
@@ -34,7 +34,7 @@ Civitas kampus ITK belum memiliki sistem terpusat untuk mengelola barang hilang 
 ## Scope MVP
 
 ### In Scope
-- Login Google dan validasi email kampus
+- Login email + password dengan validasi email kampus (DEC-002)
 - CRUD posting lost dan found
 - Upload foto dengan pemrosesan client-side
 - Search dan filter

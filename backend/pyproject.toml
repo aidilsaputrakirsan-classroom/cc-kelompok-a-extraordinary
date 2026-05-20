@@ -1,0 +1,53 @@
+# ===================================================================
+# Temuin Backend - pytest + coverage configuration
+# ===================================================================
+# Per DEC-020: backend test coverage threshold = 60%.
+# Run from backend/ directory: `pytest`
+# ===================================================================
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+    "--cov=app",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+    "--cov-fail-under=60",
+]
+markers = [
+    "integration: integration tests that hit the database",
+    "slow: tests that take more than a second",
+]
+filterwarnings = [
+    # Pydantic v2 / SQLAlchemy emit deprecation noise in tests; suppress
+    # only the categories we cannot control to keep CI logs readable.
+    "ignore::DeprecationWarning:passlib.*",
+    "ignore::DeprecationWarning:jose.*",
+]
+
+[tool.coverage.run]
+source = ["app"]
+branch = true
+omit = [
+    "app/__init__.py",
+    "app/*/migrations/*",
+    "app/utils/seed.py",
+    "app/config.py",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]

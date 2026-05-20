@@ -1,19 +1,28 @@
 import { createBrowserRouter } from "react-router-dom"
+import { lazy, Suspense } from "react"
 import RootLayout from "@/components/layout/RootLayout"
 import HomePage from "@/pages/HomePage"
 import LoginPage from "@/pages/LoginPage"
 import RegisterPage from "@/pages/RegisterPage"
-import ItemListPage from "@/pages/ItemListPage"
-import ItemDetailPage from "@/pages/ItemDetailPage"
-import CreateItemPage from "@/pages/CreateItemPage"
-import MyItemsPage from "@/pages/MyItemsPage"
-import MyClaimsPage from "@/pages/MyClaimsPage"
-import NotificationsPage from "@/pages/NotificationsPage"
-import AdminClaimsPage from "@/pages/AdminClaimsPage"
-import AdminClaimDetailPage from "@/pages/AdminClaimDetailPage"
-import AdminMasterDataPage from "@/pages/AdminMasterDataPage"
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
 import AdminRoute from "@/components/auth/AdminRoute"
+import PageState from "@/components/PageState"
+
+const Loadable = (Component) => (props) => (
+  <Suspense fallback={<PageState state="loading" loadingText="Memuat halaman..." />}>
+    <Component {...props} />
+  </Suspense>
+);
+
+const ItemListPage = Loadable(lazy(() => import("@/pages/ItemListPage")))
+const ItemDetailPage = Loadable(lazy(() => import("@/pages/ItemDetailPage")))
+const CreateItemPage = Loadable(lazy(() => import("@/pages/CreateItemPage")))
+const MyItemsPage = Loadable(lazy(() => import("@/pages/MyItemsPage")))
+const MyClaimsPage = Loadable(lazy(() => import("@/pages/MyClaimsPage")))
+const NotificationsPage = Loadable(lazy(() => import("@/pages/NotificationsPage")))
+const AdminClaimsPage = Loadable(lazy(() => import("@/pages/AdminClaimsPage")))
+const AdminClaimDetailPage = Loadable(lazy(() => import("@/pages/AdminClaimDetailPage")))
+const AdminMasterDataPage = Loadable(lazy(() => import("@/pages/AdminMasterDataPage")))
 
 export const router = createBrowserRouter([
   {

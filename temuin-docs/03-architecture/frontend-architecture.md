@@ -53,6 +53,7 @@ frontend/
 - `MyClaimsPage`
 - `ProfilePage`
 - `NotificationsPage`
+- `StatusPage` (Sprint 7+, public, no auth)
 - Halaman admin untuk claim, master data, dan user management
 
 ## Aturan UI
@@ -65,10 +66,26 @@ frontend/
 
 ## Routing Dan Data Flow
 
-- Frontend memanggil satu base URL API aktif
-- Pada fase awal base URL menuju backend monolith
-- Pada fase gateway, base URL dialihkan ke Nginx gateway
-- Auth state menyimpan user dan JWT internal
+- Frontend memanggil satu base URL API aktif via `VITE_API_BASE_URL`
+- Pada fase awal (Sprint 1-5) base URL menuju backend monolith (`http://localhost:8000` dev, `https://temuin.pangeransilaen.net` production)
+- Pada fase gateway (Sprint 6+) base URL tetap sama, gateway nginx yang routing internal ke 3 service
+- Path API selalu prefix `/api/*` untuk konsistensi: `/api/auth/*`, `/api/items/*`, `/api/claims/*`, `/api/notifications/*`
+- Auth state menyimpan user dan JWT internal di `localStorage`
+
+## Halaman Sistem & Observability (Sprint 7)
+
+- `StatusPage` di route `/status`: tampilkan kesehatan 3 service backend dengan polling 30 detik
+  - Komponen wajib pakai shadcn: `<Card>`, `<Badge>` (variant `success` untuk up, `destructive` untuk down), `<Skeleton>` saat loading
+  - Sumber data: `GET /api/status` aggregator endpoint (DEC-022)
+  - Accessibility: `role="status"` untuk live region polling, `aria-label` per badge
+
+## Error Handling Cross-Service (Sprint 7)
+
+- Axios interceptor catat header `X-Correlation-ID` dari response (untuk debugging)
+- Status 5xx (terutama 503): tampilkan banner shadcn `<Alert variant="destructive">` dengan tombol Retry
+- Status 429 (rate limit): tampilkan toast Sonner "Terlalu banyak permintaan, coba lagi sebentar lagi"
+- Timeout cross-service: tampilkan toast Sonner "Layanan sementara terganggu, coba lagi"
+- Error boundary global di App.jsx: render fallback `<Alert>` dengan link refresh
 
 ## Auth Flow Frontend
 
@@ -88,3 +105,4 @@ Catatan:
 - [backend-architecture.md](./backend-architecture.md)
 - [../05-roles/frontend.md](../05-roles/frontend.md)
 - [../04-implementation-plan/environment-setup.md](../04-implementation-plan/environment-setup.md)
+- [../01-concept/decision-log.md](../01-concept/decision-log.md) (DEC-022 StatusPage component)
