@@ -14,11 +14,11 @@
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| BE-6.1 | Pisahkan `app/auth/` ke `services/auth-service/` (port 8001) | High | 5h | BE-5.3 | todo | - | Modul 12: bounded context. Struktur identik (`main.py`, `database.py`, `models.py`, `schemas.py`, `routers/`, `Dockerfile`). Endpoint: `POST /register`, `POST /login`, `GET /me`, `PUT /me` |
-| BE-6.2 | Pisahkan `app/items/` + `app/master_data/` ke `services/item-service/` (port 8002) | High | 5h | BE-5.3 | todo | - | Modul 12: gabung items + master_data ke satu service (DEC-019). Endpoint items + categories + buildings + locations + security_officers |
-| BE-6.3 | Pisahkan `app/claims/` + `app/notifications/` + audit_logs ke `services/engagement-service/` (port 8003) | High | 5h | BE-6.2 | todo | - | Modul 12: gabung claims + notifications + audit (DEC-019). Tambah `httpx_client.py` untuk call ke item-service |
-| BE-6.4 | Tambah shared JWT verification helper di item-service & engagement-service (DEC-017) | High | 3h | BE-6.1, BE-6.2, BE-6.3 | todo | - | Modul 12: shared secret JWT via env `JWT_SECRET`, verifikasi lokal tanpa call ke auth-service |
-| BE-6.5 | Tambah `httpx_client.py` untuk inter-service HTTP calls dengan timeout 5s | High | 2h | BE-6.3 | todo | - | Modul 12: sync REST communication. Timeout default 5s. Retry+CB ditambah di Sprint 7 |
+| BE-6.1 | Pisahkan `app/auth/` ke `services/auth-service/` (port 8001) | High | 5h | BE-5.3 | in_progress | - | Modul 12: bounded context. Struktur identik (`main.py`, `database.py`, `models.py`, `schemas.py`, `routers/`, `Dockerfile`). Endpoint: `POST /register`, `POST /login`, `GET /me`, `PUT /me` |
+| BE-6.2 | Pisahkan `app/items/` + `app/master_data/` ke `services/item-service/` (port 8002) | High | 5h | BE-5.3 | in_progress | - | Modul 12: gabung items + master_data ke satu service (DEC-019). Endpoint items + categories + buildings + locations + security_officers |
+| BE-6.3 | Pisahkan `app/claims/` + `app/notifications/` + audit_logs ke `services/engagement-service/` (port 8003) | High | 5h | BE-6.2 | in_progress | - | Modul 12: gabung claims + notifications + audit (DEC-019). Tambah `httpx_client.py` untuk call ke item-service |
+| BE-6.4 | Tambah shared JWT verification helper di item-service & engagement-service (DEC-017) | High | 3h | BE-6.1, BE-6.2, BE-6.3 | in_progress | - | Modul 12: shared secret JWT via env `JWT_SECRET`, verifikasi lokal tanpa call ke auth-service |
+| BE-6.5 | Tambah `httpx_client.py` untuk inter-service HTTP calls dengan timeout 5s | High | 2h | BE-6.3 | in_progress | - | Modul 12: sync REST communication. Timeout default 5s. Retry+CB ditambah di Sprint 7 |
 
 ## Lead Frontend (@nicholasmnrng)
 

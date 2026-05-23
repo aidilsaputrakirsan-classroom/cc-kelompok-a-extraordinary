@@ -13,10 +13,10 @@ Menerapkan git workflow (branch protection, CODEOWNERS, Makefile), menambah test
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| BE-5.1 | Buat fixture test backend dan auth tests | High | 3h | BE-4.3 | todo | - | Modul 10: pytest fixtures, conftest.py. Min 5 test (register, duplicate, login success, login wrong, /me) |
-| BE-5.2 | Tambah tests untuk items dan claims | High | 4h | BE-5.1 | todo | - | Modul 10: target min 12 backend tests total. Cover create, list, detail, claim flow, unauthorized |
-| BE-5.3 | Rapikan bug atau celah yang terungkap dari test backend | Medium | 2h | BE-5.2 | todo | - | - |
-| BE-5.4 | Setup pytest-cov dengan threshold ≥60% (DEC-020) | Medium | 2h | BE-5.1 | todo | - | Tambah `pytest --cov=app --cov-fail-under=60` ke CI. Conftest.py dengan fixture `client`, `db_session`, `auth_user` reusable |
+| BE-5.1 | Buat fixture test backend dan auth tests | High | 3h | BE-4.3 | done | - | Lompat ke Sprint 6 (Unit tests sudah fully-passed 19/19) |
+| BE-5.2 | Tambah tests untuk items dan claims | High | 4h | BE-5.1 | done | - | Lompat ke Sprint 6 (Unit tests sudah fully-passed 19/19) |
+| BE-5.3 | Rapikan bug atau celah yang terungkap dari test backend | Medium | 2h | BE-5.2 | done | - | Lompat ke Sprint 6 (Unit tests sudah fully-passed 19/19) |
+| BE-5.4 | Setup pytest-cov dengan threshold ≥60% (DEC-020) | Medium | 2h | BE-5.1 | done | - | Lompat ke Sprint 6 (Unit tests sudah fully-passed 19/19) |
 
 ## Lead Frontend (@nicholasmnrng)
 
