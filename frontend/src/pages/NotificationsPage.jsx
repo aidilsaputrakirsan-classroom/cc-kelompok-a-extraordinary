@@ -14,7 +14,7 @@ export default function NotificationsPage() {
     try {
       setLoading(true)
       setError(null)
-      const response = await api.get('/notifications/me', { signal })
+      const response = await api.get('/api/notifications/me', { signal })
       const notifData = response.data?.data || response.data || []
       if (Array.isArray(notifData)) {
         setNotifications(notifData)
@@ -38,7 +38,7 @@ export default function NotificationsPage() {
 
   const handleMarkAsRead = async (id) => {
     try {
-      await api.put(`/notifications/${id}/read`)
+      await api.put(`/api/notifications/${id}/read`)
       setNotifications(prev =>
         prev.map(notif => notif.id === id ? { ...notif, is_read: true } : notif)
       )
@@ -50,7 +50,7 @@ export default function NotificationsPage() {
 
   const handleMarkAllAsRead = async () => {
     try {
-      await api.put('/notifications/read-all')
+      await api.put('/api/notifications/read-all')
       setNotifications(prev => prev.map(notif => ({ ...notif, is_read: true })))
     } catch (error) {
       console.error("Error marking all as read:", error)

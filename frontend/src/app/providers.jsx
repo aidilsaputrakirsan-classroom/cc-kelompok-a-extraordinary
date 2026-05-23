@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
     }
 
     const controller = new AbortController()
-    api.get("/auth/me", { signal: controller.signal })
+    api.get("/api/auth/me", { signal: controller.signal })
       .then((res) => {
         if (!controller.signal.aborted) setUser(res.data)
       })

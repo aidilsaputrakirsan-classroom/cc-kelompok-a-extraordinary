@@ -29,7 +29,7 @@ function MasterDataTable({ entityType, label, singular }) {
     try {
       setLoading(true)
       setError(null)
-      const response = await api.get(`/master-data/${entityType}`, { signal })
+      const response = await api.get(`/api/master-data/${entityType}`, { signal })
       const data = response.data?.data || response.data || []
       if (Array.isArray(data)) setItems(data)
     } catch (err) {
@@ -68,10 +68,10 @@ function MasterDataTable({ entityType, label, singular }) {
     try {
       setSaving(true)
       if (editItem) {
-        await api.put(`/master-data/${entityType}/${editItem.id}`, { name: name.trim() })
+        await api.put(`/api/master-data/${entityType}/${editItem.id}`, { name: name.trim() })
         toast.success(`${singular} berhasil diperbarui.`)
       } else {
-        await api.post(`/master-data/${entityType}`, { name: name.trim() })
+        await api.post(`/api/master-data/${entityType}`, { name: name.trim() })
         toast.success(`${singular} berhasil ditambahkan.`)
       }
       setDialogOpen(false)
@@ -90,7 +90,7 @@ function MasterDataTable({ entityType, label, singular }) {
   const handleDelete = async (item) => {
     if (!confirm(`Hapus ${singular.toLowerCase()} "${item.name}"?`)) return
     try {
-      await api.delete(`/master-data/${entityType}/${item.id}`)
+      await api.delete(`/api/master-data/${entityType}/${item.id}`)
       toast.success(`${singular} berhasil dihapus.`)
       fetchItems()
     } catch (err) {

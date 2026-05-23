@@ -34,7 +34,7 @@ export default function ItemDetailPage() {
     try {
       setLoading(true)
       setError(null)
-      const response = await api.get(`/items/${id}`, { signal })
+      const response = await api.get(`/api/items/${id}`, { signal })
       const itemData = response.data?.data || response.data
       setItem(itemData)
 
@@ -53,7 +53,7 @@ export default function ItemDetailPage() {
 
   const fetchClaims = async (itemId, signal) => {
     try {
-      const res = await api.get(`/claims/?item_id=${itemId}`, { signal })
+      const res = await api.get(`/api/claims/?item_id=${itemId}`, { signal })
       const itemClaims = res.data?.data || res.data || []
       setClaims(itemClaims)
     } catch (err) {
@@ -72,7 +72,7 @@ export default function ItemDetailPage() {
   const handleClaimSubmit = async (claimData) => {
     try {
       setClaimLoading(true)
-      const response = await api.post('/claims/', claimData)
+      const response = await api.post('/api/claims/', claimData)
       if (response.status === 201 || response.status === 200) {
         toast.success("Klaim berhasil diajukan! Admin akan segera memverifikasi.")
         setShowClaimForm(false)
@@ -92,7 +92,7 @@ export default function ItemDetailPage() {
 
     try {
       setDeleteLoading(true)
-      await api.delete(`/items/${item.id}`)
+      await api.delete(`/api/items/${item.id}`)
       toast.success("Laporan berhasil dihapus!")
       navigate("/my-items")
     } catch (error) {
@@ -105,7 +105,7 @@ export default function ItemDetailPage() {
   const handleUpdateStatus = async (newStatus) => {
     try {
       setStatusUpdateLoading(true)
-      await api.put(`/items/${item.id}`, { status: newStatus })
+      await api.put(`/api/items/${item.id}`, { status: newStatus })
       toast.success("Status berhasil diperbarui!")
       fetchItemAndClaims()
     } catch (error) {
