@@ -19,7 +19,7 @@ export default function LoginPage() {
     e.preventDefault()
     try {
       setLoading(true)
-      const response = await api.post("/auth/login/", { email, password })
+      const response = await api.post("/auth/login", { email, password })
       const { access_token } = response.data
 
       // Simpan token dulu agar interceptor bisa pakai
