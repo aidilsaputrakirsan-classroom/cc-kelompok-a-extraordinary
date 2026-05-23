@@ -48,7 +48,14 @@ temp/
 
 # Credentials (safety net)
 serviceAccountKey.json
+serviceAccountKey*.json
+*-credentials.json
+*-service-account*.json
+firebase-*.json
+gcp-*.json
+aws-credentials*
 
 # AI agent local files
 .opencode/
 .claude/
+docs/superpowers/
