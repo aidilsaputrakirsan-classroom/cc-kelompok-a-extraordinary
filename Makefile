@@ -4,7 +4,7 @@
 # Prerequisites: docker compose up -d (containers must be running)
 # ============================================================
 
-.PHONY: build up down logs lint lint-fix lint-backend lint-frontend test test-backend test-frontend test-coverage pr-check ci-local
+.PHONY: build up down logs lint lint-fix lint-backend lint-frontend test test-backend test-frontend test-coverage pr-check ci-local up-micro down-micro down-micro-clean logs-micro shell-micro ps-micro stats-micro
 
 # --- Docker Lifecycle ---
 
@@ -87,3 +87,45 @@ pr-check:
 	@echo "Step 5: Cleaning up..."
 	docker compose down
 	@echo "PR check passed!"
+
+# ============================================================
+# Microservices targets (Sprint 6, DO-6.4)
+# ============================================================
+
+COMPOSE_MICRO := docker compose -f infra/docker-compose.microservices.yml
+
+up-micro:
+	$(COMPOSE_MICRO) up -d
+	@echo ""
+	@echo "Microservices started. Endpoints:"
+	@echo "  auth:       http://localhost:8001/health"
+	@echo "  item:       http://localhost:8002/health"
+	@echo "  engagement: http://localhost:8003/health"
+	@echo "  frontend:   http://localhost:3000"
+
+down-micro:
+	$(COMPOSE_MICRO) down
+
+down-micro-clean:
+	$(COMPOSE_MICRO) down -v
+
+logs-micro:
+ifndef service
+	$(COMPOSE_MICRO) logs -f
+else
+	$(COMPOSE_MICRO) logs -f $(service)
+endif
+
+shell-micro:
+ifndef service
+	@echo "Usage: make shell-micro service=<auth-service|item-service|engagement-service|frontend|db>"
+	@echo "Example: make shell-micro service=auth-service"
+else
+	$(COMPOSE_MICRO) exec $(service) sh
+endif
+
+ps-micro:
+	$(COMPOSE_MICRO) ps
+
+stats-micro:
+	docker stats temuin-db temuin-auth temuin-item temuin-engagement temuin-frontend --no-stream

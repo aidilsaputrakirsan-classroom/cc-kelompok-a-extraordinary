@@ -1,0 +1,145 @@
+# Temuin microservices production compose (DEC-019).
+# 3 service + 1 Postgres dengan 3 logical DB.
+# Total RAM target: <1.4 GB (Tencent VPS 1.9 GB constraint).
+#
+# Volume temuin_pgdata di-set external supaya dipakai bersama dengan
+# state existing dari deploy monolith (kalau cutover) atau di-create
+# baru oleh DevOps script (cold start).
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: temuin-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      # Default DB tetap dibuat agar pg_isready healthcheck respond.
+      # 3 logical DB (auth_db, item_db, engagement_db) dibuat oleh
+      # postgres-init/01-create-databases.sh saat initdb.
+      POSTGRES_DB: ${DB_USER}
+    volumes:
+      - temuin_pgdata:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - temuin-net
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+
+  auth-service:
+    image: pangeransilaen/temuin-auth-service:latest
+    container_name: temuin-auth
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@temuin-db:5432/auth_db
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      DB_HOST: temuin-db
+      DB_PORT: "5432"
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "127.0.0.1:8001:8001"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - temuin-net
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  item-service:
+    image: pangeransilaen/temuin-item-service:latest
+    container_name: temuin-item
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@temuin-db:5432/item_db
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      DB_HOST: temuin-db
+      DB_PORT: "5432"
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "127.0.0.1:8002:8002"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - temuin-net
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  engagement-service:
+    image: pangeransilaen/temuin-engagement-service:latest
+    container_name: temuin-engagement
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@temuin-db:5432/engagement_db
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      AUTH_SERVICE_URL: http://temuin-auth:8001
+      ITEM_SERVICE_URL: http://temuin-item:8002
+      DB_HOST: temuin-db
+      DB_PORT: "5432"
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "127.0.0.1:8003:8003"
+    depends_on:
+      db:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      item-service:
+        condition: service_started
+    networks:
+      - temuin-net
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  frontend:
+    image: pangeransilaen/temuin-frontend:prod
+    container_name: temuin-frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:80"
+    depends_on:
+      - auth-service
+      - item-service
+      - engagement-service
+    networks:
+      - temuin-net
+    deploy:
+      resources:
+        limits:
+          memory: 96M
+
+volumes:
+  temuin_pgdata:
+    name: temuin_pgdata
+    external: true
+
+networks:
+  temuin-net:
+    name: temuin-net
+    driver: bridge
