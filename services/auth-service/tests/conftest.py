@@ -1,0 +1,50 @@
+"""Shared test fixtures for auth-service smoke tests."""
+import os
+
+# Set required env BEFORE importing app
+os.environ.setdefault("DATABASE_URL", "sqlite:///./_test_auth.db")
+os.environ.setdefault("SECRET_KEY", "test-secret-key-for-pytest-only-not-prod")
+os.environ.setdefault("ALGORITHM", "HS256")
+os.environ.setdefault("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
+os.environ.setdefault("CORS_ORIGINS", '["http://localhost"]')
+
+import pytest  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
+from sqlalchemy import create_engine  # noqa: E402
+from sqlalchemy.orm import sessionmaker  # noqa: E402
+
+from app.database import Base, get_db  # noqa: E402
+from app.main import app  # noqa: E402
+
+# Use a separate test SQLite DB
+engine = create_engine("sqlite:///./_test_auth.db", connect_args={"check_same_thread": False})
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+def override_get_db():
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+app.dependency_overrides[get_db] = override_get_db
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _setup_db():
+    Base.metadata.create_all(bind=engine)
+    yield
+    Base.metadata.drop_all(bind=engine)
+    engine.dispose()
+    if os.path.exists("./_test_auth.db"):
+        try:
+            os.remove("./_test_auth.db")
+        except OSError:
+            pass  # Windows file lock, harmless
+
+
+@pytest.fixture()
+def client():
+    return TestClient(app)
