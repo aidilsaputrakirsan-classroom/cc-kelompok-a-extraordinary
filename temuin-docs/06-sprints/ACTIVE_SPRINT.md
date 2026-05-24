@@ -2,10 +2,10 @@
 
 ## Current Priority
 
-- **Active Sprint**: `sprint-05`
-- **Periode**: Minggu 13 (carryover dari Minggu 9-10)
-- **Alignment Modul**: Modul 9-10 (Git Workflow, CI 3-job, Backend & Frontend Testing dengan threshold)
-- **Last Updated**: 2026-05-17
+- **Active Sprint**: `sprint-06`
+- **Periode**: Minggu 14
+- **Alignment Modul**: Modul 11-12 (Continuous Deployment, Microservices Bounded Context)
+- **Last Updated**: 2026-05-23
 
 ## Sprint Calendar (Modul 10-15 Roadmap)
 

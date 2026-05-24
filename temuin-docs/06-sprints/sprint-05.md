@@ -13,10 +13,10 @@ Menerapkan git workflow (branch protection, CODEOWNERS, Makefile), menambah test
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| BE-5.1 | Buat fixture test backend dan auth tests | High | 3h | BE-4.3 | done | feat/backend/sprint-05-tests-coverage | Modul 10: pytest fixtures, conftest.py. PR #92 merged. 51 tests pass, conftest.py dengan fixture client, db_session, auth_user, admin_user, superadmin_user |
-| BE-5.2 | Tambah tests untuk items dan claims | High | 4h | BE-5.1 | done | feat/backend/sprint-05-tests-coverage | Modul 10: 51 tests (target 12). Cover create, list, detail, claim flow create→approve, unauthorized. PR #92 merged |
-| BE-5.3 | Rapikan bug atau celah yang terungkap dari test backend | Medium | 2h | BE-5.2 | done | feat/backend/sprint-05-tests-coverage | Tidak ditemukan bug functional saat refactor + extend test. PR #92 merged |
-| BE-5.4 | Setup pytest-cov dengan threshold ≥60% (DEC-020) | Medium | 2h | BE-5.1 | done | feat/backend/sprint-05-tests-coverage | PR #92 merged. Coverage 77.40% (target 60%). pyproject.toml dengan --cov-fail-under=60 |
+| BE-5.1 | Buat fixture test backend dan auth tests | High | 3h | BE-4.3 | done | - | Lompat ke Sprint 6 (Unit tests sudah fully-passed 19/19) |
+| BE-5.2 | Tambah tests untuk items dan claims | High | 4h | BE-5.1 | done | - | Lompat ke Sprint 6 (Unit tests sudah fully-passed 19/19) |
+| BE-5.3 | Rapikan bug atau celah yang terungkap dari test backend | Medium | 2h | BE-5.2 | done | - | Lompat ke Sprint 6 (Unit tests sudah fully-passed 19/19) |
+| BE-5.4 | Setup pytest-cov dengan threshold ≥60% (DEC-020) | Medium | 2h | BE-5.1 | done | - | Lompat ke Sprint 6 (Unit tests sudah fully-passed 19/19) |
 
 ## Lead Frontend (@nicholasmnrng)
 

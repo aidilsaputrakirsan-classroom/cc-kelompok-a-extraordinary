@@ -1,0 +1,32 @@
+
+from fastapi import APIRouter, Depends, status
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.dependencies import CurrentUser, get_current_user, require_admin
+from app.master_data import schemas, service
+
+router = APIRouter(prefix="/master-data", tags=["master_data"])
+
+@router.get("/{entity_type}", response_model=list[schemas.MasterDataResponse])
+def get_master_data(
+    entity_type: str,
+    db: Session = Depends(get_db),
+    _: CurrentUser = Depends(get_current_user),
+):
+    """ Ambil semua master data untuk entity tertentu (categories, buildings, locations, security-officers).
+    Auth wajib: user yang login. """
+    return service.get_all(db, entity_type)
+
+@router.post("/{entity_type}", response_model=schemas.MasterDataResponse, status_code=status.HTTP_201_CREATED)
+def create_master_data(entity_type: str, data: schemas.MasterDataCreate, db: Session = Depends(get_db), admin: CurrentUser = Depends(require_admin)):
+    return service.create(db, entity_type, data)
+
+@router.put("/{entity_type}/{id}", response_model=schemas.MasterDataResponse)
+def update_master_data(entity_type: str, id: str, data: schemas.MasterDataCreate, db: Session = Depends(get_db), admin: CurrentUser = Depends(require_admin)):
+    return service.update(db, entity_type, id, data)
+
+@router.delete("/{entity_type}/{id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_master_data(entity_type: str, id: str, db: Session = Depends(get_db), admin: CurrentUser = Depends(require_admin)):
+    service.delete(db, entity_type, id)
+    return None
