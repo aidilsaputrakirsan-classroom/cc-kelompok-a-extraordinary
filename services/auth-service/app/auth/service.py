@@ -40,11 +40,28 @@ def validate_password(password: str) -> None:
         )
 
 def validate_itk_email(email: str) -> str:
+    """Validasi email harus dari domain itk.ac.id atau subdomain-nya.
+
+    Yang lolos:
+      - staff@itk.ac.id           (root domain)
+      - mahasiswa@student.itk.ac.id (subdomain)
+
+    Yang ditolak:
+      - user@notitk.ac.id (bukan subdomain itk.ac.id)
+      - user@itk.ac.id.evil.com (suffix attack)
+    """
     normalized_email = email.strip().lower()
-    if not normalized_email.endswith("@itk.ac.id"):
+    if "@" not in normalized_email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Format email tidak valid"
+        )
+    domain = normalized_email.rsplit("@", 1)[1]
+    # Accept root atau subdomain itk.ac.id
+    if domain != "itk.ac.id" and not domain.endswith(".itk.ac.id"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Hanya email itk.ac.id yang diizinkan"
+            detail="Hanya email itk.ac.id (atau subdomain) yang diizinkan"
         )
     return normalized_email
 

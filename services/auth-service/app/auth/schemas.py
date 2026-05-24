@@ -1,27 +1,32 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class RegisterRequest(BaseModel):
     email: str
     password: str
-    name: str
+    name: str = Field(..., min_length=1)
+
 
 class LoginRequest(BaseModel):
     email: str
     password: str
 
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
+
 class UserBase(BaseModel):
-    name: str
+    name: str = Field(..., min_length=1)
     phone: str | None = None
+
 
 class UserUpdate(UserBase):
     pass
+
 
 class UserResponse(UserBase):
     id: str
