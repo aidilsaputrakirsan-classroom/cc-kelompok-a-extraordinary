@@ -40,10 +40,10 @@ export default function CreateItemPage() {
       setMasterDataError(null)
       
       const [catRes, buildRes, locRes, soRes] = await Promise.all([
-        api.get('/master-data/categories', { signal }),
-        api.get('/master-data/buildings', { signal }),
-        api.get('/master-data/locations', { signal }),
-        api.get('/master-data/security-officers', { signal }),
+        api.get('/api/master-data/categories', { signal }),
+        api.get('/api/master-data/buildings', { signal }),
+        api.get('/api/master-data/locations', { signal }),
+        api.get('/api/master-data/security-officers', { signal }),
       ])
       
       setCategories(catRes.data?.data || catRes.data || [])
@@ -132,7 +132,7 @@ export default function CreateItemPage() {
         security_officer_id: formData.security_officer_id || undefined,
         images: images.map((img, idx) => ({ image_data: img, display_order: idx }))
       }
-      const response = await api.post('/items/', payload)
+      const response = await api.post('/api/items/', payload)
       if (response.status === 201 || response.status === 200) {
         toast.success("Laporan berhasil dibuat!")
         navigate("/items")

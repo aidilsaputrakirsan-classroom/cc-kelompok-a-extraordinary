@@ -51,10 +51,10 @@ export function EditItemDialog({ isOpen, onClose, item, onSuccess }) {
       setMasterDataError(null)
       
       const [catRes, buildRes, locRes, soRes] = await Promise.all([
-        api.get('/master-data/categories', { signal }),
-        api.get('/master-data/buildings', { signal }),
-        api.get('/master-data/locations', { signal }),
-        api.get('/master-data/security-officers', { signal }),
+        api.get('/api/master-data/categories', { signal }),
+        api.get('/api/master-data/buildings', { signal }),
+        api.get('/api/master-data/locations', { signal }),
+        api.get('/api/master-data/security-officers', { signal }),
       ])
       
       setCategories(catRes.data?.data || catRes.data || [])
@@ -97,7 +97,7 @@ export function EditItemDialog({ isOpen, onClose, item, onSuccess }) {
         security_officer_id: formData.security_officer_id || undefined
       }
       
-      const response = await api.put(`/items/${item.id}`, payload)
+      const response = await api.put(`/api/items/${item.id}`, payload)
       if (response.status === 200) {
         await onSuccess?.()
       }

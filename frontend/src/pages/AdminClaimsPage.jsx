@@ -18,7 +18,7 @@ export default function AdminClaimsPage() {
       setLoading(true)
       setError(null)
       // Gunakan trailing slash
-      const response = await api.get('/claims/', { signal })
+      const response = await api.get('/api/claims/', { signal })
       const claimsData = response.data?.data || response.data || []
       if (Array.isArray(claimsData)) {
         setClaims(claimsData)

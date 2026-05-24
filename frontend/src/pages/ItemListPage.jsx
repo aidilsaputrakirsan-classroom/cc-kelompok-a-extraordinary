@@ -19,7 +19,7 @@ export default function ItemListPage() {
     try {
       setLoading(true)
       setError(null)
-      const response = await api.get('/items/', { signal })
+      const response = await api.get('/api/items/', { signal })
       const itemsData = response.data?.data || response.data || []
       if (Array.isArray(itemsData)) {
         setItems(itemsData)

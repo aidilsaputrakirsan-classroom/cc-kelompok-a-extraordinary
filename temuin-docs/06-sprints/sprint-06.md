@@ -24,9 +24,9 @@
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| FE-6.1 | Adaptasi `src/config/api.js`: base URL via `VITE_API_BASE_URL`, fallback `/api` | Medium | 2h | FE-5.3, DO-6.2 | todo | - | `.env.production` set `VITE_API_BASE_URL=https://temuin.pangeransilaen.net/api` |
-| FE-6.2 | Update path API ke prefix `/api/*`: `/api/auth/*`, `/api/items/*`, `/api/claims/*`, `/api/notifications/*` | High | 3h | FE-6.1, BE-6.4 | todo | - | Tidak ada hardcode `localhost:8000`. Adapt sesuai routing gateway |
-| FE-6.3 | Toast Sonner saat 503/timeout cross-service | Medium | 2h | FE-6.2 | todo | - | "Layanan sementara terganggu, coba lagi". Pakai shadcn `<Sonner />` |
+| FE-6.1 | Adaptasi `src/config/api.js`: base URL via `VITE_API_BASE_URL`, fallback `''` | Medium | 2h | FE-5.3, DO-6.2 | done | feature/frontend/sprint-06-api-adaptation | PR #102 merged. Fallback jadi empty string (Vite proxy handle /api routing). .env.example diupdate dengan panduan dev vs production |
+| FE-6.2 | Update path API ke prefix `/api/*`: `/api/auth/*`, `/api/items/*`, `/api/claims/*`, `/api/notifications/*` | High | 3h | FE-6.1, BE-6.4 | done | feature/frontend/sprint-06-api-adaptation | PR #102 merged. 14 file diubah, 39 endpoint diupdate. Build hijau, 21/21 tests lulus |
+| FE-6.3 | Toast Sonner saat 503/timeout cross-service | Medium | 2h | FE-6.2 | done | feature/frontend/sprint-06-api-adaptation | PR #102 merged. Axios response interceptor untuk 503/504/network error -> toast "Layanan sementara terganggu, coba lagi" |
 
 ## Lead DevOps (@PangeranSilaen)
 
