@@ -1,0 +1,144 @@
+# =============================================================================
+# Temuin CD - Sprint 6 (Modul 11): Continuous Deployment ke Tencent VPS
+# =============================================================================
+# Trigger: push ke master (post-merge). CI pre-merge sudah validate quality.
+#
+# Strategy: build & push 4 image (3 service + frontend) -> SSH VPS -> docker
+# compose pull && up -d -> health check 3 endpoint dengan retry.
+#
+# Rollback: kalau health check gagal, capture logs --tail=100 untuk debug.
+# Manual rollback via SSH: cd /opt/temuin && cp docker-compose.monolith.yml.bak
+# docker-compose.yml && docker compose down && docker compose up -d.
+# =============================================================================
+name: CD
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:  # allow manual trigger
+
+concurrency:
+  group: cd-${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-push:
+    name: Build & Push Images
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - name: auth-service
+            context: ./services/auth-service
+            tag: pangeransilaen/temuin-auth-service:latest
+            build_args: ""
+          - name: item-service
+            context: ./services/item-service
+            tag: pangeransilaen/temuin-item-service:latest
+            build_args: ""
+          - name: engagement-service
+            context: ./services/engagement-service
+            tag: pangeransilaen/temuin-engagement-service:latest
+            build_args: ""
+          - name: frontend
+            context: ./frontend
+            tag: pangeransilaen/temuin-frontend:prod
+            build_args: |
+              VITE_API_BASE_URL=
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build & push ${{ matrix.name }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          push: true
+          tags: ${{ matrix.tag }}
+          build-args: ${{ matrix.build_args }}
+          cache-from: type=registry,ref=${{ matrix.tag }}
+          cache-to: type=inline
+
+  deploy:
+    name: Deploy to Tencent VPS
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    timeout-minutes: 10
+
+    steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.TENCENT_VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.TENCENT_VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Pull & restart containers
+        env:
+          VPS_USER: ${{ secrets.TENCENT_VPS_USER }}
+          VPS_HOST: ${{ secrets.TENCENT_VPS_HOST }}
+        run: |
+          ssh -i ~/.ssh/id_ed25519 $VPS_USER@$VPS_HOST << 'EOF'
+            set -e
+            cd /opt/temuin
+            echo "=== Pulling latest images ==="
+            docker compose -f docker-compose.microservices.yml pull
+            echo "=== Restarting containers ==="
+            docker compose -f docker-compose.microservices.yml up -d
+            echo "=== Waiting for health checks (30s) ==="
+            sleep 30
+            echo "=== Service status ==="
+            docker compose -f docker-compose.microservices.yml ps
+          EOF
+
+      - name: Health check (retry 3x)
+        run: |
+          set -e
+          echo "Verifying production health..."
+          for i in 1 2 3; do
+            sleep 10
+            echo "=== Attempt $i/3 ==="
+            HEALTH_AUTH=$(curl -fsS -o /dev/null -w "%{http_code}" https://temuin.pangeransilaen.net/api/auth/health || echo "fail")
+            HEALTH_ITEM=$(curl -fsS -o /dev/null -w "%{http_code}" https://temuin.pangeransilaen.net/api/items/health || echo "fail")
+            HEALTH_ENG=$(curl -fsS -o /dev/null -w "%{http_code}" https://temuin.pangeransilaen.net/api/engagement/health || echo "fail")
+            echo "auth=$HEALTH_AUTH item=$HEALTH_ITEM engagement=$HEALTH_ENG"
+            if [ "$HEALTH_AUTH" = "200" ] && [ "$HEALTH_ITEM" = "200" ] && [ "$HEALTH_ENG" = "200" ]; then
+              echo "All 3 services healthy"
+              exit 0
+            fi
+            if [ $i -eq 3 ]; then
+              echo "Health check failed after 3 attempts"
+              exit 1
+            fi
+          done
+
+      - name: Capture logs on failure
+        if: failure()
+        env:
+          VPS_USER: ${{ secrets.TENCENT_VPS_USER }}
+          VPS_HOST: ${{ secrets.TENCENT_VPS_HOST }}
+        run: |
+          ssh -i ~/.ssh/id_ed25519 $VPS_USER@$VPS_HOST << 'EOF'
+            cd /opt/temuin
+            echo "=== auth-service logs ==="
+            docker compose -f docker-compose.microservices.yml logs --tail=50 auth-service || true
+            echo ""
+            echo "=== item-service logs ==="
+            docker compose -f docker-compose.microservices.yml logs --tail=50 item-service || true
+            echo ""
+            echo "=== engagement-service logs ==="
+            docker compose -f docker-compose.microservices.yml logs --tail=50 engagement-service || true
+          EOF
