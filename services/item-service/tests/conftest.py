@@ -1,4 +1,5 @@
 """Shared test fixtures for item-service smoke tests."""
+import contextlib
 import os
 
 os.environ.setdefault("DATABASE_URL", "sqlite:///./_test_item.db")
@@ -39,10 +40,8 @@ def _setup_db():
     Base.metadata.drop_all(bind=engine)
     engine.dispose()
     if os.path.exists("./_test_item.db"):
-        try:
+        with contextlib.suppress(OSError):
             os.remove("./_test_item.db")
-        except OSError:
-            pass
 
 
 @pytest.fixture()
