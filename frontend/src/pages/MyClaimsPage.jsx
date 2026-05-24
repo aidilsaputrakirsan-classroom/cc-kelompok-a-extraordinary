@@ -11,11 +11,11 @@ export default function MyClaimsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  const fetchMyClaims = async () => {
+  const fetchMyClaims = async (signal) => {
     try {
       setLoading(true)
       setError(null)
-      const response = await api.get('/claims/me')
+      const response = await api.get('/claims/me', { signal })
       const claimsData = response.data?.data || response.data || []
       if (Array.isArray(claimsData)) {
         setClaims(claimsData)
@@ -23,15 +23,18 @@ export default function MyClaimsPage() {
         setClaims([])
       }
     } catch (err) {
+      if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
       console.error("Error fetching user claims:", err)
       setError(err.response?.data?.detail || "Gagal memuat klaim Anda.")
     } finally {
-      setLoading(false)
+      if (!signal?.aborted) setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchMyClaims()
+    const controller = new AbortController()
+    fetchMyClaims(controller.signal)
+    return () => controller.abort()
   }, [])
 
   return (

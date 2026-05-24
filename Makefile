@@ -4,7 +4,7 @@
 # Prerequisites: docker compose up -d (containers must be running)
 # ============================================================
 
-.PHONY: build up down logs lint lint-fix test pr-check
+.PHONY: build up down logs lint lint-fix lint-backend lint-frontend test test-backend test-frontend test-coverage pr-check ci-local
 
 # --- Docker Lifecycle ---
 
@@ -22,17 +22,43 @@ logs:
 
 # --- Development & CI Targets ---
 
-lint:
+# Composite lint: run backend (ruff) + frontend (eslint).
+# Used by CI lint job.
+lint: lint-backend lint-frontend
+
+lint-backend:
 	@echo "Running ruff linter on backend..."
 	docker compose exec backend ruff check /app --output-format=concise
+
+lint-frontend:
+	@echo "Running eslint on frontend..."
+	cd frontend && npm run lint
 
 lint-fix:
 	@echo "Running ruff with auto-fix..."
 	docker compose exec backend ruff check /app --fix
 
-test:
+# Composite test: backend (pytest) + frontend (vitest).
+test: test-backend test-frontend
+
+test-backend:
 	@echo "Running backend tests..."
 	docker compose exec backend pytest /app/tests -v --tb=short
+
+test-frontend:
+	@echo "Running frontend tests..."
+	cd frontend && npm run test -- --run
+
+test-coverage:
+	@echo "Running backend coverage..."
+	docker compose exec backend pytest /app/tests --cov=app --cov-report=term-missing --cov-fail-under=60
+	@echo "Running frontend coverage..."
+	cd frontend && npm run test:coverage
+
+# Local replica of CI workflow (lint + test + build).
+# Run before pushing to catch CI failures early.
+ci-local: lint test
+	@echo "Local CI checks passed."
 
 pr-check:
 	@echo "PR check: build + health verify..."

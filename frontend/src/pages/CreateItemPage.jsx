@@ -34,16 +34,16 @@ export default function CreateItemPage() {
   const [locations, setLocations] = useState([])
   const [securityOfficers, setSecurityOfficers] = useState([])
 
-  const fetchMasterData = async () => {
+  const fetchMasterData = async (signal) => {
     try {
       setMasterDataLoading(true)
       setMasterDataError(null)
       
       const [catRes, buildRes, locRes, soRes] = await Promise.all([
-        api.get('/master-data/categories'),
-        api.get('/master-data/buildings'),
-        api.get('/master-data/locations'),
-        api.get('/master-data/security-officers'),
+        api.get('/master-data/categories', { signal }),
+        api.get('/master-data/buildings', { signal }),
+        api.get('/master-data/locations', { signal }),
+        api.get('/master-data/security-officers', { signal }),
       ])
       
       setCategories(catRes.data?.data || catRes.data || [])
@@ -51,16 +51,19 @@ export default function CreateItemPage() {
       setLocations(locRes.data?.data || locRes.data || [])
       setSecurityOfficers(soRes.data?.data || soRes.data || [])
     } catch (err) {
+      if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
       console.error("Error fetching master data:", err)
       setMasterDataError("Gagal memuat data referensi. Silakan coba lagi.")
       toast.error("Gagal memuat data referensi.")
     } finally {
-      setMasterDataLoading(false)
+      if (!signal?.aborted) setMasterDataLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchMasterData()
+    const controller = new AbortController()
+    fetchMasterData(controller.signal)
+    return () => controller.abort()
   }, [])
 
   const handleChange = (e) => {

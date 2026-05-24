@@ -30,6 +30,7 @@ export function EditItemDialog({ isOpen, onClose, item, onSuccess }) {
   const [securityOfficers, setSecurityOfficers] = useState([])
 
   useEffect(() => {
+    const controller = new AbortController()
     if (item && isOpen) {
       setFormData({
         title: item.title || "",
@@ -39,20 +40,21 @@ export function EditItemDialog({ isOpen, onClose, item, onSuccess }) {
         location_id: item.location_id || "",
         security_officer_id: item.security_officer_id || ""
       })
-      fetchMasterData()
+      fetchMasterData(controller.signal)
     }
+    return () => controller.abort()
   }, [item, isOpen])
 
-  const fetchMasterData = async () => {
+  const fetchMasterData = async (signal) => {
     try {
       setMasterDataLoading(true)
       setMasterDataError(null)
       
       const [catRes, buildRes, locRes, soRes] = await Promise.all([
-        api.get('/master-data/categories/'),
-        api.get('/master-data/buildings/'),
-        api.get('/master-data/locations/'),
-        api.get('/master-data/security-officers/'),
+        api.get('/master-data/categories', { signal }),
+        api.get('/master-data/buildings', { signal }),
+        api.get('/master-data/locations', { signal }),
+        api.get('/master-data/security-officers', { signal }),
       ])
       
       setCategories(catRes.data?.data || catRes.data || [])
@@ -60,10 +62,11 @@ export function EditItemDialog({ isOpen, onClose, item, onSuccess }) {
       setLocations(locRes.data?.data || locRes.data || [])
       setSecurityOfficers(soRes.data?.data || soRes.data || [])
     } catch (err) {
+      if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
       console.error("Error fetching master data:", err)
       setMasterDataError("Gagal memuat data referensi. Silakan coba lagi.")
     } finally {
-      setMasterDataLoading(false)
+      if (!signal?.aborted) setMasterDataLoading(false)
     }
   }
 
@@ -77,6 +80,11 @@ export function EditItemDialog({ isOpen, onClose, item, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    if (item?.type === 'found' && !formData.security_officer_id) {
+      toast.error("Untuk barang temuan, wajib memilih Satpam Penitipan.")
+      return
+    }
     
     try {
       setLoading(true)

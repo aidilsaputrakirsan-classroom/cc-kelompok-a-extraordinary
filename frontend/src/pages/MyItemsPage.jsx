@@ -12,11 +12,11 @@ export default function MyItemsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  const fetchMyItems = async () => {
+  const fetchMyItems = async (signal) => {
     try {
       setLoading(true)
       setError(null)
-      const response = await api.get('/items/me')
+      const response = await api.get('/items/me', { signal })
       const itemsData = response.data?.data || response.data || []
       if (Array.isArray(itemsData)) {
         setItems(itemsData)
@@ -24,15 +24,18 @@ export default function MyItemsPage() {
         setItems([])
       }
     } catch (err) {
+      if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
       console.error("Error fetching user items:", err)
       setError(err.response?.data?.detail || "Gagal memuat barang Anda.")
     } finally {
-      setLoading(false)
+      if (!signal?.aborted) setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchMyItems()
+    const controller = new AbortController()
+    fetchMyItems(controller.signal)
+    return () => controller.abort()
   }, [])
 
   return (

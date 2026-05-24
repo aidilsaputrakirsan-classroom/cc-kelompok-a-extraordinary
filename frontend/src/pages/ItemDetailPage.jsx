@@ -25,47 +25,48 @@ export default function ItemDetailPage() {
   const [claimLoading, setClaimLoading] = useState(false)
   
   const [claims, setClaims] = useState([])
-  const [claimsLoading, setClaimsLoading] = useState(false)
 
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [statusUpdateLoading, setStatusUpdateLoading] = useState(false)
 
-  const fetchItemAndClaims = async () => {
+  const fetchItemAndClaims = async (signal) => {
     try {
       setLoading(true)
       setError(null)
-      const response = await api.get(`/items/${id}`)
+      const response = await api.get(`/items/${id}`, { signal })
       const itemData = response.data?.data || response.data
       setItem(itemData)
 
       // Fetch claims jika admin atau owner
       if (itemData && user && (user.role === 'admin' || user.role === 'superadmin' || user.id === itemData.created_by)) {
-        fetchClaims(itemData.id)
+        fetchClaims(itemData.id, signal)
       }
     } catch (err) {
+      if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
       console.error("Error fetching item:", err)
       setError(err.response?.data?.detail || "Gagal memuat detail barang.")
     } finally {
-      setLoading(false)
+      if (!signal?.aborted) setLoading(false)
     }
   }
 
-  const fetchClaims = async (itemId) => {
+  const fetchClaims = async (itemId, signal) => {
     try {
-      setClaimsLoading(true)
-      const res = await api.get(`/claims/?item_id=${itemId}`)
+      const res = await api.get(`/claims/?item_id=${itemId}`, { signal })
       const itemClaims = res.data?.data || res.data || []
       setClaims(itemClaims)
     } catch (err) {
+      if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
       console.error("Error fetching claims for item:", err)
-    } finally {
-      setClaimsLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchItemAndClaims()
+    const controller = new AbortController()
+    fetchItemAndClaims(controller.signal)
+    return () => controller.abort()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, user])
 
   const handleClaimSubmit = async (claimData) => {

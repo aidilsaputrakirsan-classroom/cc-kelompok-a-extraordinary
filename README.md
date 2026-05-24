@@ -1,5 +1,7 @@
 # 🔍 Temuin — Platform Lost & Found Institut Teknologi Kalimantan
 
+[![CI Pipeline](https://github.com/aidilsaputrakirsan-classroom/cc-kelompok-a-extraordinary/actions/workflows/ci.yml/badge.svg)](https://github.com/aidilsaputrakirsan-classroom/cc-kelompok-a-extraordinary/actions/workflows/ci.yml)
+
 > **Temuin** adalah platform manajemen barang hilang dan temuan (*Lost & Found*) berbasis web yang dirancang khusus untuk civitas akademika **Institut Teknologi Kalimantan (ITK)**. Sistem ini menjadi solusi terpusat yang menggantikan komunikasi informal (grup chat, pengumuman papan) dengan alur digital yang terstruktur, transparan, dan terdokumentasi.
 
 ---
@@ -516,7 +518,7 @@ Berikut adalah progres pengerjaan tim per sprint beserta link cepat menuju lapor
 | **Sprint 2** | Auth (Google Login), core item flow (CRUD laporan) | ✅ Done | [📄 Lihat Laporan](docs/sprint-02-qa-report.md) |
 | **Sprint 3** | Search & filter, klaim, notifikasi, master data | ✅ Done | [📄 Lihat Laporan](docs/sprint-03-qa-report.md) |
 | **Sprint 4** | Dockerization & kesiapan demo UTS | ✅ Done | [📄 Lihat Laporan](docs/sprint-04-qa-report.md) |
-| **Sprint 5** | CI/CD GitHub Actions & test automation backend | 🔄 Next | - |
+| **Sprint 5** | CI/CD GitHub Actions & test automation backend | ✅ Done | [📄 Lihat Laporan](docs/sprint-05-qa-report.md) |
 | **Sprint 6** | Microservices split (auth-service & item-service) | 🔄 Next | - |
 | **Sprint 7** | Nginx gateway, monitoring, audit log lanjut | 🔄 Next | - |
 | **Sprint 8** | Security hardening & final polish | 🔄 Next | - |
@@ -546,10 +548,12 @@ Kami adalah kelompok mahasiswa dari program studi **Sistem Informasi**, Institut
 - [**Setup Guide**](./docs/setup-guide.md) — Panduan instalasi awal dan konfigurasi environment.
 - [**Docker Guide**](./docs/docker-guide.md) — Panduan lengkap menjalankan sistem menggunakan Docker.
 - [**API Testing Guide**](./docs/api-testing-guide.md) — Instruksi cara menguji backend API secara manual.
+- [**Testing Guide**](./docs/testing-guide.md) — Panduan pengujian otomatis backend (Pytest), frontend (Vitest), serta standar coverage threshold.
 
 ### 🧪 Laporan Blackbox Testing (Lead QA & Docs)
 - [**API Blackbox Testing Report**](./docs/api-blackbox-testing.md) — Laporan lengkap pengujian endpoint backend via Swagger.
 - [**Frontend Blackbox Testing Report**](./docs/frontend-blackbox-testing.md) — Laporan lengkap pengujian antarmuka pengguna (UI/UX) dan alur sistem.
+- [**Sprint 05 QA Report**](./docs/sprint-05-qa-report.md) — Laporan lengkap pengujian regresi dan verifikasi sukses CI 3-job paralel pada Sprint 05.
 
 ---
 
