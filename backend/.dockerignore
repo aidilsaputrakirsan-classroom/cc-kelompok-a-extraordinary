@@ -7,6 +7,14 @@ venv/
 .env.local
 .env.docker
 
+# Cloud / service account credentials (NEVER bake into images!)
+serviceAccountKey*.json
+*-credentials.json
+*-service-account*.json
+firebase-*.json
+gcp-*.json
+aws-credentials*
+
 # Python cache
 __pycache__/
 *.pyc

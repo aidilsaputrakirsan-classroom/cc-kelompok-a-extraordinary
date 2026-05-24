@@ -35,6 +35,6 @@ describe('LoginPage Component', () => {
     
     fireEvent.click(screen.getByRole('button', { name: /masuk/i }))
     
-    expect(api.post).toHaveBeenCalledWith('/auth/login', { email: 'test@student.itk.ac.id', password: 'wrongpass' })
+    expect(api.post).toHaveBeenCalledWith('/api/auth/login', { email: 'test@student.itk.ac.id', password: 'wrongpass' })
   })
 })

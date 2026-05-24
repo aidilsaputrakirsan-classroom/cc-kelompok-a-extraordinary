@@ -15,7 +15,7 @@ export default function MyClaimsPage() {
     try {
       setLoading(true)
       setError(null)
-      const response = await api.get('/claims/me', { signal })
+      const response = await api.get('/api/claims/me', { signal })
       const claimsData = response.data?.data || response.data || []
       if (Array.isArray(claimsData)) {
         setClaims(claimsData)

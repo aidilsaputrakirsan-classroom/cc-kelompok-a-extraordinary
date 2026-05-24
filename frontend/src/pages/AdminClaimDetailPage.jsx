@@ -23,13 +23,13 @@ export default function AdminClaimDetailPage() {
       setLoading(true)
       setError(null)
       
-      const claimRes = await api.get(`/claims/${id}`, { signal })
+      const claimRes = await api.get(`/api/claims/${id}`, { signal })
       const claimData = claimRes.data?.data || claimRes.data
       setClaim(claimData)
 
       if (claimData?.item_id) {
         try {
-          const itemRes = await api.get(`/items/${claimData.item_id}`, { signal })
+          const itemRes = await api.get(`/api/items/${claimData.item_id}`, { signal })
           setItem(itemRes.data?.data || itemRes.data)
         } catch (itemErr) {
           if (itemErr.name === 'CanceledError' || itemErr.code === 'ERR_CANCELED') throw itemErr;
@@ -56,7 +56,7 @@ export default function AdminClaimDetailPage() {
   const handleStatusUpdate = async (newStatus) => {
     try {
       setUpdating(true)
-      await api.put(`/claims/${id}/status`, { status: newStatus })
+      await api.put(`/api/claims/${id}/status`, { status: newStatus })
       
       const statusLabel = {
         approved: "disetujui",

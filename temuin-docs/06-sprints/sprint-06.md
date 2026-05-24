@@ -25,21 +25,23 @@
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| FE-6.1 | Adaptasi `src/config/api.js`: base URL via `VITE_API_BASE_URL`, fallback `/api` | Medium | 2h | FE-5.3, DO-6.2 | todo | - | `.env.production` set `VITE_API_BASE_URL=https://temuin.pangeransilaen.net/api` |
-| FE-6.2 | Update path API ke prefix `/api/*`: `/api/auth/*`, `/api/items/*`, `/api/claims/*`, `/api/notifications/*` | High | 3h | FE-6.1, BE-6.4 | todo | - | Tidak ada hardcode `localhost:8000`. Adapt sesuai routing gateway |
-| FE-6.3 | Toast Sonner saat 503/timeout cross-service | Medium | 2h | FE-6.2 | todo | - | "Layanan sementara terganggu, coba lagi". Pakai shadcn `<Sonner />` |
+| FE-6.1 | Adaptasi `src/config/api.js`: base URL via `VITE_API_BASE_URL`, fallback `''` | Medium | 2h | FE-5.3, DO-6.2 | done | feature/frontend/sprint-06-api-adaptation | PR #102 merged. Fallback jadi empty string (Vite proxy handle /api routing). .env.example diupdate dengan panduan dev vs production |
+| FE-6.2 | Update path API ke prefix `/api/*`: `/api/auth/*`, `/api/items/*`, `/api/claims/*`, `/api/notifications/*` | High | 3h | FE-6.1, BE-6.4 | done | feature/frontend/sprint-06-api-adaptation | PR #102 merged. 14 file diubah, 39 endpoint diupdate. Build hijau, 21/21 tests lulus |
+| FE-6.3 | Toast Sonner saat 503/timeout cross-service | Medium | 2h | FE-6.2 | done | feature/frontend/sprint-06-api-adaptation | PR #102 merged. Axios response interceptor untuk 503/504/network error -> toast "Layanan sementara terganggu, coba lagi" |
 
 ## Lead DevOps (@PangeranSilaen)
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| DO-6.1 | Deploy monolith versi master ke Tencent VPS port 8000 → URL `https://temuin.pangeransilaen.net` (DEC-018) | High | 3h | DO-5.3, FE-5.3, BE-5.3 | todo | - | Modul 11: PaaS-equivalent deploy. Reference `docs/deployment-guide.md`. Setup host nginx + Let's Encrypt + swap 2GB |
-| DO-6.2 | Setup env vars di VPS dan database production di `/opt/temuin/.env` | High | 2h | DO-6.1 | todo | - | Modul 11: secrets management. `JWT_SECRET` random hex 64 char, `DB_PASSWORD` random, `CORS_ORIGINS` set ke domain |
+| DO-6.1 | Deploy monolith versi master ke Tencent VPS port 8000 → URL `https://temuin.pangeransilaen.net` (DEC-018) | High | 3h | DO-5.3, FE-5.3, BE-5.3 | done | manual deploy `/opt/temuin/` di VPS | Modul 11: PaaS-equivalent deploy. Reference [temuin-deployment-guide](https://github.com/PangeranSilaen/random/blob/main/temuin-deployment-guide.md). Setup host nginx + Let's Encrypt + swap 2GB. Verified `https://temuin.pangeransilaen.net` HTTPS hidup, SSL valid, login flow E2E works (post fix #97 trailing slash) |
+| DO-6.2 | Setup env vars di VPS dan database production di `/opt/temuin/.env` | High | 2h | DO-6.1 | done | manual config di VPS | Modul 11: secrets management. `SECRET_KEY` random hex 64 char, `DB_PASSWORD` random, `CORS_ORIGINS=["https://temuin.pangeransilaen.net"]`. Permission `chmod 600`. Sekaligus cleanup omniroute fork yang gak terpakai (3 nginx config + SSL cert revoked) |
 | DO-6.3 | Buat `docker-compose.microservices.yml`: 3 service + 1 Postgres shared multi-DB | High | 4h | BE-6.1, BE-6.2, BE-6.3 | todo | - | Modul 12: compose microservices. Init script `CREATE DATABASE auth_db, item_db, engagement_db`. 3 service expose ke internal network only |
 | DO-6.4 | Update Makefile: `up-micro`, `down-micro`, `logs-micro service=<name>`, `shell-micro service=<name>` | Medium | 1h | DO-6.3 | todo | - | Wrapper untuk dev tim |
 | DO-6.5 | Setup CD pipeline `.github/workflows/ci.yml` job `deploy` (DEC-020) | High | 3h | DO-6.1, DO-5.1 | todo | - | Modul 11: trigger `if: github.ref == 'refs/heads/master' && github.event_name == 'push'`. SSH ke VPS, `docker compose pull && docker compose up -d`. Health check post-deploy 30s retry |
 | DO-6.6 | Setup secrets di GitHub Actions: `TENCENT_VPS_HOST`, `TENCENT_VPS_USER`, `TENCENT_VPS_SSH_KEY`, `DOCKER_HUB_USERNAME`, `DOCKER_HUB_TOKEN` | High | 2h | DO-6.5 | todo | - | Modul 11: production secrets di GitHub Secrets. Generate SSH key terpisah untuk CD, jangan reuse personal key |
-| DO-6.7 | Verifikasi RAM consumption pakai `docker stats` setelah 5 menit idle | Medium | 1h | DO-6.3 | todo | - | Total <1.4 GB. Kalau over → trigger fallback Render free tier monolith |
+| DO-6.7 | Verifikasi RAM consumption pakai `docker stats` setelah 5 menit idle | Medium | 1h | DO-6.1 | done | manual check di VPS | Total Temuin <300 MB (db ~80M, backend ~150M, frontend ~20M). VPS total ~700 MB used dari 1.9 GB (sisa 1.2 GB). Render fallback tidak diperlukan |
+| DO-6.8 | Hotfix: rebuild + redeploy frontend image `:prod` setelah fix trailing slash 307 | High | 0.5h | DO-6.1 | done | PR #97 | Production blocker: `POST /auth/login/` return 307 redirect (FastAPI `redirect_slashes=True` + FE pakai trailing slash). Fix: hapus trailing slash di FE, rebuild image digest `sha256:95b4c34589f1`, redeploy. Verified login E2E works |
+| DO-6.9 | Hotfix: exclude credential files dari Docker image (security) | High | 0.5h | DO-6.1 | done | PR #98 | `serviceAccountKey.json` Firebase ke-bake ke image karena tidak ada di `.dockerignore`. Image public di Docker Hub berarti credentials exposed. Action: revoke key di GCP, patch `.dockerignore`, rebuild backend digest `sha256:ef893ed5d866`, redeploy |
 
 ## Lead QA & Docs (@raniayudewi)
 
