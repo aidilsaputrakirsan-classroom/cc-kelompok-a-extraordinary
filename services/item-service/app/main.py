@@ -1,9 +1,10 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
 from sqlalchemy import text
-from app.database import get_db, Base, engine
+from sqlalchemy.orm import Session
+
 from app.config import settings
+from app.database import Base, engine, get_db
 from app.items.router import router as items_router
 from app.master_data.router import router as master_data_router
 
@@ -42,4 +43,4 @@ def health_check(db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail={"status": "unhealthy", "database": str(e)}
-        )
+        ) from e

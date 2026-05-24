@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
+
 
 class RegisterRequest(BaseModel):
     email: str
@@ -18,7 +18,7 @@ class TokenResponse(BaseModel):
 
 class UserBase(BaseModel):
     name: str
-    phone: Optional[str] = None
+    phone: str | None = None
 
 class UserUpdate(UserBase):
     pass
@@ -28,5 +28,5 @@ class UserResponse(UserBase):
     email: str
     role: str
     created_at: datetime
-    
+
     model_config = ConfigDict(from_attributes=True)

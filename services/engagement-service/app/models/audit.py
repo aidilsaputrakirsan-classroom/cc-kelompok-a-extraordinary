@@ -1,7 +1,10 @@
-from sqlalchemy import Column, String, DateTime, Text
-from app.database import Base
-from datetime import datetime, timezone
 import uuid
+from datetime import UTC, datetime
+
+from sqlalchemy import Column, DateTime, String, Text
+
+from app.database import Base
+
 
 class AuditLog(Base):
     __tablename__ = "audit_logs"
@@ -11,4 +14,4 @@ class AuditLog(Base):
     entity_type = Column(String, nullable=False)
     entity_id = Column(String, nullable=False)
     details = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))

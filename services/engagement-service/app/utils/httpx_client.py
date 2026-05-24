@@ -1,5 +1,6 @@
 import httpx
 from fastapi import HTTPException
+
 from app.config import settings
 
 TIMEOUT = 5.0
@@ -18,7 +19,7 @@ def get_item(item_id: str, jwt_token: str) -> dict | None:
         raise HTTPException(
             status_code=502,
             detail=f"Gagal menghubungi item-service: {exc}"
-        )
+        ) from exc
 
 def update_item_status(item_id: str, new_status: str, jwt_token: str) -> bool:
     headers = {"Authorization": f"Bearer {jwt_token}"}
@@ -37,7 +38,7 @@ def update_item_status(item_id: str, new_status: str, jwt_token: str) -> bool:
         raise HTTPException(
             status_code=502,
             detail=f"Gagal menghubungi item-service untuk pembaruan status: {exc}"
-        )
+        ) from exc
 
 def get_admins(jwt_token: str) -> list[dict]:
     headers = {"Authorization": f"Bearer {jwt_token}"}
@@ -51,4 +52,4 @@ def get_admins(jwt_token: str) -> list[dict]:
         raise HTTPException(
             status_code=502,
             detail=f"Gagal menghubungi auth-service untuk daftar admin: {exc}"
-        )
+        ) from exc

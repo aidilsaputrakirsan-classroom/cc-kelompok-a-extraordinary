@@ -1,6 +1,9 @@
-from sqlalchemy import Column, String
-from app.database import Base
 import uuid
+
+from sqlalchemy import Column, String
+
+from app.database import Base
+
 
 class Category(Base):
     __tablename__ = "categories"

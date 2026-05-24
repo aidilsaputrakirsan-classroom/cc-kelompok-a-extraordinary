@@ -1,10 +1,11 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
 from sqlalchemy import text
-from app.database import get_db, Base, engine
-from app.config import settings
+from sqlalchemy.orm import Session
+
 from app.auth.router import router as auth_router
+from app.config import settings
+from app.database import Base, engine, get_db
 
 # Inisialisasi tabel otomatis saat startup
 Base.metadata.create_all(bind=engine)
@@ -40,4 +41,4 @@ def health_check(db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail={"status": "unhealthy", "database": str(e)}
-        )
+        ) from e

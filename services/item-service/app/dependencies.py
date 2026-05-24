@@ -1,6 +1,7 @@
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
+
 from app.config import settings
 
 security = HTTPBearer()
@@ -25,9 +26,9 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         user_id: str = payload.get("id")
         if email is None or role is None or user_id is None:
             raise credentials_exception
-    except JWTError:
-        raise credentials_exception
-        
+    except JWTError as exc:
+        raise credentials_exception from exc
+
     return CurrentUser(id=user_id, email=email, role=role)
 
 def require_admin(user: CurrentUser = Depends(get_current_user)):

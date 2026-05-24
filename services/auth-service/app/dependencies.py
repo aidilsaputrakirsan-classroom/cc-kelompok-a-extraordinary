@@ -1,9 +1,10 @@
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
-from app.database import get_db
+
 from app.config import settings
+from app.database import get_db
 from app.models.user import User
 
 security = HTTPBearer()
@@ -20,9 +21,9 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         email: str = payload.get("sub")
         if email is None:
             raise credentials_exception
-    except JWTError:
-        raise credentials_exception
-        
+    except JWTError as exc:
+        raise credentials_exception from exc
+
     user = db.query(User).filter(User.email == email).first()
     if user is None:
         raise credentials_exception

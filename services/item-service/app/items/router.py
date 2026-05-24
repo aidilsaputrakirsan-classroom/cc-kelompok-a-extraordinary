@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
-from typing import List, Optional
 
 from app.database import get_db
-from app.dependencies import get_current_user, CurrentUser
+from app.dependencies import CurrentUser, get_current_user
 from app.items import schemas, service
 
 router = APIRouter(prefix="/items", tags=["Items"])
@@ -12,28 +12,28 @@ router = APIRouter(prefix="/items", tags=["Items"])
 def create_item(item: schemas.ItemCreate, db: Session = Depends(get_db), current_user: CurrentUser = Depends(get_current_user)):
     return service.create_item(db=db, user_id=current_user.id, item_data=item)
 
-@router.get("/me", response_model=List[schemas.ItemResponse])
+@router.get("/me", response_model=list[schemas.ItemResponse])
 def list_my_items(
     db: Session = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user)
 ):
     return service.get_items_by_user(db=db, user_id=current_user.id)
 
-@router.get("/", response_model=List[schemas.ItemResponse])
+@router.get("/", response_model=list[schemas.ItemResponse])
 def list_items(
-    skip: int = 0, 
-    limit: int = 100, 
-    search: Optional[str] = None,
-    item_type: Optional[str] = Query(None, alias="type"),
-    status: Optional[str] = None,
-    category_id: Optional[str] = None,
-    building_id: Optional[str] = None,
-    location_id: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 100,
+    search: str | None = None,
+    item_type: str | None = Query(None, alias="type"),
+    status: str | None = None,
+    category_id: str | None = None,
+    building_id: str | None = None,
+    location_id: str | None = None,
     db: Session = Depends(get_db)
 ):
     return service.get_items(
-        db=db, skip=skip, limit=limit, search=search, 
-        type=item_type, status=status, category_id=category_id, 
+        db=db, skip=skip, limit=limit, search=search,
+        type=item_type, status=status, category_id=category_id,
         building_id=building_id, location_id=location_id
     )
 

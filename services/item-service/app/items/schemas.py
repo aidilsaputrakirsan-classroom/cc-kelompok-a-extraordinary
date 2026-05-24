@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Optional
 from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict, Field
+
 
 class ImageCreate(BaseModel):
     image_data: str
@@ -9,21 +10,21 @@ class ImageCreate(BaseModel):
 class ItemCreate(BaseModel):
     type: str = Field(..., pattern="^(lost|found)$")
     title: str
-    description: Optional[str] = None
-    category_id: Optional[str] = None
-    building_id: Optional[str] = None
-    location_id: Optional[str] = None
-    security_officer_id: Optional[str] = None
-    images: List[ImageCreate] = []
+    description: str | None = None
+    category_id: str | None = None
+    building_id: str | None = None
+    location_id: str | None = None
+    security_officer_id: str | None = None
+    images: list[ImageCreate] = []
 
 class ItemUpdate(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
-    category_id: Optional[str] = None
-    building_id: Optional[str] = None
-    location_id: Optional[str] = None
-    security_officer_id: Optional[str] = None
-    status: Optional[str] = Field(None, pattern="^(open|in_claim|returned|closed)$")
+    title: str | None = None
+    description: str | None = None
+    category_id: str | None = None
+    building_id: str | None = None
+    location_id: str | None = None
+    security_officer_id: str | None = None
+    status: str | None = Field(None, pattern="^(open|in_claim|returned|closed)$")
 
 class ItemStatusUpdate(BaseModel):
     status: str = Field(..., pattern="^(open|in_claim|returned|closed)$")
@@ -32,7 +33,7 @@ class ImageResponse(BaseModel):
     id: str
     image_data: str
     display_order: int
-    
+
     model_config = ConfigDict(from_attributes=True)
 
 class ItemResponse(BaseModel):
@@ -40,13 +41,13 @@ class ItemResponse(BaseModel):
     type: str
     status: str
     title: str
-    description: Optional[str] = None
-    category_id: Optional[str] = None
-    building_id: Optional[str] = None
-    location_id: Optional[str] = None
-    security_officer_id: Optional[str] = None
+    description: str | None = None
+    category_id: str | None = None
+    building_id: str | None = None
+    location_id: str | None = None
+    security_officer_id: str | None = None
     created_by: str
     created_at: datetime
-    images: List[ImageResponse] = []
-    
+    images: list[ImageResponse] = []
+
     model_config = ConfigDict(from_attributes=True)

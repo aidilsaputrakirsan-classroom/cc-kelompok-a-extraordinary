@@ -1,13 +1,14 @@
+
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-from typing import List
+
 from app.database import get_db
-from app.dependencies import get_current_user, require_admin, CurrentUser
+from app.dependencies import CurrentUser, get_current_user, require_admin
 from app.notifications import schemas, service
 
 router = APIRouter(prefix="/notifications", tags=["notifications"])
 
-@router.get("/me", response_model=List[schemas.NotificationResponse])
+@router.get("/me", response_model=list[schemas.NotificationResponse])
 def get_my_notifications(db: Session = Depends(get_db), user: CurrentUser = Depends(get_current_user)):
     return service.get_my_notifications(db, user.id)
 

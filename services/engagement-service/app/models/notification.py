@@ -1,7 +1,10 @@
-from sqlalchemy import Column, String, DateTime, Text, Boolean
-from app.database import Base
-from datetime import datetime, timezone
 import uuid
+from datetime import UTC, datetime
+
+from sqlalchemy import Boolean, Column, DateTime, String, Text
+
+from app.database import Base
+
 
 class Notification(Base):
     __tablename__ = "notifications"
@@ -10,4 +13,4 @@ class Notification(Base):
     title = Column(String, nullable=False)
     message = Column(Text, nullable=False)
     is_read = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))

@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
+from app.auth.schemas import LoginRequest, RegisterRequest, TokenResponse, UserResponse, UserUpdate
+from app.auth.service import login_user, register_user
 from app.database import get_db
-from app.auth.schemas import RegisterRequest, LoginRequest, TokenResponse, UserResponse, UserUpdate
-from app.auth.service import register_user, login_user
 from app.dependencies import get_current_user
 from app.models.user import User
 
@@ -39,7 +40,7 @@ def update_me(update_data: UserUpdate, db: Session = Depends(get_db), current_us
     current_user.name = update_data.name
     if update_data.phone is not None:
         current_user.phone = update_data.phone
-        
+
     db.commit()
     db.refresh(current_user)
     return current_user

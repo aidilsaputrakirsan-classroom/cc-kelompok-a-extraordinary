@@ -1,12 +1,13 @@
-from sqlalchemy.orm import Session
+import logging
+
 from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.claims.schemas import ClaimCreate, ClaimStatusUpdate
 from app.models.claim import Claim, ClaimStatusHistory
 from app.notifications.schemas import NotificationCreate
 from app.notifications.service import create_notification
-from typing import Optional
-from app.claims.schemas import ClaimCreate, ClaimStatusUpdate
 from app.utils import httpx_client
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -15,25 +16,25 @@ def create_claim(db: Session, user_id: str, claim_in: ClaimCreate, jwt_token: st
     item = httpx_client.get_item(claim_in.item_id, jwt_token)
     if not item:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
-    
+
     if item.get("type") != 'found':
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Only 'found' items can be claimed")
-        
+
     if item.get("status") in ["returned", "closed"]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Item is already returned or closed")
-        
+
     if item.get("created_by") == user_id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot claim an item you posted")
-        
+
     active_statuses = ['pending', 'approved', 'completed']
     existing_claim = db.query(Claim).filter(
         Claim.item_id == claim_in.item_id,
         Claim.status.in_(active_statuses)
     ).first()
-    
+
     if existing_claim:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This item already has an active claim")
-        
+
     new_claim = Claim(
         item_id=claim_in.item_id,
         user_id=user_id,
@@ -42,7 +43,7 @@ def create_claim(db: Session, user_id: str, claim_in: ClaimCreate, jwt_token: st
     )
     db.add(new_claim)
     db.flush()
-    
+
     history = ClaimStatusHistory(
         claim_id=new_claim.id,
         status="pending",
@@ -85,7 +86,7 @@ def create_claim(db: Session, user_id: str, claim_in: ClaimCreate, jwt_token: st
     except Exception as exc:
         # Jangan gagalkan klaim hanya karena notifikasi admin gagal terkirim
         logger.warning("Gagal mengirimkan notifikasi ke admin: %s", exc, exc_info=True)
-    
+
     return new_claim
 
 def get_claims_by_user(db: Session, user_id: str):
@@ -102,13 +103,13 @@ def get_claim_by_id(db: Session, claim_id: str, user_id: str, user_role: str, jw
     is_claim_owner = claim.user_id == user_id
     is_item_owner = item and item.get("created_by") == user_id
     is_admin = user_role in ["admin", "superadmin"]
-    
+
     if not is_claim_owner and not is_item_owner and not is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to view this claim")
-        
+
     return claim
 
-def get_claims_by_item(db: Session, item_id: Optional[str], user_id: str, user_role: str, jwt_token: str):
+def get_claims_by_item(db: Session, item_id: str | None, user_id: str, user_role: str, jwt_token: str):
     is_admin = user_role in ["admin", "superadmin"]
 
     if not item_id:
@@ -122,10 +123,10 @@ def get_claims_by_item(db: Session, item_id: Optional[str], user_id: str, user_r
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
 
     is_item_owner = item.get("created_by") == user_id
-    
+
     if not is_item_owner and not is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only item owner or admin can view claims for this item")
-        
+
     return db.query(Claim).filter(Claim.item_id == item_id).all()
 
 def update_claim_status(db: Session, claim_id: str, payload: ClaimStatusUpdate, user_id: str, user_role: str, jwt_token: str):
@@ -143,14 +144,13 @@ def update_claim_status(db: Session, claim_id: str, payload: ClaimStatusUpdate, 
     if payload.status in ["approved", "rejected", "completed"]:
         if not is_item_owner and not is_admin:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only item owner or admin can approve/reject/complete claims")
-    elif payload.status == "cancelled":
-        if not is_claim_owner and not is_admin:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only claim owner or admin can cancel a claim")
-    
+    elif payload.status == "cancelled" and not is_claim_owner and not is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only claim owner or admin can cancel a claim")
+
     # Update claim status
     claim.status = payload.status
     db.add(claim)
-    
+
     # Log claim history
     history = ClaimStatusHistory(
         claim_id=claim.id,
@@ -158,7 +158,7 @@ def update_claim_status(db: Session, claim_id: str, payload: ClaimStatusUpdate, 
         changed_by=user_id
     )
     db.add(history)
-    
+
     # Sync item status berdasarkan status claim secara cross-service via HTTP
     new_item_status = None
     if payload.status == "approved":
@@ -167,11 +167,11 @@ def update_claim_status(db: Session, claim_id: str, payload: ClaimStatusUpdate, 
         new_item_status = "returned"
     elif payload.status in ["rejected", "cancelled"]:
         new_item_status = "open"
-        
+
     if new_item_status and item and item.get("status") != new_item_status:
         # Melakukan cross-service status synchronization
         httpx_client.update_item_status(item.get("id"), new_item_status, jwt_token)
-        
+
     db.commit()
     db.refresh(claim)
 

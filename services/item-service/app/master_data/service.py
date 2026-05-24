@@ -1,7 +1,8 @@
-from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from app.models.master_data import Category, Building, Location, SecurityOfficer
+from sqlalchemy.orm import Session
+
 from app.master_data.schemas import MasterDataCreate
+from app.models.master_data import Building, Category, Location, SecurityOfficer
 
 MODEL_MAP = {
     "categories": Category,

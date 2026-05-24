@@ -1,24 +1,26 @@
-from sqlalchemy.orm import Session
-from app.models.item import Item, ItemImage, ItemStatusHistory
-from app.items.schemas import ItemCreate, ItemUpdate
+from datetime import UTC, datetime
+
 from fastapi import HTTPException, status
-from datetime import datetime, timezone
 from sqlalchemy import or_
-from typing import Optional
+from sqlalchemy.orm import Session
+
+from app.items.schemas import ItemCreate, ItemUpdate
+from app.models.item import Item, ItemImage, ItemStatusHistory
+
 
 def create_item(db: Session, user_id: str, item_data: ItemCreate):
     if item_data.type == "found" and not item_data.security_officer_id:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Validasi gagal: Posting found wajib memilih security_officer_id"
         )
-    
+
     if len(item_data.images) > 4:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Validasi gagal: Maksimal 4 foto per item"
         )
-        
+
     for img in item_data.images:
         # Check base64 rough size estimate (2MB limit = ~2.66MB in base64 strings)
         if len(img.image_data) > 2800000:
@@ -40,7 +42,7 @@ def create_item(db: Session, user_id: str, item_data: ItemCreate):
     )
     db.add(new_item)
     db.flush() # flush to get new_item.id
-    
+
     for img in item_data.images:
         new_img = ItemImage(
             item_id=new_item.id,
@@ -48,7 +50,7 @@ def create_item(db: Session, user_id: str, item_data: ItemCreate):
             display_order=img.display_order
         )
         db.add(new_img)
-        
+
     db.commit()
     db.refresh(new_item)
     return new_item
@@ -56,22 +58,22 @@ def create_item(db: Session, user_id: str, item_data: ItemCreate):
 def get_items_by_user(db: Session, user_id: str):
     return db.query(Item).filter(
         Item.created_by == user_id,
-        Item.deleted_at == None
+        Item.deleted_at is None
     ).order_by(Item.created_at.desc()).all()
 
 def get_items(
-    db: Session, 
-    skip: int = 0, 
+    db: Session,
+    skip: int = 0,
     limit: int = 100,
-    search: Optional[str] = None,
-    type: Optional[str] = None,
-    status: Optional[str] = None,
-    category_id: Optional[str] = None,
-    building_id: Optional[str] = None,
-    location_id: Optional[str] = None
+    search: str | None = None,
+    type: str | None = None,
+    status: str | None = None,
+    category_id: str | None = None,
+    building_id: str | None = None,
+    location_id: str | None = None
 ):
-    query = db.query(Item).filter(Item.deleted_at == None)
-    
+    query = db.query(Item).filter(Item.deleted_at is None)
+
     if search:
         escaped = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
         query = query.filter(or_(Item.title.ilike(f"%{escaped}%", escape="\\"), Item.description.ilike(f"%{escaped}%", escape="\\")))
@@ -85,28 +87,28 @@ def get_items(
         query = query.filter(Item.building_id == building_id)
     if location_id:
         query = query.filter(Item.location_id == location_id)
-        
+
     query = query.order_by(Item.created_at.desc())
     return query.offset(skip).limit(limit).all()
 
 def get_item(db: Session, item_id: str):
-    return db.query(Item).filter(Item.id == item_id, Item.deleted_at == None).first()
+    return db.query(Item).filter(Item.id == item_id, Item.deleted_at is None).first()
 
 def update_item(db: Session, item_id: str, user_id: str, user_role: str, item_data: ItemUpdate):
     item = get_item(db, item_id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
-        
+
     if item.created_by != user_id and user_role not in ["admin", "superadmin"]:
         raise HTTPException(status_code=403, detail="Not authorized to update this item")
-        
+
     update_data_dict = item_data.model_dump(exclude_unset=True)
     if "status" in update_data_dict and user_role not in ["admin", "superadmin"]:
         raise HTTPException(status_code=403, detail="Not authorized to update item status")
 
     for key, value in update_data_dict.items():
         setattr(item, key, value)
-        
+
     # Check rule found
     if item.type == "found" and not item.security_officer_id:
         raise HTTPException(status_code=400, detail="Posting found wajib memilih security_officer_id")
@@ -151,9 +153,9 @@ def delete_item(db: Session, item_id: str, user_id: str, user_role: str):
     item = get_item(db, item_id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
-        
+
     if item.created_by != user_id and user_role not in ["admin", "superadmin"]:
         raise HTTPException(status_code=403, detail="Not authorized to delete this item")
-        
-    item.deleted_at = datetime.now(timezone.utc)
+
+    item.deleted_at = datetime.now(UTC)
     db.commit()

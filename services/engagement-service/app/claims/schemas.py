@@ -1,6 +1,8 @@
-from pydantic import BaseModel, ConfigDict
-from typing import Optional, Literal
 from datetime import datetime
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict
+
 
 class ClaimCreate(BaseModel):
     item_id: str
@@ -14,7 +16,7 @@ class ClaimResponse(BaseModel):
     item_id: str
     user_id: str
     status: str
-    ownership_answer: Optional[str] = None
+    ownership_answer: str | None = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

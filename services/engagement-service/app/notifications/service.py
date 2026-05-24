@@ -1,7 +1,9 @@
-from sqlalchemy.orm import Session
 from fastapi import HTTPException
+from sqlalchemy.orm import Session
+
 from app.models.notification import Notification
 from app.notifications.schemas import NotificationCreate
+
 
 def create_notification(db: Session, data: NotificationCreate):
     new_notif = Notification(user_id=data.user_id, title=data.title, message=data.message)
@@ -16,7 +18,7 @@ def get_my_notifications(db: Session, user_id: str):
 def mark_all_as_read(db: Session, user_id: str):
     db.query(Notification).filter(
         Notification.user_id == user_id,
-        Notification.is_read == False
+        Notification.is_read is False
     ).update({"is_read": True})
     db.commit()
 

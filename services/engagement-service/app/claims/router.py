@@ -1,10 +1,11 @@
+
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
-from typing import List, Optional
-from app.database import get_db
-from app.dependencies import get_current_user, CurrentUser, security
 from fastapi.security import HTTPAuthorizationCredentials
+from sqlalchemy.orm import Session
+
 from app.claims import schemas, service
+from app.database import get_db
+from app.dependencies import CurrentUser, get_current_user, security
 
 router = APIRouter(
     prefix="/claims",
@@ -25,7 +26,7 @@ def create_claim(
     jwt_token = credentials.credentials
     return service.create_claim(db=db, user_id=current_user.id, claim_in=claim_in, jwt_token=jwt_token)
 
-@router.get("/me", response_model=List[schemas.ClaimResponse])
+@router.get("/me", response_model=list[schemas.ClaimResponse])
 def get_my_claims(
     db: Session = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user)
@@ -51,9 +52,9 @@ def get_claim_detail(
         user_role=current_user.role, jwt_token=jwt_token
     )
 
-@router.get("/", response_model=List[schemas.ClaimResponse])
+@router.get("/", response_model=list[schemas.ClaimResponse])
 def get_claims_for_item(
-    item_id: Optional[str] = None,
+    item_id: str | None = None,
     db: Session = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Depends(security)
