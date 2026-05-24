@@ -2,14 +2,19 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from typing import List
 from app.database import get_db
-from app.dependencies import require_admin, CurrentUser
+from app.dependencies import get_current_user, require_admin, CurrentUser
 from app.master_data import schemas, service
 
 router = APIRouter(prefix="/master-data", tags=["master_data"])
 
 @router.get("/{entity_type}", response_model=List[schemas.MasterDataResponse])
-def get_master_data(entity_type: str, db: Session = Depends(get_db)):
-    """ Ambil semua master data untuk entity tertentu (categories, buildings, locations, security-officers) """
+def get_master_data(
+    entity_type: str,
+    db: Session = Depends(get_db),
+    _: CurrentUser = Depends(get_current_user),
+):
+    """ Ambil semua master data untuk entity tertentu (categories, buildings, locations, security-officers).
+    Auth wajib: user yang login. """
     return service.get_all(db, entity_type)
 
 @router.post("/{entity_type}", response_model=schemas.MasterDataResponse, status_code=status.HTTP_201_CREATED)

@@ -50,7 +50,13 @@ def update_item(item_id: str, item_data: schemas.ItemUpdate, db: Session = Depen
 
 @router.put("/{item_id}/status", response_model=schemas.ItemResponse)
 def update_item_status(item_id: str, payload: schemas.ItemStatusUpdate, db: Session = Depends(get_db), current_user: CurrentUser = Depends(get_current_user)):
-    return service.update_item_status(db=db, item_id=item_id, new_status=payload.status, changed_by=current_user.id)
+    return service.update_item_status(
+        db=db,
+        item_id=item_id,
+        new_status=payload.status,
+        changed_by=current_user.id,
+        user_role=current_user.role,
+    )
 
 @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_item(item_id: str, db: Session = Depends(get_db), current_user: CurrentUser = Depends(get_current_user)):

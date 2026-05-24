@@ -40,7 +40,7 @@ def validate_password(password: str) -> None:
 
 def validate_itk_email(email: str) -> str:
     normalized_email = email.strip().lower()
-    if not normalized_email.endswith("itk.ac.id"):
+    if not normalized_email.endswith("@itk.ac.id"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Hanya email itk.ac.id yang diizinkan"

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.auth.schemas import RegisterRequest, LoginRequest, TokenResponse, UserResponse, UserUpdate
@@ -45,21 +45,31 @@ def update_me(update_data: UserUpdate, db: Session = Depends(get_db), current_us
     return current_user
 
 @router.get("/users/admins", response_model=list[UserResponse])
-def get_admins(db: Session = Depends(get_db)):
+def get_admins(
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
     """
     Mendapatkan daftar seluruh admin dan superadmin.
+    Auth wajib: hanya user yang login (siapa pun) yang boleh akses.
+    Endpoint ini dipanggil oleh engagement-service untuk fan-out notifikasi
+    klaim baru ke admin. Caller wajib forward JWT bearer.
     """
     admins = db.query(User).filter(User.role.in_(["admin", "superadmin"])).all()
     return admins
 
 @router.get("/users/{user_id}", response_model=UserResponse)
-def get_user_by_id(user_id: str, db: Session = Depends(get_db)):
+def get_user_by_id(
+    user_id: str,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
     """
     Mendapatkan profil user berdasarkan ID.
+    Auth wajib: hanya user yang login (siapa pun) yang boleh akses.
     """
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="User not found")
     return user
 

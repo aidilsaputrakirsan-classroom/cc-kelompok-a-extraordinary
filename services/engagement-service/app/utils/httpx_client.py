@@ -39,11 +39,12 @@ def update_item_status(item_id: str, new_status: str, jwt_token: str) -> bool:
             detail=f"Gagal menghubungi item-service untuk pembaruan status: {exc}"
         )
 
-def get_admins() -> list[dict]:
+def get_admins(jwt_token: str) -> list[dict]:
+    headers = {"Authorization": f"Bearer {jwt_token}"}
     url = f"{settings.AUTH_SERVICE_URL}/auth/users/admins"
     try:
         with httpx.Client(timeout=TIMEOUT) as client:
-            response = client.get(url)
+            response = client.get(url, headers=headers)
             response.raise_for_status()
             return response.json()
     except httpx.HTTPError as exc:

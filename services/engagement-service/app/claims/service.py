@@ -6,6 +6,9 @@ from app.notifications.service import create_notification
 from typing import Optional
 from app.claims.schemas import ClaimCreate, ClaimStatusUpdate
 from app.utils import httpx_client
+import logging
+
+logger = logging.getLogger(__name__)
 
 def create_claim(db: Session, user_id: str, claim_in: ClaimCreate, jwt_token: str) -> Claim:
     # Mengambil detail item secara cross-service via HTTP
@@ -62,7 +65,7 @@ def create_claim(db: Session, user_id: str, claim_in: ClaimCreate, jwt_token: st
 
     # Mengambil daftar admin secara cross-service via HTTP
     try:
-        admins = httpx_client.get_admins()
+        admins = httpx_client.get_admins(jwt_token)
         for admin in admins:
             admin_id = admin.get("id")
             if not admin_id:
@@ -80,7 +83,8 @@ def create_claim(db: Session, user_id: str, claim_in: ClaimCreate, jwt_token: st
                 ),
             )
     except Exception as exc:
-        print(f"Warning: Gagal mengirimkan notifikasi ke admin: {exc}")
+        # Jangan gagalkan klaim hanya karena notifikasi admin gagal terkirim
+        logger.warning("Gagal mengirimkan notifikasi ke admin: %s", exc, exc_info=True)
     
     return new_claim
 

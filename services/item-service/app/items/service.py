@@ -115,15 +115,27 @@ def update_item(db: Session, item_id: str, user_id: str, user_role: str, item_da
     db.refresh(item)
     return item
 
-def update_item_status(db: Session, item_id: str, new_status: str, changed_by: str):
+def update_item_status(db: Session, item_id: str, new_status: str, changed_by: str, user_role: str):
     item = get_item(db, item_id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
-    
+
+    # Authorization: hanya item owner atau admin/superadmin yang boleh ubah status.
+    # Endpoint ini juga dipanggil oleh engagement-service saat update_claim_status,
+    # dengan JWT bearer caller asli (yang sudah dicek sebagai item owner / admin
+    # di engagement-service). Jadi di sini cukup re-validate berdasarkan JWT role.
+    is_admin = user_role in ["admin", "superadmin"]
+    is_owner = item.created_by == changed_by
+    if not is_admin and not is_owner:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to update this item status",
+        )
+
     if item.status != new_status:
         item.status = new_status
         db.add(item)
-        
+
         item_history = ItemStatusHistory(
             item_id=item.id,
             status=new_status,
@@ -132,7 +144,7 @@ def update_item_status(db: Session, item_id: str, new_status: str, changed_by: s
         db.add(item_history)
         db.commit()
         db.refresh(item)
-        
+
     return item
 
 def delete_item(db: Session, item_id: str, user_id: str, user_role: str):

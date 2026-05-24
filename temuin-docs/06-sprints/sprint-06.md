@@ -19,6 +19,7 @@
 | BE-6.3 | Pisahkan `app/claims/` + `app/notifications/` + audit_logs ke `services/engagement-service/` (port 8003) | High | 5h | BE-6.2 | done | feature/sprint-06-backend-split | Modul 12: gabung claims + notifications + audit (DEC-019). Tambah `httpx_client.py` untuk call ke item-service |
 | BE-6.4 | Tambah shared JWT verification helper di item-service & engagement-service (DEC-017) | High | 3h | BE-6.1, BE-6.2, BE-6.3 | done | feature/sprint-06-backend-split | Modul 12: shared secret JWT via env `JWT_SECRET`, verifikasi lokal tanpa call ke auth-service |
 | BE-6.5 | Tambah `httpx_client.py` untuk inter-service HTTP calls dengan timeout 5s | High | 2h | BE-6.3 | done | feature/sprint-06-backend-split | Modul 12: sync REST communication. Timeout default 5s. Retry+CB ditambah di Sprint 7 |
+| BE-6.6 | Security hardening pasca code review microservices split | High | 2h | BE-6.1, BE-6.2, BE-6.3, BE-6.5 | done | feature/sprint-06-backend-split | Hotfix follow-up review PR #96. Tambah auth guard di `/auth/users/admins` & `/auth/users/{id}` (sebelumnya public, leak admin email/role); tambah owner+admin check di `PUT /items/{id}/status` (sebelumnya any user bisa ubah status item siapa saja); tambah auth pada `GET /master-data/{type}`; fix domain check `endswith("@itk.ac.id")` (sebelumnya `endswith("itk.ac.id")` bypass via `notitk.ac.id`); httpx_client.get_admins forward JWT bearer; replace `print()` dengan `logging.warning()` di claims notify-admin |
 
 ## Lead Frontend (@nicholasmnrng)
 
