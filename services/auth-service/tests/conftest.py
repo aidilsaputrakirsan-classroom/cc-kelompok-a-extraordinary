@@ -1,4 +1,5 @@
 """Shared test fixtures for auth-service smoke tests."""
+import contextlib
 import os
 
 # Set required env BEFORE importing app
@@ -39,10 +40,8 @@ def _setup_db():
     Base.metadata.drop_all(bind=engine)
     engine.dispose()
     if os.path.exists("./_test_auth.db"):
-        try:
-            os.remove("./_test_auth.db")
-        except OSError:
-            pass  # Windows file lock, harmless
+        with contextlib.suppress(OSError):
+            os.remove("./_test_auth.db")  # Windows lock harmless
 
 
 @pytest.fixture()

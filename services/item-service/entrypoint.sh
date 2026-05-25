@@ -22,12 +22,14 @@ if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
     echo "WARNING: PostgreSQL not ready after $MAX_RETRIES retries. Starting anyway..."
 fi
 
-# --- Seed Master Data ---
-echo "Seeding master data (if empty)..."
-if python -m app.utils.seed; then
-    echo "Master data seed check completed."
+# --- Init schema (Base.metadata.create_all) + Seed master data ---
+# Importing app.main triggers Base.metadata.create_all sebelum kita seed.
+# Jadi seed.py jalan setelah tabel dibuat.
+echo "Initializing schema + seeding master data (if empty)..."
+if python -c "import app.main" && python -m app.utils.seed; then
+    echo "Schema init + master data seed completed."
 else
-    echo "WARNING: Seed script failed. Starting app anyway..."
+    echo "WARNING: Schema init / seed failed. Starting app anyway..."
 fi
 
 # --- Start Uvicorn ---
