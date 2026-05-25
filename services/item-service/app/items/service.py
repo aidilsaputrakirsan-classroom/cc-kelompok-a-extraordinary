@@ -58,7 +58,7 @@ def create_item(db: Session, user_id: str, item_data: ItemCreate):
 def get_items_by_user(db: Session, user_id: str):
     return db.query(Item).filter(
         Item.created_by == user_id,
-        Item.deleted_at is None
+        Item.deleted_at.is_(None)
     ).order_by(Item.created_at.desc()).all()
 
 def get_items(
@@ -72,7 +72,7 @@ def get_items(
     building_id: str | None = None,
     location_id: str | None = None
 ):
-    query = db.query(Item).filter(Item.deleted_at is None)
+    query = db.query(Item).filter(Item.deleted_at.is_(None))
 
     if search:
         escaped = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
@@ -92,7 +92,7 @@ def get_items(
     return query.offset(skip).limit(limit).all()
 
 def get_item(db: Session, item_id: str):
-    return db.query(Item).filter(Item.id == item_id, Item.deleted_at is None).first()
+    return db.query(Item).filter(Item.id == item_id, Item.deleted_at.is_(None)).first()
 
 def update_item(db: Session, item_id: str, user_id: str, user_role: str, item_data: ItemUpdate):
     item = get_item(db, item_id)
