@@ -519,7 +519,7 @@ Berikut adalah progres pengerjaan tim per sprint beserta link cepat menuju lapor
 | **Sprint 3** | Search & filter, klaim, notifikasi, master data | ✅ Done | [📄 Lihat Laporan](docs/sprint-03-qa-report.md) |
 | **Sprint 4** | Dockerization & kesiapan demo UTS | ✅ Done | [📄 Lihat Laporan](docs/sprint-04-qa-report.md) |
 | **Sprint 5** | CI/CD GitHub Actions & test automation backend | ✅ Done | [📄 Lihat Laporan](docs/sprint-05-qa-report.md) |
-| **Sprint 6** | Microservices split (auth-service & item-service) | 🔄 Next | - |
+| **Sprint 6** | Microservices split (auth-service & item-service) | ✅ Done | [📄 Lihat Laporan](docs/sprint-06-qa-report.md) |
 | **Sprint 7** | Nginx gateway, monitoring, audit log lanjut | 🔄 Next | - |
 | **Sprint 8** | Security hardening & final polish | 🔄 Next | - |
 
@@ -549,11 +549,13 @@ Kami adalah kelompok mahasiswa dari program studi **Sistem Informasi**, Institut
 - [**Docker Guide**](./docs/docker-guide.md) — Panduan lengkap menjalankan sistem menggunakan Docker.
 - [**API Testing Guide**](./docs/api-testing-guide.md) — Instruksi cara menguji backend API secara manual.
 - [**Testing Guide**](./docs/testing-guide.md) — Panduan pengujian otomatis backend (Pytest), frontend (Vitest), serta standar coverage threshold.
+- [**Deployment Guide**](./docs/deployment-guide.md) — Panduan lengkap deployment monolith dan dekomposisi microservices di Tencent Cloud VPS.
 
 ### 🧪 Laporan Blackbox Testing (Lead QA & Docs)
 - [**API Blackbox Testing Report**](./docs/api-blackbox-testing.md) — Laporan lengkap pengujian endpoint backend via Swagger.
 - [**Frontend Blackbox Testing Report**](./docs/frontend-blackbox-testing.md) — Laporan lengkap pengujian antarmuka pengguna (UI/UX) dan alur sistem.
 - [**Sprint 05 QA Report**](./docs/sprint-05-qa-report.md) — Laporan lengkap pengujian regresi dan verifikasi sukses CI 3-job paralel pada Sprint 05.
+- [**Sprint 06 QA Report**](./docs/sprint-06-qa-report.md) — Laporan lengkap pengujian regresi fungsional lintas microservices dan verifikasi CD pipeline pada Sprint 06.
 
 ---
 

@@ -52,11 +52,11 @@
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| QA-6.1 | Smoke test 3 endpoint health di production (`/api/auth/health`, `/api/items/health`, `/api/engagement/health`) | High | 2h | DO-6.3 | todo | - | Modul 11: production smoke test. Semua return 200, screenshot di `image/sprint-06/` |
-| QA-6.2 | Regression blackbox flow penuh: register → login → create item → claim → approve dengan 3 service hidup | High | 3h | FE-6.2, BE-6.4, DO-6.3 | todo | - | Modul 12: end-to-end testing |
-| QA-6.3 | Tulis/update `docs/deployment-guide.md` (cara deploy ke VPS, env vars, troubleshooting OOM, fallback Render) | Medium | 2h | QA-6.1, DO-6.2 | todo | - | Modul 11: deployment documentation. Reference panduan privat user yang sudah ada |
-| QA-6.4 | Production smoke test setelah CD deploy auto-trigger | Medium | 1h | DO-6.5 | todo | - | Modul 11: verify CD pipeline works. PR test → merge → CD trigger → verify deploy live |
-| QA-6.5 | Update `temuin-docs/03-architecture/system-architecture.md` dengan diagram 3-service hybrid kalau ada perubahan dari implementasi | Low | 1h | DO-6.3 | todo | - | Pastikan dokumen sinkron dengan implementasi |
+| QA-6.1 | Smoke test 3 endpoint health di production (`/api/auth/health`, `/api/items/health`, `/api/engagement/health`) | High | 2h | DO-6.3 | done | docs/qa/sprint-05-to-06-report | Modul 11: Semua return 200 OK di domain produksi |
+| QA-6.2 | Regression blackbox flow penuh: register → login → create item → claim → approve dengan 3 service hidup | High | 3h | FE-6.2, BE-6.4, DO-6.3 | done | docs/qa/sprint-05-to-06-report | Modul 12: 12 screenshot bukti lengkap di `image/sprint-06/` |
+| QA-6.3 | Tulis/update `docs/deployment-guide.md` (cara deploy ke VPS, env vars, troubleshooting OOM, fallback Render) | Medium | 2h | QA-6.1, DO-6.2 | done | docs/qa/sprint-05-to-06-report | Modul 11: Panduan ditulis lengkap di docs/deployment-guide.md |
+| QA-6.4 | Production smoke test setelah CD deploy auto-trigger | Medium | 1h | DO-6.5 | done | docs/qa/sprint-05-to-06-report | Modul 11: CD pipeline hijau, auto-deploy di VPS produksi berjalan lancar |
+| QA-6.5 | Update `temuin-docs/03-architecture/system-architecture.md` dengan diagram 3-service hybrid kalau ada perubahan dari implementasi | Low | 1h | DO-6.3 | done | docs/qa/sprint-05-to-06-report | Sinkronisasi arsitektur 3-service hybrid sukses terverifikasi |
 
 ## Quick Links
 
