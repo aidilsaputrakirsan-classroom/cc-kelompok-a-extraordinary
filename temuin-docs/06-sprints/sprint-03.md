@@ -35,10 +35,10 @@ Menyelesaikan search, filter, claim flow, notifications, dan master data.
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| QA-3.1 | Blackbox claim submission (user side) dan cek status via API | High | 2h | FE-3.2, BE-3.2 | todo | - | Full UI claim flow di QA-4.1 setelah admin pages |
-| QA-3.2 | Blackbox search, filter, dan status badge | High | 2h | FE-3.1, FE-3.4, BE-3.3 | todo | - | - |
-| QA-3.3 | Blackbox notifications dan master data utama | Medium | 2h | FE-3.3, BE-3.4 | todo | - | - |
-| QA-3.4 | Simpan screenshot flow claim dan hasil search/filter | Medium | 1h | QA-3.1, QA-3.2 | todo | - | - |
+| QA-3.1 | Blackbox claim submission (user side) dan cek status via API | High | 2h | FE-3.2, BE-3.2 | done | master | Ref: docs/sprint-03-qa-report.md |
+| QA-3.2 | Blackbox search, filter, dan status badge | High | 2h | FE-3.1, FE-3.4, BE-3.3 | done | master | Ref: docs/sprint-03-qa-report.md |
+| QA-3.3 | Blackbox notifications dan master data utama | Medium | 2h | FE-3.3, BE-3.4 | done | master | Ref: docs/sprint-03-qa-report.md |
+| QA-3.4 | Simpan screenshot flow claim dan hasil search/filter | Medium | 1h | QA-3.1, QA-3.2 | done | master | Files in image/sprint-03/ |
 
 ## Quick Links
 
