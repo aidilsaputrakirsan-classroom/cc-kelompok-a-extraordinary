@@ -7,3 +7,4 @@ Folder ini menyimpan dokumen backup yang tidak lagi menjadi source of truth akti
 
 ## Progress & Bukti Laporan QA
 - [Sprint 05 QA Report](../../docs/sprint-05-qa-report.md) - CI & Backend Testing (Selesai 2026-05-20)
+- [Sprint 06 QA Report](../../docs/sprint-06-qa-report.md) - Cloud Deploy & Microservices Split (Selesai 2026-05-29)
