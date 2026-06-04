@@ -27,11 +27,11 @@
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| FE-7.1 | Pastikan frontend forward via gateway path (sudah dari Sprint 6, verify kembali) | High | 1h | DO-7.2, BE-7.1 | todo | - | Verifikasi tidak ada hardcoded port service backend |
-| FE-7.2 | Tambah error boundary + banner shadcn `<Alert variant="destructive">` dengan Retry saat 503 | Medium | 2h | FE-7.1 | todo | - | Modul 13: graceful degradation UI |
-| FE-7.3 | Tambah feedback status untuk admin (loading state, success toast, error banner) | Medium | 2h | FE-7.2, BE-7.2 | todo | - | Konsistensi UX area admin |
-| FE-7.4 | Buat `StatusPage.jsx` dengan shadcn `<Card>` + `<Badge>` (success/destructive) + `<Skeleton>` (DEC-022) | Medium | 4h | BE-7.8, FE-7.2 | todo | - | Modul 14: route `/status`, polling 30 detik, public no-auth, source data `GET /api/status`. Accessibility: `role="status"`, `aria-label` per badge, target Lighthouse a11y ≥90 |
-| FE-7.5 | Update axios interceptor: log header `X-Correlation-ID` ke console saat 5xx error | Low | 1h | FE-7.4 | todo | - | Modul 14: debugging trace |
+| FE-7.1 | Pastikan frontend forward via gateway path (sudah dari Sprint 6, verify kembali) | High | 1h | DO-7.2, BE-7.1 | in_progress | - | Verifikasi tidak ada hardcoded port service backend |
+| FE-7.2 | Tambah error boundary + banner shadcn `<Alert variant="destructive">` dengan Retry saat 503 | Medium | 2h | FE-7.1 | in_progress | - | Modul 13: graceful degradation UI |
+| FE-7.3 | Tambah feedback status untuk admin (loading state, success toast, error banner) | Medium | 2h | FE-7.2, BE-7.2 | in_progress | - | Konsistensi UX area admin |
+| FE-7.4 | Buat `StatusPage.jsx` dengan shadcn `<Card>` + `<Badge>` (success/destructive) + `<Skeleton>` (DEC-022) | Medium | 4h | BE-7.8, FE-7.2 | in_progress | - | Modul 14: route `/status`, polling 30 detik, public no-auth, source data `GET /api/status`. Accessibility: `role="status"`, `aria-label` per badge, target Lighthouse a11y ≥90 |
+| FE-7.5 | Update axios interceptor: log header `X-Correlation-ID` ke console saat 5xx error | Low | 1h | FE-7.4 | in_progress | - | Modul 14: debugging trace |
 
 ## Lead DevOps (@PangeranSilaen)
 

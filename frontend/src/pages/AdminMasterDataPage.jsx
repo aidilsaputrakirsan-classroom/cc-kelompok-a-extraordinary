@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { api } from "@/config/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -24,6 +25,8 @@ function MasterDataTable({ entityType, label, singular }) {
   const [editItem, setEditItem] = useState(null)
   const [name, setName] = useState("")
   const [saving, setSaving] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
+  const [actionError, setActionError] = useState(null)
 
   const fetchItems = async (signal) => {
     try {
@@ -51,12 +54,14 @@ function MasterDataTable({ entityType, label, singular }) {
   const openCreate = () => {
     setEditItem(null)
     setName("")
+    setActionError(null)
     setDialogOpen(true)
   }
 
   const openEdit = (item) => {
     setEditItem(item)
     setName(item.name)
+    setActionError(null)
     setDialogOpen(true)
   }
 
@@ -67,6 +72,7 @@ function MasterDataTable({ entityType, label, singular }) {
     }
     try {
       setSaving(true)
+      setActionError(null)
       if (editItem) {
         await api.put(`/api/master-data/${entityType}/${editItem.id}`, { name: name.trim() })
         toast.success(`${singular} berhasil diperbarui.`)
@@ -81,6 +87,7 @@ function MasterDataTable({ entityType, label, singular }) {
     } catch (err) {
       console.error("Error saving:", err)
       const errorMsg = err.response?.data?.detail || "Gagal menyimpan data."
+      setActionError(errorMsg)
       toast.error(errorMsg)
     } finally {
       setSaving(false)
@@ -90,18 +97,23 @@ function MasterDataTable({ entityType, label, singular }) {
   const handleDelete = async (item) => {
     if (!confirm(`Hapus ${singular.toLowerCase()} "${item.name}"?`)) return
     try {
+      setDeletingId(item.id)
+      setActionError(null)
       await api.delete(`/api/master-data/${entityType}/${item.id}`)
       toast.success(`${singular} berhasil dihapus.`)
       fetchItems()
     } catch (err) {
       console.error("Error deleting:", err)
       const errorMsg = err.response?.data?.detail || "Gagal menghapus data."
+      setActionError(errorMsg)
       toast.error(errorMsg)
+    } finally {
+      setDeletingId(null)
     }
   }
 
   if (loading) return <PageState state="loading" loadingText={`Memuat data ${label.toLowerCase()}...`} />
-  if (error) return <PageState state="error" errorText={error} onRetry={fetchItems} />
+  if (error) return <PageState state="error" errorText={error} onRetry={() => fetchItems()} />
 
   return (
     <div className="space-y-4">
@@ -112,6 +124,13 @@ function MasterDataTable({ entityType, label, singular }) {
         </Button>
       </div>
 
+      {actionError && (
+        <Alert variant="destructive">
+          <AlertTitle>Aksi admin gagal</AlertTitle>
+          <AlertDescription>{actionError}</AlertDescription>
+        </Alert>
+      )}
+
       {items.length === 0 ? (
         <PageState state="empty" emptyText={`Belum ada ${label.toLowerCase()} yang terdaftar.`} />
       ) : (
@@ -120,11 +139,11 @@ function MasterDataTable({ entityType, label, singular }) {
             <div key={item.id} className="flex items-center justify-between p-4 bg-card">
               <span className="font-medium text-sm">{item.name}</span>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => openEdit(item)}>
+                <Button variant="outline" size="sm" onClick={() => openEdit(item)} disabled={deletingId === item.id}>
                   Edit
                 </Button>
-                <Button variant="destructive" size="sm" onClick={() => handleDelete(item)}>
-                  Hapus
+                <Button variant="destructive" size="sm" onClick={() => handleDelete(item)} disabled={deletingId === item.id}>
+                  {deletingId === item.id ? "Menghapus..." : "Hapus"}
                 </Button>
               </div>
             </div>
@@ -140,6 +159,12 @@ function MasterDataTable({ entityType, label, singular }) {
               {editItem ? `Ubah nama ${singular.toLowerCase()} ini.` : `Masukkan nama ${singular.toLowerCase()} baru.`}
             </DialogDescription>
           </DialogHeader>
+          {actionError && (
+            <Alert variant="destructive">
+              <AlertTitle>Gagal menyimpan data</AlertTitle>
+              <AlertDescription>{actionError}</AlertDescription>
+            </Alert>
+          )}
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nama</Label>
