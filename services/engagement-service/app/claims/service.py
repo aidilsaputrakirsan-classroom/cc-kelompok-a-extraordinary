@@ -2,9 +2,11 @@ import logging
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+from typing import Optional
 
 from app.claims.schemas import ClaimCreate, ClaimStatusUpdate
 from app.models.claim import Claim, ClaimStatusHistory
+from app.models.audit import AuditLog
 from app.notifications.schemas import NotificationCreate
 from app.notifications.service import create_notification
 from app.utils import httpx_client
@@ -98,7 +100,10 @@ def get_claim_by_id(db: Session, claim_id: str, user_id: str, user_role: str, jw
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Claim not found")
 
     # Mengambil detail item secara cross-service via HTTP
-    item = httpx_client.get_item(claim.item_id, jwt_token)
+    try:
+        item = httpx_client.get_item(claim.item_id, jwt_token)
+    except Exception:
+        item = None
 
     is_claim_owner = claim.user_id == user_id
     is_item_owner = item and item.get("created_by") == user_id
@@ -118,9 +123,15 @@ def get_claims_by_item(db: Session, item_id: str | None, user_id: str, user_role
         return db.query(Claim).all()
 
     # Mengambil detail item secara cross-service via HTTP
-    item = httpx_client.get_item(item_id, jwt_token)
+    try:
+        item = httpx_client.get_item(item_id, jwt_token)
+    except Exception:
+        item = None
+        
     if not item:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+        if is_admin:
+            return db.query(Claim).filter(Claim.item_id == item_id).all()
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Item service is currently unavailable. Cannot verify ownership.")
 
     is_item_owner = item.get("created_by") == user_id
 
@@ -135,7 +146,10 @@ def update_claim_status(db: Session, claim_id: str, payload: ClaimStatusUpdate, 
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Claim not found")
 
     # Mengambil detail item secara cross-service via HTTP
-    item = httpx_client.get_item(claim.item_id, jwt_token)
+    try:
+        item = httpx_client.get_item(claim.item_id, jwt_token)
+    except Exception:
+        item = None
 
     is_item_owner = item and item.get("created_by") == user_id
     is_claim_owner = claim.user_id == user_id
@@ -159,6 +173,17 @@ def update_claim_status(db: Session, claim_id: str, payload: ClaimStatusUpdate, 
     )
     db.add(history)
 
+    # Emit audit logs jika dilakukan oleh admin
+    if is_admin:
+        audit_entry = AuditLog(
+            user_id=user_id,
+            action=f"UPDATE_CLAIM_STATUS_{payload.status.upper()}",
+            entity_type="claim",
+            entity_id=claim.id,
+            details=f"Admin updated claim status to {payload.status} for item_id {claim.item_id}"
+        )
+        db.add(audit_entry)
+
     # Sync item status berdasarkan status claim secara cross-service via HTTP
     new_item_status = None
     if payload.status == "approved":
@@ -169,8 +194,22 @@ def update_claim_status(db: Session, claim_id: str, payload: ClaimStatusUpdate, 
         new_item_status = "open"
 
     if new_item_status and item and item.get("status") != new_item_status:
-        # Melakukan cross-service status synchronization
-        httpx_client.update_item_status(item.get("id"), new_item_status, jwt_token)
+        try:
+            # Melakukan cross-service status synchronization
+            httpx_client.update_item_status(item.get("id"), new_item_status, jwt_token)
+            
+            # Emit audit log untuk item status change
+            if is_admin:
+                audit_item = AuditLog(
+                    user_id=user_id,
+                    action="SYNC_ITEM_STATUS",
+                    entity_type="item",
+                    entity_id=item.get("id"),
+                    details=f"Synced item status to {new_item_status} due to claim status change to {payload.status}"
+                )
+                db.add(audit_item)
+        except Exception as exc:
+            logger.warning("Gagal menyelaraskan status item secara cross-service: %s", exc, exc_info=True)
 
     db.commit()
     db.refresh(claim)

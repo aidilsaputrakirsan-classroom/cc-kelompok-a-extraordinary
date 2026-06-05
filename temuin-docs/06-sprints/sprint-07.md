@@ -14,14 +14,14 @@
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| BE-7.1 | Tambah aggregated `/health` endpoint per service: status DB + downstream service | High | 2h | BE-6.4 | todo | - | Modul 13: health checks granular. Status: healthy / degraded / unhealthy |
-| BE-7.2 | Tambah audit_logs handling di engagement-service: emit log saat admin action (claim approve/reject, item status change) | Medium | 3h | BE-6.3 | todo | - | DEC-008. Audit log dimasukkan ke engagement-service per DEC-019 |
-| BE-7.3 | Tambah `services/shared/logging_config.py` + `logging_middleware.py` (DEC-022) | High | 3h | BE-7.1 | todo | - | Modul 14: structured JSON logging. Field: timestamp ISO UTC, level, service, correlation_id, method, path, status, duration_ms. Copy ke 3 service |
-| BE-7.4 | Implementasi retry pattern (3x exponential 0.5/1/2s) di `httpx_client.py` (DEC-021) | High | 3h | BE-6.5 | todo | - | Modul 13: retry untuk jalur `engagement → item-service`. Retryable: 500/502/503/504/timeout/connection error. Non-retryable: 400/401/403/404 |
-| BE-7.5 | Implementasi circuit breaker in-memory di `httpx_client.py` (DEC-021) | High | 3h | BE-7.4 | todo | - | Modul 13: state CLOSED → OPEN setelah 5 failure dalam 30s, cooldown 60s sebelum HALF_OPEN |
-| BE-7.6 | Tambah `/metrics` endpoint per service: Prometheus text format (DEC-022) | Medium | 3h | BE-7.3 | todo | - | Modul 14: counter request_total, histogram request_duration_seconds, counter error_total. Tidak deploy Prometheus |
-| BE-7.7 | Tambah graceful degradation: bila `item-service` down, listing claims tetap respond tanpa info item enrichment (DEC-021) | Medium | 2h | BE-7.5 | todo | - | Modul 13: graceful degradation pattern |
-| BE-7.8 | Tambah endpoint `GET /api/status` aggregator: JSON status 3 service untuk StatusPage | Medium | 2h | BE-7.1, BE-7.6 | todo | - | Modul 14: response `{"services":[{"name":"auth","status":"up","latency_ms":12}, ...]}` |
+| BE-7.1 | Tambah aggregated `/health` endpoint per service: status DB + downstream service | High | 2h | BE-6.4 | done | feature/sprint-07-backend-observability-reliability | Modul 13: health checks granular. Status: healthy / degraded / unhealthy |
+| BE-7.2 | Tambah audit_logs handling di engagement-service: emit log saat admin action (claim approve/reject, item status change) | Medium | 3h | BE-6.3 | done | feature/sprint-07-backend-observability-reliability | DEC-008. Audit log dimasukkan ke engagement-service per DEC-019 |
+| BE-7.3 | Tambah `services/shared/logging_config.py` + `logging_middleware.py` (DEC-022) | High | 3h | BE-7.1 | done | feature/sprint-07-backend-observability-reliability | Modul 14: structured JSON logging. Field: timestamp ISO UTC, level, service, correlation_id, method, path, status, duration_ms. Copy ke 3 service |
+| BE-7.4 | Implementasi retry pattern (3x exponential 0.5/1/2s) di `httpx_client.py` (DEC-021) | High | 3h | BE-6.5 | done | feature/sprint-07-backend-observability-reliability | Modul 13: retry untuk jalur `engagement → item-service`. Retryable: 500/502/503/504/timeout/connection error. Non-retryable: 400/401/403/404 |
+| BE-7.5 | Implementasi circuit breaker in-memory di `httpx_client.py` (DEC-021) | High | 3h | BE-7.4 | done | feature/sprint-07-backend-observability-reliability | Modul 13: state CLOSED → OPEN setelah 5 failure dalam 30s, cooldown 60s sebelum HALF_OPEN |
+| BE-7.6 | Tambah `/metrics` endpoint per service: Prometheus text format (DEC-022) | Medium | 3h | BE-7.3 | done | feature/sprint-07-backend-observability-reliability | Modul 14: counter request_total, histogram request_duration_seconds, counter error_total. Tidak deploy Prometheus |
+| BE-7.7 | Tambah graceful degradation: bila `item-service` down, listing claims tetap respond tanpa info item enrichment (DEC-021) | Medium | 2h | BE-7.5 | done | feature/sprint-07-backend-observability-reliability | Modul 13: graceful degradation pattern |
+| BE-7.8 | Tambah endpoint `GET /api/status` aggregator: JSON status 3 service untuk StatusPage | Medium | 2h | BE-7.1, BE-7.6 | done | feature/sprint-07-backend-observability-reliability | Modul 14: response `{"services":[{"name":"auth","status":"up","latency_ms":12}, ...]}` |
 
 ## Lead Frontend (@nicholasmnrng)
 
