@@ -1,12 +1,13 @@
 import httpx
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
-from sqlalchemy.orm import Session
 from sqlalchemy import text
-from app.database import get_db, Base, engine
-from app.config import settings
+from sqlalchemy.orm import Session
+
 from app.claims.router import router as claims_router
+from app.config import settings
+from app.database import Base, engine, get_db
 from app.notifications.router import router as notifications_router
 from app.status.router import router as status_router
 from app.utils.logging_config import setup_logging
@@ -54,8 +55,8 @@ async def health_check(db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail={"status": "unhealthy", "database": str(e)}
-        )
-        
+        ) from e
+
     # 2. Cek downstream services (auth-service & item-service)
     # Gunakan timeout singkat agar healthcheck responsif
     auth_healthy = False
@@ -77,10 +78,7 @@ async def health_check(db: Session = Depends(get_db)):
         pass
 
     # Tentukan status keseluruhan
-    if auth_healthy and item_healthy:
-        overall_status = "healthy"
-    else:
-        overall_status = "degraded"
+    overall_status = "healthy" if auth_healthy and item_healthy else "degraded"
 
     return {
         "status": overall_status,

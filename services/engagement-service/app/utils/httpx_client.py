@@ -1,9 +1,11 @@
-import time
-import httpx
 import logging
-from fastapi import HTTPException
-from app.config import settings
+import time
+
+import httpx
 from app.utils.logging_config import correlation_id_ctx
+from fastapi import HTTPException
+
+from app.config import settings
 
 logger = logging.getLogger("httpx_client")
 
@@ -18,14 +20,13 @@ class CircuitBreaker:
         self.state = "CLOSED" # CLOSED, OPEN, HALF_OPEN
         self.failures = [] # timestamps of failures
         self.last_state_change = time.time()
-        
+
     def check_state(self):
         now = time.time()
-        if self.state == "OPEN":
-            if now - self.last_state_change > CB_COOLDOWN:
-                self.state = "HALF_OPEN"
-                self.last_state_change = now
-                logger.info(f"Circuit Breaker [{self.name}] transitioned to HALF_OPEN")
+        if self.state == "OPEN" and now - self.last_state_change > CB_COOLDOWN:
+            self.state = "HALF_OPEN"
+            self.last_state_change = now
+            logger.info(f"Circuit Breaker [{self.name}] transitioned to HALF_OPEN")
         return self.state
 
     def record_success(self):
@@ -34,13 +35,13 @@ class CircuitBreaker:
             self.failures = []
             self.last_state_change = time.time()
             logger.info(f"Circuit Breaker [{self.name}] transitioned to CLOSED")
-            
+
     def record_failure(self):
         now = time.time()
         self.failures.append(now)
         # Filter failures within window
         self.failures = [t for t in self.failures if now - t <= CB_FAILURE_WINDOW]
-        
+
         if self.state == "HALF_OPEN":
             self.state = "OPEN"
             self.last_state_change = now
@@ -64,7 +65,7 @@ def request_with_retry_and_cb(cb: CircuitBreaker, method: str, url: str, **kwarg
     # 2. Sisipkan X-Correlation-ID header
     if "headers" not in kwargs:
         kwargs["headers"] = {}
-    
+
     corr_id = correlation_id_ctx.get()
     if corr_id and corr_id != "-":
         kwargs["headers"]["X-Correlation-ID"] = corr_id
@@ -72,20 +73,20 @@ def request_with_retry_and_cb(cb: CircuitBreaker, method: str, url: str, **kwarg
     # 3. Retry configuration
     retries = 3
     backoff_factors = [0.5, 1.0, 2.0]
-    
+
     for attempt in range(retries + 1):
         try:
             with httpx.Client(timeout=TIMEOUT) as client:
                 response = client.request(method, url, **kwargs)
-                
+
                 # Check if status code is retryable (500, 502, 503, 504)
                 if response.status_code in [500, 502, 503, 504]:
                     response.raise_for_status() # Trigger except block to retry
-                
+
                 # Request berhasil sepenuhnya
                 cb.record_success()
                 return response
-                
+
         except (httpx.HTTPStatusError, httpx.RequestError) as exc:
             # Check if this status code is non-retryable (400, 401, 403, 404)
             if isinstance(exc, httpx.HTTPStatusError):
@@ -93,10 +94,10 @@ def request_with_retry_and_cb(cb: CircuitBreaker, method: str, url: str, **kwarg
                 if status_code in [400, 401, 403, 404]:
                     # Jangan di-retry, dan catat sebagai status error tapi bukan failure circuit breaker
                     raise exc
-            
+
             # Jika di sini, berarti error retryable (5xx, timeout, atau connection error)
             logger.warning(f"Request to {url} failed (attempt {attempt+1}/{retries+1}): {exc}")
-            
+
             if attempt < retries:
                 time.sleep(backoff_factors[attempt])
             else:
@@ -116,30 +117,30 @@ def get_item(item_id: str, jwt_token: str) -> dict | None:
         raise HTTPException(
             status_code=502,
             detail=f"Gagal menghubungi item-service: {exc}"
-        )
+        ) from exc
     except Exception as exc:
         raise HTTPException(
             status_code=502,
             detail=f"Gagal menghubungi item-service: {exc}"
-        )
+        ) from exc
 
 def update_item_status(item_id: str, new_status: str, jwt_token: str) -> bool:
     headers = {"Authorization": f"Bearer {jwt_token}"}
     url = f"{settings.ITEM_SERVICE_URL}/items/{item_id}/status"
     payload = {"status": new_status}
     try:
-        response = request_with_retry_and_cb(item_service_cb, "PUT", url, json=payload, headers=headers)
+        request_with_retry_and_cb(item_service_cb, "PUT", url, json=payload, headers=headers)
         return True
     except httpx.HTTPStatusError as exc:
         raise HTTPException(
             status_code=exc.response.status_code,
             detail=exc.response.json().get("detail", "Gagal memperbarui status item")
-        )
+        ) from exc
     except Exception as exc:
         raise HTTPException(
             status_code=502,
             detail=f"Gagal menghubungi item-service untuk pembaruan status: {exc}"
-        )
+        ) from exc
 
 def get_admins() -> list[dict]:
     url = f"{settings.AUTH_SERVICE_URL}/auth/users/admins"
@@ -150,4 +151,4 @@ def get_admins() -> list[dict]:
         raise HTTPException(
             status_code=502,
             detail=f"Gagal menghubungi auth-service untuk daftar admin: {exc}"
-        )
+        ) from exc

@@ -2,11 +2,10 @@ import logging
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Optional
 
 from app.claims.schemas import ClaimCreate, ClaimStatusUpdate
-from app.models.claim import Claim, ClaimStatusHistory
 from app.models.audit import AuditLog
+from app.models.claim import Claim, ClaimStatusHistory
 from app.notifications.schemas import NotificationCreate
 from app.notifications.service import create_notification
 from app.utils import httpx_client
@@ -127,7 +126,7 @@ def get_claims_by_item(db: Session, item_id: str | None, user_id: str, user_role
         item = httpx_client.get_item(item_id, jwt_token)
     except Exception:
         item = None
-        
+
     if not item:
         if is_admin:
             return db.query(Claim).filter(Claim.item_id == item_id).all()
@@ -197,7 +196,7 @@ def update_claim_status(db: Session, claim_id: str, payload: ClaimStatusUpdate, 
         try:
             # Melakukan cross-service status synchronization
             httpx_client.update_item_status(item.get("id"), new_item_status, jwt_token)
-            
+
             # Emit audit log untuk item status change
             if is_admin:
                 audit_item = AuditLog(
