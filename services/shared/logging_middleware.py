@@ -2,10 +2,11 @@ import logging
 import time
 import uuid
 
-from app.utils.logging_config import correlation_id_ctx
-from app.utils.metrics import track_error, track_request
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
+
+from app.utils.logging_config import correlation_id_ctx
+from app.utils.metrics import track_error, track_request
 
 logger = logging.getLogger("request_logger")
 

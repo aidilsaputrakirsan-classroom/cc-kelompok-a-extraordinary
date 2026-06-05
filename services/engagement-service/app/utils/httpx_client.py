@@ -2,10 +2,10 @@ import logging
 import time
 
 import httpx
-from app.utils.logging_config import correlation_id_ctx
 from fastapi import HTTPException
 
 from app.config import settings
+from app.utils.logging_config import correlation_id_ctx
 
 logger = logging.getLogger("httpx_client")
 

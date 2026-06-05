@@ -2,6 +2,7 @@ import time
 from unittest.mock import MagicMock, patch
 
 import httpx
+
 from app.utils.httpx_client import CircuitBreaker, request_with_retry_and_cb
 from app.utils.logging_config import correlation_id_ctx
 
