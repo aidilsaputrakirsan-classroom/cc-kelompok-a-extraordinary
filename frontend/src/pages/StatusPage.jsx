@@ -31,7 +31,11 @@ const serviceLabel = {
 
 function StatusBadge({ status, name }) {
   const normalized = normalizeStatus(status)
-  const variant = normalized === "down" ? "destructive" : "success"
+  const variant = {
+    up: "success",
+    degraded: "secondary",
+    down: "destructive",
+  }[normalized]
 
   return (
     <Badge
@@ -84,15 +88,21 @@ export default function StatusPage() {
 
   useEffect(() => {
     const controller = new AbortController()
+    const pollingControllers = new Set()
     fetchStatus(controller.signal)
 
     const interval = window.setInterval(() => {
       const pollingController = new AbortController()
-      fetchStatus(pollingController.signal)
+      pollingControllers.add(pollingController)
+      fetchStatus(pollingController.signal).finally(() => {
+        pollingControllers.delete(pollingController)
+      })
     }, POLLING_INTERVAL_MS)
 
     return () => {
       controller.abort()
+      pollingControllers.forEach((pollingController) => pollingController.abort())
+      pollingControllers.clear()
       window.clearInterval(interval)
     }
   }, [fetchStatus])

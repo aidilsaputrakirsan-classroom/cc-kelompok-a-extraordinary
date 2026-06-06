@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { RotateCcw } from "lucide-react"
+import { RotateCcw, X } from "lucide-react"
 import { SERVICE_ERROR_EVENT } from "@/config/api"
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -34,10 +34,20 @@ export default function ServiceErrorBanner() {
             )}
           </AlertDescription>
           <AlertAction>
-            <Button variant="outline" size="sm" onClick={handleRetry}>
-              <RotateCcw data-icon="inline-start" />
-              Retry
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={handleRetry}>
+                <RotateCcw data-icon="inline-start" />
+                Retry
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setError(null)}
+                aria-label="Tutup banner gangguan layanan"
+              >
+                <X />
+              </Button>
+            </div>
           </AlertAction>
         </Alert>
       </div>
