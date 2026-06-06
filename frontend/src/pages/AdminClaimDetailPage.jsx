@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom"
 import { api } from "@/config/api"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { StatusBadge } from "@/components/ui/StatusBadge"
 import PageState from "@/components/PageState"
 import { toast } from "sonner"
@@ -16,6 +17,7 @@ export default function AdminClaimDetailPage() {
   
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [actionError, setActionError] = useState(null)
   const [updating, setUpdating] = useState(false)
 
   const fetchData = async (signal) => {
@@ -56,6 +58,7 @@ export default function AdminClaimDetailPage() {
   const handleStatusUpdate = async (newStatus) => {
     try {
       setUpdating(true)
+      setActionError(null)
       await api.put(`/api/claims/${id}/status`, { status: newStatus })
       
       const statusLabel = {
@@ -71,6 +74,7 @@ export default function AdminClaimDetailPage() {
     } catch (error) {
       console.error("Error updating claim:", error)
       const errorMsg = error.response?.data?.detail || "Gagal mengubah status klaim."
+      setActionError(errorMsg)
       toast.error(errorMsg)
     } finally {
       setUpdating(false)
@@ -78,7 +82,7 @@ export default function AdminClaimDetailPage() {
   }
 
   if (loading) return <PageState state="loading" loadingText="Memuat detail klaim..." />
-  if (error) return <PageState state="error" errorText={error} onRetry={fetchData} />
+  if (error) return <PageState state="error" errorText={error} onRetry={() => fetchData()} />
   if (!claim) return <PageState state="empty" emptyText="Klaim tidak ditemukan." />
 
   return (
@@ -124,20 +128,27 @@ export default function AdminClaimDetailPage() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-wrap gap-3 border-t pt-6">
+          {actionError && (
+            <Alert variant="destructive" className="basis-full">
+              <AlertTitle>Gagal memperbarui status</AlertTitle>
+              <AlertDescription>{actionError}</AlertDescription>
+            </Alert>
+          )}
+
           {claim.status === 'pending' && (
             <>
               <Button 
                 onClick={() => handleStatusUpdate('approved')} 
                 disabled={updating}
               >
-                Setujui Klaim
+                {updating ? "Memproses..." : "Setujui Klaim"}
               </Button>
               <Button 
                 variant="destructive" 
                 onClick={() => handleStatusUpdate('rejected')}
                 disabled={updating}
               >
-                Tolak Klaim
+                {updating ? "Memproses..." : "Tolak Klaim"}
               </Button>
             </>
           )}
@@ -148,14 +159,14 @@ export default function AdminClaimDetailPage() {
                 onClick={() => handleStatusUpdate('completed')}
                 disabled={updating}
               >
-                Tandai Selesai (Diserahkan)
+                {updating ? "Memproses..." : "Tandai Selesai (Diserahkan)"}
               </Button>
               <Button 
                 variant="outline" 
                 onClick={() => handleStatusUpdate('cancelled')}
                 disabled={updating}
               >
-                Batalkan Persetujuan
+                {updating ? "Memproses..." : "Batalkan Persetujuan"}
               </Button>
             </>
           )}

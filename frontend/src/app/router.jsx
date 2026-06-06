@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom"
-import { lazy, Suspense } from "react"
+import { createElement, lazy, Suspense } from "react"
 import RootLayout from "@/components/layout/RootLayout"
 import HomePage from "@/pages/HomePage"
 import LoginPage from "@/pages/LoginPage"
@@ -8,9 +8,9 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute"
 import AdminRoute from "@/components/auth/AdminRoute"
 import PageState from "@/components/PageState"
 
-const Loadable = (Component) => (props) => (
+const Loadable = (PageComponent) => (props) => (
   <Suspense fallback={<PageState state="loading" loadingText="Memuat halaman..." />}>
-    <Component {...props} />
+    {createElement(PageComponent, props)}
   </Suspense>
 );
 
@@ -23,6 +23,7 @@ const NotificationsPage = Loadable(lazy(() => import("@/pages/NotificationsPage"
 const AdminClaimsPage = Loadable(lazy(() => import("@/pages/AdminClaimsPage")))
 const AdminClaimDetailPage = Loadable(lazy(() => import("@/pages/AdminClaimDetailPage")))
 const AdminMasterDataPage = Loadable(lazy(() => import("@/pages/AdminMasterDataPage")))
+const StatusPage = Loadable(lazy(() => import("@/pages/StatusPage")))
 
 export const router = createBrowserRouter([
   {
@@ -32,6 +33,10 @@ export const router = createBrowserRouter([
   {
     path: "/register",
     element: <RegisterPage />,
+  },
+  {
+    path: "/status",
+    element: <StatusPage />,
   },
   {
     path: "/",
