@@ -1,5 +1,6 @@
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import PlainTextResponse
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -7,6 +8,12 @@ from app.config import settings
 from app.database import Base, engine, get_db
 from app.items.router import router as items_router
 from app.master_data.router import router as master_data_router
+from app.utils.logging_config import setup_logging
+from app.utils.logging_middleware import RequestLoggingMiddleware
+from app.utils.metrics import get_prometheus_metrics
+
+# Inisialisasi logging terstruktur
+setup_logging()
 
 # Inisialisasi tabel otomatis saat startup
 Base.metadata.create_all(bind=engine)
@@ -26,6 +33,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Register Request logging middleware
+app.add_middleware(RequestLoggingMiddleware)
+
 @app.get("/")
 def read_root():
     return {"message": "Welcome to Temuin Item Service"}
@@ -44,3 +54,7 @@ def health_check(db: Session = Depends(get_db)):
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail={"status": "unhealthy", "database": str(e)}
         ) from e
+
+@app.get("/metrics", response_class=PlainTextResponse)
+def metrics():
+    return get_prometheus_metrics()
