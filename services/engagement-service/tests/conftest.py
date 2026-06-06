@@ -52,6 +52,16 @@ def client():
 
 
 @pytest.fixture()
+def db_session():
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.rollback()
+        db.close()
+
+
+@pytest.fixture()
 def user_token():
     payload = {"sub": "user@itk.ac.id", "role": "user", "id": "user-uuid-1"}
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)

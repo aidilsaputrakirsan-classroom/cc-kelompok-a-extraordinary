@@ -79,9 +79,10 @@ def request_with_retry_and_cb(cb: CircuitBreaker, method: str, url: str, **kwarg
             with httpx.Client(timeout=TIMEOUT) as client:
                 response = client.request(method, url, **kwargs)
 
-                # Check if status code is retryable (500, 502, 503, 504)
-                if response.status_code in [500, 502, 503, 504]:
-                    response.raise_for_status() # Trigger except block to retry
+                # Retry only temporary downstream failures. Client errors stay
+                # non-retryable, but must still surface as failed responses.
+                if response.status_code >= 400:
+                    response.raise_for_status()
 
                 # Request berhasil sepenuhnya
                 cb.record_success()
@@ -142,10 +143,11 @@ def update_item_status(item_id: str, new_status: str, jwt_token: str) -> bool:
             detail=f"Gagal menghubungi item-service untuk pembaruan status: {exc}"
         ) from exc
 
-def get_admins() -> list[dict]:
+def get_admins(jwt_token: str) -> list[dict]:
+    headers = {"Authorization": f"Bearer {jwt_token}"}
     url = f"{settings.AUTH_SERVICE_URL}/auth/users/admins"
     try:
-        response = request_with_retry_and_cb(auth_service_cb, "GET", url)
+        response = request_with_retry_and_cb(auth_service_cb, "GET", url, headers=headers)
         return response.json()
     except Exception as exc:
         raise HTTPException(

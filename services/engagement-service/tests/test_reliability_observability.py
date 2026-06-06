@@ -2,7 +2,13 @@ import time
 from unittest.mock import MagicMock, patch
 
 import httpx
+import pytest
+from fastapi import HTTPException
 
+from app.claims.schemas import ClaimStatusUpdate
+from app.claims.service import update_claim_status
+from app.models.claim import Claim
+from app.utils import httpx_client
 from app.utils.httpx_client import CircuitBreaker, request_with_retry_and_cb
 from app.utils.logging_config import correlation_id_ctx
 
@@ -82,6 +88,60 @@ def test_correlation_id_propagation():
         assert kwargs["headers"]["X-Correlation-ID"] == "test-123-corr"
 
     correlation_id_ctx.reset(token)
+
+def test_get_admins_forwards_authorization_header():
+    with patch("app.utils.httpx_client.request_with_retry_and_cb") as mock_request:
+        mock_res = MagicMock()
+        mock_res.json.return_value = [{"id": "admin-1"}]
+        mock_request.return_value = mock_res
+
+        admins = httpx_client.get_admins("jwt-token")
+
+        assert admins == [{"id": "admin-1"}]
+        args, kwargs = mock_request.call_args
+        assert args[1] == "GET"
+        assert kwargs["headers"]["Authorization"] == "Bearer jwt-token"
+
+def test_non_retryable_4xx_raises_without_retry():
+    cb = CircuitBreaker("test-cb-4xx")
+
+    with patch("httpx.Client.request") as mock_request:
+        response = httpx.Response(403, request=httpx.Request("GET", "http://localhost/test"))
+        mock_request.return_value = response
+
+        with pytest.raises(httpx.HTTPStatusError):
+            request_with_retry_and_cb(cb, "GET", "http://localhost/test")
+
+        assert mock_request.call_count == 1
+        assert cb.state == "CLOSED"
+
+def test_update_claim_status_blocks_when_item_service_down(db_session):
+    claim = Claim(
+        id="claim-item-down",
+        item_id="item-down",
+        user_id="claim-owner",
+        status="pending",
+        ownership_answer="Jawaban klaim",
+    )
+    db_session.add(claim)
+    db_session.commit()
+
+    with patch(
+        "app.claims.service.httpx_client.get_item",
+        side_effect=HTTPException(status_code=502, detail="item-service down"),
+    ), pytest.raises(HTTPException) as exc_info:
+        update_claim_status(
+            db_session,
+            claim.id,
+            ClaimStatusUpdate(status="approved"),
+            "admin-user",
+            "admin",
+            "jwt-token",
+        )
+
+    db_session.refresh(claim)
+    assert exc_info.value.status_code == 503
+    assert claim.status == "pending"
 
 @patch("time.sleep", return_value=None) # Skip sleep during retries
 def test_retry_on_5xx_status(mock_sleep):

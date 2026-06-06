@@ -147,8 +147,14 @@ def update_claim_status(db: Session, claim_id: str, payload: ClaimStatusUpdate, 
     # Mengambil detail item secara cross-service via HTTP
     try:
         item = httpx_client.get_item(claim.item_id, jwt_token)
-    except Exception:
-        item = None
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Item service is currently unavailable. Cannot update claim status safely.",
+        ) from exc
+
+    if not item:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
 
     is_item_owner = item and item.get("created_by") == user_id
     is_claim_owner = claim.user_id == user_id
