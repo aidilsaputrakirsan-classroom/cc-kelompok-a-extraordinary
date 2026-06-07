@@ -59,8 +59,8 @@ describe("StatusPage", () => {
   it("polls status endpoint every 30 seconds", async () => {
     vi.useFakeTimers()
     api.get
-      .mockResolvedValueOnce({ data: { services: [] } })
-      .mockResolvedValueOnce({ data: { services: [] } })
+      .mockResolvedValueOnce({ data: { services: [{ name: "auth", status: "up", latency_ms: 12 }] } })
+      .mockResolvedValueOnce({ data: { services: [{ name: "auth", status: "up", latency_ms: 10 }] } })
 
     render(<StatusPage />)
 
@@ -108,5 +108,19 @@ describe("StatusPage", () => {
       expect(screen.getByText("Status belum tersedia")).toBeInTheDocument()
     })
     expect(screen.getByText("Gagal memuat status layanan.")).toBeInTheDocument()
+  })
+
+  it("shows an error banner when status endpoint returns non-json fallback content", async () => {
+    api.get.mockResolvedValueOnce({
+      data: "<!doctype html><html><body>SPA fallback</body></html>",
+    })
+
+    render(<StatusPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText("Status belum tersedia")).toBeInTheDocument()
+    })
+    expect(screen.getByText("Gagal memuat status layanan.")).toBeInTheDocument()
+    expect(screen.queryByText("Auth Service")).not.toBeInTheDocument()
   })
 })

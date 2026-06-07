@@ -75,8 +75,11 @@ export default function StatusPage() {
     try {
       setError(null)
       const response = await api.get("/api/status", { signal })
-      const statusData = response.data?.services || []
-      setServices(Array.isArray(statusData) ? statusData : [])
+      const statusData = response.data?.services
+      if (!Array.isArray(statusData) || statusData.length === 0) {
+        throw new Error("invalid status response")
+      }
+      setServices(statusData)
       setLastUpdated(new Date())
     } catch (err) {
       if (err.name === "CanceledError" || err.code === "ERR_CANCELED") return
