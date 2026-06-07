@@ -114,9 +114,11 @@ jobs:
             HEALTH_AUTH=$(curl -fsS -o /dev/null -w "%{http_code}" https://temuin.pangeransilaen.net/api/auth/health || echo "fail")
             HEALTH_ITEM=$(curl -fsS -o /dev/null -w "%{http_code}" https://temuin.pangeransilaen.net/api/items/health || echo "fail")
             HEALTH_ENG=$(curl -fsS -o /dev/null -w "%{http_code}" https://temuin.pangeransilaen.net/api/engagement/health || echo "fail")
-            echo "auth=$HEALTH_AUTH item=$HEALTH_ITEM engagement=$HEALTH_ENG"
-            if [ "$HEALTH_AUTH" = "200" ] && [ "$HEALTH_ITEM" = "200" ] && [ "$HEALTH_ENG" = "200" ]; then
-              echo "All 3 services healthy"
+            STATUS_JSON=$(curl -fsS https://temuin.pangeransilaen.net/api/status || echo "fail")
+            STATUS_OK=$(printf '%s' "$STATUS_JSON" | python3 -c 'import json,sys; data=json.load(sys.stdin); services=data.get("services", []); sys.exit(0 if isinstance(services, list) and len(services) == 3 else 1)' && echo "200" || echo "fail")
+            echo "auth=$HEALTH_AUTH item=$HEALTH_ITEM engagement=$HEALTH_ENG status=$STATUS_OK"
+            if [ "$HEALTH_AUTH" = "200" ] && [ "$HEALTH_ITEM" = "200" ] && [ "$HEALTH_ENG" = "200" ] && [ "$STATUS_OK" = "200" ]; then
+              echo "All 3 services healthy and /api/status returns JSON services"
               exit 0
             fi
             if [ $i -eq 3 ]; then
