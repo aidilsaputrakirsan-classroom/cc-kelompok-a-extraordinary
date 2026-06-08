@@ -86,6 +86,28 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.TENCENT_VPS_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Copy compose + gateway config to VPS
+        # Sprint 7 (DO-7.5/7.9): sinkron file config ke VPS. CD lama hanya
+        # narik image; perubahan level-compose (healthcheck, logging, limit)
+        # dan gateway/nginx.conf butuh file ter-update di server.
+        #
+        # Layout di VPS dibuat mirror repo supaya bind-mount relatif
+        # `../gateway/nginx.conf` di compose resolve dengan benar:
+        #   /opt/temuin/infra/docker-compose.microservices.yml
+        #   /opt/temuin/gateway/nginx.conf
+        #   /opt/temuin/infra/postgres-init/
+        env:
+          VPS_USER: ${{ secrets.TENCENT_VPS_USER }}
+          VPS_HOST: ${{ secrets.TENCENT_VPS_HOST }}
+        run: |
+          ssh -i ~/.ssh/id_ed25519 "$VPS_USER@$VPS_HOST" "mkdir -p /opt/temuin/infra/postgres-init /opt/temuin/gateway"
+          scp -i ~/.ssh/id_ed25519 infra/docker-compose.microservices.yml "$VPS_USER@$VPS_HOST:/opt/temuin/infra/docker-compose.microservices.yml"
+          scp -i ~/.ssh/id_ed25519 gateway/nginx.conf "$VPS_USER@$VPS_HOST:/opt/temuin/gateway/nginx.conf"
+          scp -i ~/.ssh/id_ed25519 infra/postgres-init/* "$VPS_USER@$VPS_HOST:/opt/temuin/infra/postgres-init/"
+
       - name: Pull & restart containers
         env:
           VPS_USER: ${{ secrets.TENCENT_VPS_USER }}
@@ -94,14 +116,17 @@ jobs:
           ssh -i ~/.ssh/id_ed25519 $VPS_USER@$VPS_HOST << 'EOF'
             set -e
             cd /opt/temuin
+            # -p temuin: kunci project name agar konsisten dengan stack lama
+            # (basename /opt/temuin) walau compose file kini di infra/.
+            COMPOSE="docker compose -p temuin -f infra/docker-compose.microservices.yml"
             echo "=== Pulling latest images ==="
-            docker compose -f docker-compose.microservices.yml pull
+            $COMPOSE pull
             echo "=== Restarting containers ==="
-            docker compose -f docker-compose.microservices.yml up -d
+            $COMPOSE up -d
             echo "=== Waiting for health checks (30s) ==="
             sleep 30
             echo "=== Service status ==="
-            docker compose -f docker-compose.microservices.yml ps
+            $COMPOSE ps
           EOF
 
       - name: Health check (retry 3x)
@@ -135,12 +160,16 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_ed25519 $VPS_USER@$VPS_HOST << 'EOF'
             cd /opt/temuin
+            COMPOSE="docker compose -p temuin -f infra/docker-compose.microservices.yml"
             echo "=== auth-service logs ==="
-            docker compose -f docker-compose.microservices.yml logs --tail=50 auth-service || true
+            $COMPOSE logs --tail=50 auth-service || true
             echo ""
             echo "=== item-service logs ==="
-            docker compose -f docker-compose.microservices.yml logs --tail=50 item-service || true
+            $COMPOSE logs --tail=50 item-service || true
             echo ""
             echo "=== engagement-service logs ==="
-            docker compose -f docker-compose.microservices.yml logs --tail=50 engagement-service || true
+            $COMPOSE logs --tail=50 engagement-service || true
+            echo ""
+            echo "=== gateway logs ==="
+            $COMPOSE logs --tail=50 gateway || true
           EOF

@@ -37,15 +37,15 @@
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| DO-7.1 | Tambah container `temuin-gateway` Nginx production-grade (DEC-022, DEC-023) | High | 3h | DO-6.3 | todo | - | Modul 13: container nginx:alpine. `gateway/nginx.conf` dengan upstream block 3 service |
-| DO-7.2 | Routing nginx: 3 service + path stripping + proxy_next_upstream | High | 3h | DO-7.1, BE-6.4 | todo | - | Routing per `devops-architecture.md` section "Nginx Gateway Production" |
-| DO-7.3 | Healthcheck Docker Compose (interval 10s, retries 3) + restart policy `unless-stopped` 3 service | Medium | 2h | DO-7.2, BE-7.1 | todo | - | Modul 13: restart policies, resource limits memory 200M per service |
-| DO-7.4 | Tulis `scripts/logs.sh` helper: `all`, `errors`, `trace <id>`, `metrics` subcommand | Medium | 2h | DO-7.3, BE-7.3 | todo | - | Modul 14: helper untuk debug correlation ID dan metrics |
-| DO-7.5 | Setup logging driver json-file max-size 10m max-file 3 di compose (DEC-022) | Medium | 2h | DO-7.3, BE-7.3 | todo | - | Modul 14: log rotation. Service tag per container |
-| DO-7.6 | Correlation ID forwarding nginx: generate UUID 12 char bila tidak ada, forward ke upstream (DEC-022) | High | 2h | DO-7.2, BE-7.3 | todo | - | Modul 14: `proxy_set_header X-Correlation-ID $request_id`. Log di access log |
-| DO-7.7 | Rate limiting nginx zone `auth_zone` 5r/s burst 10 + `general_zone` 30r/s burst 50 (DEC-023) | High | 2h | DO-7.2 | todo | - | Modul 13: response 429 dengan body JSON `{"detail":"Too many requests"}` |
-| DO-7.8 | Integration test job di CI: spin compose microservices + run `scripts/integration-test.sh` (DEC-020) | Medium | 3h | DO-6.3 | todo | - | Modul 13: trigger hanya untuk PR ke master. Smoke test 3 health endpoint + 1 login flow + 1 claim flow |
-| DO-7.9 | Deploy update gateway+observability ke Tencent VPS, verifikasi `https://temuin.pangeransilaen.net/api/status` | Medium | 2h | DO-7.7, BE-7.8 | todo | - | Modul 11+14: production deploy update |
+| DO-7.1 | Tambah container `temuin-gateway` Nginx production-grade (DEC-022, DEC-023) | High | 3h | DO-6.3 | done | feature/devops/sprint-07-gateway-observability / PR #114 | Modul 13: container nginx:alpine. `gateway/nginx.conf` dengan upstream block 3 service |
+| DO-7.2 | Routing nginx: 3 service + path stripping + proxy_next_upstream | High | 3h | DO-7.1, BE-6.4 | done | feature/devops/sprint-07-gateway-observability / PR #114 | Routing per `devops-architecture.md` section "Nginx Gateway Production" |
+| DO-7.3 | Healthcheck Docker Compose (interval 10s, retries 3) + restart policy `unless-stopped` 3 service | Medium | 2h | DO-7.2, BE-7.1 | done | feature/devops/sprint-07-gateway-observability / PR #114 | Modul 13: restart policies, resource limits memory 200M per service |
+| DO-7.4 | Tulis `scripts/logs.sh` helper: `all`, `errors`, `trace <id>`, `metrics` subcommand | Medium | 2h | DO-7.3, BE-7.3 | done | feature/devops/sprint-07-gateway-observability / PR #114 | Modul 14: helper untuk debug correlation ID dan metrics |
+| DO-7.5 | Setup logging driver json-file max-size 10m max-file 3 di compose (DEC-022) | Medium | 2h | DO-7.3, BE-7.3 | done | feature/devops/sprint-07-gateway-observability / PR #114 | Modul 14: log rotation. Service tag per container |
+| DO-7.6 | Correlation ID forwarding nginx: generate UUID 12 char bila tidak ada, forward ke upstream (DEC-022) | High | 2h | DO-7.2, BE-7.3 | done | feature/devops/sprint-07-gateway-observability / PR #114 | Modul 14: `proxy_set_header X-Correlation-ID $request_id`. Log di access log |
+| DO-7.7 | Rate limiting nginx zone `auth_zone` 5r/s burst 10 + `general_zone` 30r/s burst 50 (DEC-023) | High | 2h | DO-7.2 | done | feature/devops/sprint-07-gateway-observability / PR #114 | Modul 13: response 429 dengan body JSON `{"detail":"Too many requests"}` |
+| DO-7.8 | Integration test job di CI: spin compose microservices + run `scripts/integration-test.sh` (DEC-020) | Medium | 3h | DO-6.3 | done | feature/devops/sprint-07-gateway-observability / PR #114 | Modul 13: trigger hanya untuk PR ke master. Smoke test 3 health endpoint + 1 login flow + 1 claim flow |
+| DO-7.9 | Deploy update gateway+observability ke Tencent VPS, verifikasi `https://temuin.pangeransilaen.net/api/status` | Medium | 2h | DO-7.7, BE-7.8 | todo | - | Modul 11+14: production deploy update. CD scp config + host nginx repoint :3000 -> :8080 (manual server step) |
 
 ## Lead QA & Docs (@raniayudewi)
 

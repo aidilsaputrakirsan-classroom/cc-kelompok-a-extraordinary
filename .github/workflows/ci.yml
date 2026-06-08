@@ -244,3 +244,78 @@ jobs:
       - name: Run pytest smoke tests
         working-directory: services/${{ matrix.service }}
         run: pytest tests -v
+
+  integration-test:
+    name: Integration Test (gateway + microservices)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Sprint 7 (DO-7.8, DEC-020): hanya untuk PR ke master. Spin compose
+    # microservices + gateway, jalankan scripts/integration-test.sh.
+    if: github.event_name == 'pull_request'
+
+    env:
+      # Nilai dummy khusus CI (bukan secret production).
+      DB_USER: temuin_user
+      DB_PASSWORD: temuin_ci_pwd
+      SECRET_KEY: ci-test-secret-not-used-in-prod
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: "60"
+      CORS_ORIGINS: '["http://localhost:8080"]'
+      COMPOSE_FILE: infra/docker-compose.microservices.yml
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Write CI .env for compose
+        run: |
+          cat > .env <<EOF
+          DB_USER=${DB_USER}
+          DB_PASSWORD=${DB_PASSWORD}
+          SECRET_KEY=${SECRET_KEY}
+          ALGORITHM=${ALGORITHM}
+          ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES}
+          CORS_ORIGINS=${CORS_ORIGINS}
+          EOF
+
+      - name: Create external pgdata volume
+        run: docker volume create temuin_pgdata
+
+      - name: Build service + frontend images locally
+        # Build dari source supaya test PR mencakup perubahan branch,
+        # bukan image :latest lama di Docker Hub.
+        run: |
+          docker build -t pangeransilaen/temuin-auth-service:latest ./services/auth-service
+          docker build -t pangeransilaen/temuin-item-service:latest ./services/item-service
+          docker build -t pangeransilaen/temuin-engagement-service:latest ./services/engagement-service
+          docker build -t pangeransilaen/temuin-frontend:prod ./frontend
+
+      - name: Start stack
+        run: docker compose --env-file .env -f "${COMPOSE_FILE}" up -d
+
+      - name: Wait for gateway healthy
+        run: |
+          for i in $(seq 1 30); do
+            status=$(docker inspect --format '{{.State.Health.Status}}' temuin-gateway 2>/dev/null || echo "starting")
+            echo "Attempt $i: gateway=$status"
+            if [ "$status" = "healthy" ]; then
+              echo "Gateway healthy"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Gateway did not become healthy in time"
+          exit 1
+
+      - name: Run integration smoke test
+        run: |
+          chmod +x scripts/integration-test.sh
+          GATEWAY_URL=http://localhost:8080 bash scripts/integration-test.sh
+
+      - name: Capture logs on failure
+        if: failure()
+        run: docker compose --env-file .env -f "${COMPOSE_FILE}" logs --tail=100
+
+      - name: Tear down
+        if: always()
+        run: docker compose --env-file .env -f "${COMPOSE_FILE}" down -v || true
