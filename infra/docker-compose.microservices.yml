@@ -2,15 +2,28 @@
 # 3 service + 1 Postgres dengan 3 logical DB.
 # Total RAM target: <1.4 GB (Tencent VPS 1.9 GB constraint).
 #
+# Sprint 7 (DEC-021/022/023): + temuin-gateway production-grade,
+# healthcheck + restart policy + resource limit per service, dan
+# json-file log rotation (max 10m x 3) dengan service tag.
+#
 # Volume temuin_pgdata di-set external supaya dipakai bersama dengan
 # state existing dari deploy monolith (kalau cutover) atau di-create
 # baru oleh DevOps script (cold start).
+
+# Anchor logging json-file (DEC-022): rotation 10m x 3 + service tag.
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+    tag: "{{.Name}}"
 
 services:
   db:
     image: postgres:16-alpine
     container_name: temuin-db
     restart: unless-stopped
+    logging: *default-logging
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -25,7 +38,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 3
     networks:
       - temuin-net
     deploy:
@@ -37,6 +50,7 @@ services:
     image: pangeransilaen/temuin-auth-service:latest
     container_name: temuin-auth
     restart: unless-stopped
+    logging: *default-logging
     environment:
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@temuin-db:5432/auth_db
       SECRET_KEY: ${SECRET_KEY}
@@ -52,17 +66,24 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://localhost:8001/health', timeout=3).status==200 else sys.exit(1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
     networks:
       - temuin-net
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 200M
 
   item-service:
     image: pangeransilaen/temuin-item-service:latest
     container_name: temuin-item
     restart: unless-stopped
+    logging: *default-logging
     environment:
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@temuin-db:5432/item_db
       SECRET_KEY: ${SECRET_KEY}
@@ -78,17 +99,24 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://localhost:8002/health', timeout=3).status==200 else sys.exit(1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
     networks:
       - temuin-net
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 200M
 
   engagement-service:
     image: pangeransilaen/temuin-engagement-service:latest
     container_name: temuin-engagement
     restart: unless-stopped
+    logging: *default-logging
     environment:
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@temuin-db:5432/engagement_db
       SECRET_KEY: ${SECRET_KEY}
@@ -110,18 +138,28 @@ services:
         condition: service_started
       item-service:
         condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://localhost:8003/health', timeout=3).status==200 else sys.exit(1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
     networks:
       - temuin-net
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 200M
 
   frontend:
     image: pangeransilaen/temuin-frontend:prod
     container_name: temuin-frontend
     restart: unless-stopped
+    logging: *default-logging
     ports:
+      # Dipertahankan untuk transisi zero-downtime: host nginx VPS lama
+      # forward ke :3000 sampai DO-7.9 repoint ke gateway :8080. Local
+      # runner (scripts/temuin.ps1) juga pakai :3000.
       - "127.0.0.1:3000:80"
     depends_on:
       - auth-service
@@ -133,6 +171,34 @@ services:
       resources:
         limits:
           memory: 96M
+
+  gateway:
+    image: nginx:alpine
+    container_name: temuin-gateway
+    restart: unless-stopped
+    logging: *default-logging
+    volumes:
+      - ../gateway/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      # Production single entry point (host nginx VPS forward ke sini).
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      - auth-service
+      - item-service
+      - engagement-service
+      - frontend
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/api/status >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - temuin-net
+    deploy:
+      resources:
+        limits:
+          memory: 64M
 
 volumes:
   temuin_pgdata:

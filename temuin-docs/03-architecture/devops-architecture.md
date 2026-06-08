@@ -100,6 +100,12 @@ File `gateway/nginx.conf`:
 - `proxy_connect_timeout 5s`, `proxy_send_timeout 30s`, `proxy_read_timeout 30s`
 - `proxy_next_upstream error timeout http_502 http_503 http_504`
 
+### Catatan Implementasi Sprint 7 (deviasi terkontrol)
+- Container `temuin-gateway` (nginx:alpine) ditambahkan sebagai entry point production baru di `127.0.0.1:8080`, config via bind-mount `gateway/nginx.conf` (bukan custom image — stock nginx:alpine + mount).
+- Routing `/api/*` di `frontend/nginx.conf` (warisan Sprint 6) SENGAJA dipertahankan dan container frontend tetap expose `127.0.0.1:3000`. Tujuannya transisi zero-downtime: host nginx VPS lama masih forward ke `:3000` sampai DO-7.9 me-repoint ke gateway `:8080`. Setelah repoint stabil, routing `/api` di frontend boleh dibersihkan (Sprint 8).
+- Correlation ID memakai `$request_id` nginx (di-trim 12 karakter via `map`); kalau client sudah mengirim `X-Correlation-ID`, nilai itu dipakai apa adanya.
+- Gateway tidak butuh image terpisah di CD `build-and-push`; CD cukup scp `infra/docker-compose.microservices.yml` + `gateway/nginx.conf` ke `/opt/temuin/` (layout mirror repo agar bind-mount relatif resolve).
+
 ## Observability Ops (DEC-022, Sprint 7)
 
 ### Log Driver
