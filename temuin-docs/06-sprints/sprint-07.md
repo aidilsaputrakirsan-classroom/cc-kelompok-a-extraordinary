@@ -45,7 +45,7 @@
 | DO-7.6 | Correlation ID forwarding nginx: generate UUID 12 char bila tidak ada, forward ke upstream (DEC-022) | High | 2h | DO-7.2, BE-7.3 | done | feature/devops/sprint-07-gateway-observability / PR #114 | Modul 14: `proxy_set_header X-Correlation-ID $request_id`. Log di access log |
 | DO-7.7 | Rate limiting nginx zone `auth_zone` 5r/s burst 10 + `general_zone` 30r/s burst 50 (DEC-023) | High | 2h | DO-7.2 | done | feature/devops/sprint-07-gateway-observability / PR #114 | Modul 13: response 429 dengan body JSON `{"detail":"Too many requests"}` |
 | DO-7.8 | Integration test job di CI: spin compose microservices + run `scripts/integration-test.sh` (DEC-020) | Medium | 3h | DO-6.3 | done | feature/devops/sprint-07-gateway-observability / PR #114 | Modul 13: trigger hanya untuk PR ke master. Smoke test 3 health endpoint + 1 login flow + 1 claim flow |
-| DO-7.9 | Deploy update gateway+observability ke Tencent VPS, verifikasi `https://temuin.pangeransilaen.net/api/status` | Medium | 2h | DO-7.7, BE-7.8 | todo | - | Modul 11+14: production deploy update. CD scp config + host nginx repoint :3000 -> :8080 (manual server step) |
+| DO-7.9 | Deploy update gateway+observability ke Tencent VPS, verifikasi `https://temuin.pangeransilaen.net/api/status` | Medium | 2h | DO-7.7, BE-7.8 | done | master (CD auto-deploy) + host nginx repoint | Modul 11+14: CD auto-deploy gateway via PR #114 merge. Host nginx VPS di-repoint :3000 -> :8080 (backup temuin.bak-20260609-003715). Verified: /api/status 3 service up, correlation ID aktif, rate limit 429 via HTTPS |
 
 ## Lead QA & Docs (@raniayudewi)
 
