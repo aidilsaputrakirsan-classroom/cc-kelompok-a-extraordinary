@@ -51,12 +51,12 @@
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| QA-7.1 | Blackbox routing via gateway untuk flow utama: register, login, create item, claim, approve | High | 2h | FE-7.1, DO-7.2 | todo | - | Pastikan semua endpoint accessible via `https://temuin.pangeransilaen.net/api/*` |
-| QA-7.2 | Blackbox: matikan tiap service satu-satu, verifikasi StatusPage update ke "down" dalam 30 detik | High | 2h | FE-7.4, DO-7.3 | todo | - | Modul 14: chaos test ringan. Screenshot 3 skenario down |
-| QA-7.3 | Blackbox: rate limit `/api/auth/login` benar 429 setelah 5 req/s (DEC-023) | Medium | 1h | DO-7.7 | todo | - | Modul 13: loop 20x curl, expect HTTP 429. Screenshot response 429 |
-| QA-7.4 | Verifikasi correlation ID end-to-end: trigger 1 request, ambil header dari devtools, grep di 3 log container | Medium | 2h | FE-7.5, DO-7.6 | todo | - | Modul 14: request tracing. Screenshot devtools + grep output |
-| QA-7.5 | Tulis `docs/operations-guide.md`: cara baca log JSON, cek `/metrics`, restart service, investigasi correlation_id | Medium | 2h | QA-7.4, DO-7.4 | todo | - | Modul 14: ops handbook |
-| QA-7.6 | Update `temuin-docs/03-architecture/devops-architecture.md` jika ada deviasi dari implementasi | Low | 1h | DO-7.9 | todo | - | Pastikan sinkron |
+| QA-7.1 | Blackbox routing via gateway untuk flow utama: register, login, create item, claim, approve | High | 2h | FE-7.1, DO-7.2 | done | feat/qa/sprint-07-testing | Lulus E2E flow via gateway, bukti SS di report |
+| QA-7.2 | Blackbox: matikan tiap service satu-satu, verifikasi StatusPage update ke "down" dalam 30 detik | High | 2h | FE-7.4, DO-7.3 | done | feat/qa/sprint-07-testing | StatusPage mendeteksi container offline dengan akurat, polling 30 detik |
+| QA-7.3 | Blackbox: rate limit `/api/auth/login` benar 429 setelah 5 req/s (DEC-023) | Medium | 1h | DO-7.7 | done | feat/qa/sprint-07-testing | Terbukti membatasi rate limit login dengan status HTTP 429 |
+| QA-7.4 | Verifikasi correlation ID end-to-end: trigger 1 request, ambil header dari devtools, grep di 3 log container | Medium | 2h | FE-7.5, DO-7.6 | done | feat/qa/sprint-07-testing | Correlation ID berhasil di-trace dari client headers hingga log kontainer |
+| QA-7.5 | Tulis `docs/operations-guide.md`: cara baca log JSON, cek `/metrics`, restart service, investigasi correlation_id | Medium | 2h | QA-7.4, DO-7.4 | done | feat/qa/sprint-07-testing | Modul 14: ops handbook, selesai ditulis |
+| QA-7.6 | Update `temuin-docs/03-architecture/devops-architecture.md` jika ada deviasi dari implementasi | Low | 1h | DO-7.9 | done | feat/qa/sprint-07-testing | Sudah diaudit dan sinkron 100% dengan implementasi, tidak ada deviasi |
 
 ## Quick Links
 
