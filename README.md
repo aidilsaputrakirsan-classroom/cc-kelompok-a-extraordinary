@@ -520,7 +520,7 @@ Berikut adalah progres pengerjaan tim per sprint beserta link cepat menuju lapor
 | **Sprint 4** | Dockerization & kesiapan demo UTS | ✅ Done | [📄 Lihat Laporan](docs/sprint-04-qa-report.md) |
 | **Sprint 5** | CI/CD GitHub Actions & test automation backend | ✅ Done | [📄 Lihat Laporan](docs/sprint-05-qa-report.md) |
 | **Sprint 6** | Microservices split (auth-service & item-service) | ✅ Done | [📄 Lihat Laporan](docs/sprint-06-qa-report.md) |
-| **Sprint 7** | Nginx gateway, monitoring, audit log lanjut | 🔄 Next | - |
+| **Sprint 7** | Nginx gateway, monitoring, audit log lanjut | ✅ Done | [📄 Lihat Laporan](docs/sprint-07-qa-report.md) |
 | **Sprint 8** | Security hardening & final polish | 🔄 Next | - |
 
 **Status Fase UTS:** ✅ **Sprint 1–4 Stabil & Fully Dockerized**
@@ -550,12 +550,14 @@ Kami adalah kelompok mahasiswa dari program studi **Sistem Informasi**, Institut
 - [**API Testing Guide**](./docs/api-testing-guide.md) — Instruksi cara menguji backend API secara manual.
 - [**Testing Guide**](./docs/testing-guide.md) — Panduan pengujian otomatis backend (Pytest), frontend (Vitest), serta standar coverage threshold.
 - [**Deployment Guide**](./docs/deployment-guide.md) — Panduan lengkap deployment monolith dan dekomposisi microservices di Tencent Cloud VPS.
+- [**Operations Guide**](./docs/operations-guide.md) — Panduan penanganan log JSON, metrics Prometheus, pelacakan Correlation ID, dan kontrol docker-compose.
 
 ### 🧪 Laporan Blackbox Testing (Lead QA & Docs)
 - [**API Blackbox Testing Report**](./docs/api-blackbox-testing.md) — Laporan lengkap pengujian endpoint backend via Swagger.
 - [**Frontend Blackbox Testing Report**](./docs/frontend-blackbox-testing.md) — Laporan lengkap pengujian antarmuka pengguna (UI/UX) dan alur sistem.
 - [**Sprint 05 QA Report**](./docs/sprint-05-qa-report.md) — Laporan lengkap pengujian regresi dan verifikasi sukses CI 3-job paralel pada Sprint 05.
 - [**Sprint 06 QA Report**](./docs/sprint-06-qa-report.md) — Laporan lengkap pengujian regresi fungsional lintas microservices dan verifikasi CD pipeline pada Sprint 06.
+- [**Sprint 07 QA Report**](./docs/sprint-07-qa-report.md) — Laporan lengkap pengujian fungsional gateway, rate limiting, statuspage, dan request tracing (correlation ID) pada Sprint 07.
 
 ---
 
