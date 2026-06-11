@@ -106,6 +106,11 @@ File `gateway/nginx.conf`:
 - Correlation ID memakai `$request_id` nginx (di-trim 12 karakter via `map`); kalau client sudah mengirim `X-Correlation-ID`, nilai itu dipakai apa adanya.
 - Gateway tidak butuh image terpisah di CD `build-and-push`; CD cukup scp `infra/docker-compose.microservices.yml` + `gateway/nginx.conf` ke `/opt/temuin/` (layout mirror repo agar bind-mount relatif resolve).
 
+### Catatan Implementasi Sprint 8 (DO-8.1/8.3)
+- Karena `gateway/nginx.conf` di-bind-mount ke `nginx:alpine`, `docker compose up -d` TIDAK me-recreate gateway saat hanya isi config berubah (image & definisi service tetap) — nginx masih pegang config lama di memory. CD `deploy` kini menjalankan `nginx -t && nginx -s reload` eksplisit setelah `up -d` (fallback `--force-recreate gateway`) supaya perubahan upstream (mis. `frontend:8080`) benar-benar aktif.
+- Health check CD ditambah cek frontend `/` (sebelumnya hanya `/api/*`), supaya deploy tidak hijau-palsu saat frontend mati / gateway salah upstream port.
+- Frontend non-root menggeser listen `80 -> 8080`; routing `/api` warisan di `frontend/nginx.conf` masih dipertahankan (belum dibersihkan) demi jalur transisi `:3000`.
+
 ## Observability Ops (DEC-022, Sprint 7)
 
 ### Log Driver
@@ -129,31 +134,32 @@ File `docker-compose.yml`:
 
 ## Security (Sprint 8, DEC-023)
 
-### Image Hardening
-- Backend Dockerfile pakai `USER appuser` (uid 1000), tidak run sebagai root
-- Frontend nginx pakai `--user 101:101` (nginx user di alpine)
-- `.dockerignore` pastikan `.env`, `__pycache__`, `node_modules` tidak masuk image
+### Image Hardening (DO-8.1)
+- Backend Dockerfile (auth/item/engagement) pakai `USER appuser` dengan uid di-pin **1000** (`adduser -D -u 1000`), tidak run sebagai root.
+- Frontend pakai base image `nginxinc/nginx-unprivileged:alpine` (runtime `USER 101`), nginx **listen 8080** (port non-privileged). Akibatnya container frontend mapping `127.0.0.1:3000:8080` dan gateway upstream jadi `frontend:8080`.
+- Verifikasi production (`docker exec <c> id -u`): auth/item/engagement = `1000`, frontend = `101`. (Gateway `nginx:alpine` master tetap uid 0 — perilaku standar nginx, worker drop ke non-priv; di luar scope DO-8.1.)
+- `.dockerignore` pastikan `.env`, `__pycache__`, `node_modules` tidak masuk image.
 
-### Secrets Audit
-- `.env.example` lengkap di repo (placeholder, no real secret)
-- `.env`, `.env.production`, `.env.docker` wajib di `.gitignore`
-- Verifikasi dengan `git log --all --full-history -- '.env'` empty
-- `JWT_SECRET` minimum 32 karakter random hex (`openssl rand -hex 32`)
-- `SECRET_KEY` Postgres password generate fresh, tidak reuse
+### Secrets Audit (DO-8.2)
+- `.env.example` + `.env.docker` di repo hanya placeholder (mis. `SECRET_KEY=CHANGE_ME_...`), no real secret.
+- `.env`, `.env.production`, `.env.docker` pattern di-ignore via `.gitignore` (`.env` + `.env.*`, kecuali `!.env.example` & `!.env.docker`).
+- **Temuan**: `SECRET_KEY` asli pernah ter-commit di `.env.docker` pada Sprint 3 (commit `5920a41`) lalu diganti placeholder. Secret production **sudah berbeda** dari nilai bocor (ter-rotate, len 66), jadi tidak ter-eksploitasi. History rewrite belum dilakukan (high-risk untuk clone tim) — dicatat sebagai utang teknis di `docs/release-notes.md`.
+- Var rahasia aktual bernama `SECRET_KEY` (JWT signing) + `DB_PASSWORD`; di-set di `/opt/temuin/.env`, tidak masuk log/response.
 
-### Security Headers
-Backend middleware tambah:
+### Security Headers (DO-8.4)
+Middleware di tiap service (`app/main.py`):
 - `X-Content-Type-Options: nosniff`
 - `X-Frame-Options: DENY`
-- `Strict-Transport-Security: max-age=31536000; includeSubDomains` (HTTPS only)
-- `Content-Security-Policy: default-src 'self'` minimum
+- `Strict-Transport-Security: max-age=63072000; includeSubDomains` (tanpa `preload`)
+- `Content-Security-Policy` **docs-aware**: strict `default-src 'self'; frame-ancestors 'none'` untuk path biasa; dilonggarkan khusus `/docs`, `/redoc`, `/openapi.json` (izinkan `cdn.jsdelivr.net`) supaya Swagger UI tetap jalan.
+- `/metrics` di-`include_in_schema=False` (DO-8.6 swagger cleanup) bersama endpoint internal cross-service auth.
 
 ### Input Validation
 Pydantic schema dengan `field_validator`:
-- Email: regex `@itk.ac.id$`
+- Email: regex `@([a-z0-9-]+\.)*itk\.ac\.id\Z` (anchored `\Z` + `.strip()` agar tidak bisa di-bypass trailing newline; subdomain ITK diterima)
 - Password: min 8 char, mengandung huruf dan angka
-- String fields: max length sesuai kebutuhan (title 200, description 2000)
-- Numeric: bound check (price 0..999_999_999, kalau ada)
+- String fields: max length sesuai kebutuhan (title 200, description 2000), name 2..200 (strip)
+- Error body 422 dinormalkan jadi `{"detail": "<string>"}` via exception handler (konsisten dengan kontrak frontend)
 
 ## Artefak Kunci
 
