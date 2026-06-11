@@ -12,7 +12,8 @@ class RegisterRequest(BaseModel):
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: str) -> str:
-        email_regex = re.compile(r"^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9-]+\.)*itk\.ac\.id$", re.IGNORECASE)
+        v = v.strip()
+        email_regex = re.compile(r"^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9-]+\.)*itk\.ac\.id\Z", re.IGNORECASE)
         if not email_regex.match(v):
             raise ValueError("Hanya email dengan domain itk.ac.id yang diperbolehkan")
         return v.lower()
@@ -29,6 +30,7 @@ class RegisterRequest(BaseModel):
     @field_validator("name")
     @classmethod
     def validate_name(cls, v: str) -> str:
+        v = v.strip()
         if len(v) < 2 or len(v) > 200:
             raise ValueError("Nama harus berukuran 2 sampai 200 karakter")
         return v
@@ -41,7 +43,8 @@ class LoginRequest(BaseModel):
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: str) -> str:
-        email_regex = re.compile(r"^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9-]+\.)*itk\.ac\.id$", re.IGNORECASE)
+        v = v.strip()
+        email_regex = re.compile(r"^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9-]+\.)*itk\.ac\.id\Z", re.IGNORECASE)
         if not email_regex.match(v):
             raise ValueError("Hanya email dengan domain itk.ac.id yang diperbolehkan")
         return v.lower()
@@ -58,6 +61,7 @@ class UserBase(BaseModel):
     @field_validator("name")
     @classmethod
     def validate_name(cls, v: str) -> str:
+        v = v.strip()
         if len(v) < 2 or len(v) > 200:
             raise ValueError("Nama harus berukuran 2 sampai 200 karakter")
         return v

@@ -16,14 +16,16 @@ def test_health_check(client):
 
 
 def test_register_invalid_email_rejected(client):
-    """B-7 fix: validate_itk_email tolak domain yang bukan itk.ac.id atau subdomain."""
+    """B-7 fix: validate email tolak domain yang bukan itk.ac.id atau subdomain.
+    Sprint 8 BE-8.1/B2: validasi terjadi di schema layer -> 422 dengan detail string."""
     response = client.post(
         "/auth/register",
         json={"email": "user@notitk.ac.id", "password": "Password123", "name": "Test User"},
     )
-    assert response.status_code in (403, 422)
-    detail_str = str(response.json()["detail"]).lower()
-    assert "itk.ac.id" in detail_str
+    assert response.status_code == 422
+    detail = response.json()["detail"]
+    assert isinstance(detail, str)
+    assert "itk.ac.id" in detail.lower()
 
 
 def test_register_subdomain_email_accepted(client):
