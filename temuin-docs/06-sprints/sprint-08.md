@@ -43,12 +43,12 @@ Tutup celah security yang disinggung Modul 15, finalisasi dokumen, siapkan demo 
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| QA-8.1 | Full blackbox regression seluruh flow utama: register, login, create lost, create found, claim, approve, completed, notification, profile, admin master data | High | 4h | BE-8.3, FE-8.3, DO-8.3 | todo | - | Modul 15: 20 skenario testing. Checklist + screenshot semua di `image/sprint-08/` |
-| QA-8.2 | Tulis `docs/api-contract.md`: ringkasan endpoint per service, request/response sample, JWT requirement, rate limit | Medium | 2h | BE-8.6 | todo | - | Modul 15: professional documentation |
-| QA-8.3 | Tulis `docs/final-checklist.md`: pre-demo checklist (VPS up, DB seeded, demo creds, browser cache, video backup ready) | Medium | 1h | QA-8.1, DO-8.4 | todo | - | Modul 15: UAS readiness checklist |
-| QA-8.4 | Final verification: semua service jalan via gateway, `/api/status` semua up, demo ready | High | 2h | QA-8.1, DO-8.5 | todo | - | Modul 15: UAS readiness |
-| QA-8.5 | Update comprehensive README.md (architecture, tech stack, quick start, API docs, team, live URL) | Medium | 2h | QA-8.2, DO-8.6 | todo | - | Modul 15: README final. CI badge + live URL `https://temuin.pangeransilaen.net` |
-| QA-8.6 | Audit konsistensi dokumen aktif `temuin-docs/`: tidak ada stale modul reference, decision log lengkap | Medium | 1h | QA-8.5 | todo | - | Modul 15: docs final consistency |
+| QA-8.1 | Full blackbox regression seluruh flow utama: register, login, create lost, create found, claim, approve, completed, notification, profile, admin master data | High | 4h | BE-8.3, FE-8.3, DO-8.3 | done | feat/qa/sprint-08-docs-and-reports | Modul 15: 20 skenario testing. Checklist + screenshot semua di `image/sprint-08/` |
+| QA-8.2 | Tulis `docs/api-contract.md`: ringkasan endpoint per service, request/response sample, JWT requirement, rate limit | Medium | 2h | BE-8.6 | done | feat/qa/sprint-08-docs-and-reports | Modul 15: professional documentation |
+| QA-8.3 | Tulis `docs/final-checklist.md`: pre-demo checklist (VPS up, DB seeded, demo creds, browser cache, video backup ready) | Medium | 1h | QA-8.1, DO-8.4 | done | feat/qa/sprint-08-docs-and-reports | Modul 15: UAS readiness checklist |
+| QA-8.4 | Final verification: semua service jalan via gateway, `/api/status` semua up, demo ready | High | 2h | QA-8.1, DO-8.5 | done | feat/qa/sprint-08-docs-and-reports | Modul 15: UAS readiness |
+| QA-8.5 | Update comprehensive README.md (architecture, tech stack, quick start, API docs, team, live URL) | Medium | 2h | QA-8.2, DO-8.6 | done | feat/qa/sprint-08-docs-and-reports | Modul 15: README final. CI badge + live URL `https://temuin.pangeransilaen.net` |
+| QA-8.6 | Audit konsistensi dokumen aktif `temuin-docs/`: tidak ada stale modul reference, decision log lengkap | Medium | 1h | QA-8.5 | done | feat/qa/sprint-08-docs-and-reports | Modul 15: docs final consistency |
 
 ## Quick Links
 
