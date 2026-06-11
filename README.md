@@ -187,8 +187,8 @@ Diagram tingkat tinggi yang menggambarkan interaksi antara pengguna, antarmuka w
 ```mermaid
 graph LR
     User((User)) --> Frontend["Client (React App)"]
-    Frontend <==> API["Server (FastAPI)"]
-    API <==> DB[(Database PostgreSQL)]
+    Frontend <--> API["Server (FastAPI)"]
+    API <--> DB[(Database PostgreSQL)]
 ```
 
 ### 1.1 Microservices Architecture (Current Stage)
@@ -206,7 +206,7 @@ graph TD
     EngaS <--> DB_Enga[(engagement_db logical)]
     
     %% Communication pattern (Sprint 7)
-    EngaS -. HTTP Client Call (Retry + CB) .-> ItemS
+    EngaS -.->|"HTTP Client Call (Retry + CB)"| ItemS
 ```
 
 ### 2. Backend Architecture (FastAPI Modular)
@@ -233,7 +233,7 @@ graph TD
         Components --> State["🔐 Auth Context & State"]
         State --> Service["📡 API Service (Axios Wrapper)"]
     end
-    Service <==> Backend_API["🌐 Server API"]
+    Service <--> Backend_API["🌐 Server API"]
 ```
 
 ---
