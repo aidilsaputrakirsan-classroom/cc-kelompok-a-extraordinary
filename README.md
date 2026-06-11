@@ -219,7 +219,7 @@ graph TD
         Router --> Valid["📋 Pydantic Validation"]
         Router --> AuthS["🔐 JWT Auth Service"]
         Router --> Logic["🧠 CRUD/Business Logic"]
-        Logic <--> Database[("🗄️ PostgreSQL")]
+        Logic <--> Database[(PostgreSQL DB)]
     end
 ```
 
