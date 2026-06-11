@@ -293,18 +293,31 @@ jobs:
       - name: Start stack
         run: docker compose --env-file .env -f "${COMPOSE_FILE}" up -d
 
-      - name: Wait for gateway healthy
+      - name: Wait for stack healthy
+        # Tunggu SEMUA service (auth, item, engagement) + gateway healthy.
+        # Gateway bisa healthy duluan sementara upstream masih booting,
+        # bikin smoke test kena 502 (race condition). Nunggu upstream juga
+        # menghilangkan flake itu di akar.
         run: |
-          for i in $(seq 1 30); do
-            status=$(docker inspect --format '{{.State.Health.Status}}' temuin-gateway 2>/dev/null || echo "starting")
-            echo "Attempt $i: gateway=$status"
-            if [ "$status" = "healthy" ]; then
-              echo "Gateway healthy"
+          containers="temuin-auth temuin-item temuin-engagement temuin-gateway"
+          for i in $(seq 1 40); do
+            all_healthy=true
+            line=""
+            for c in $containers; do
+              status=$(docker inspect --format '{{.State.Health.Status}}' "$c" 2>/dev/null || echo "missing")
+              line="$line $c=$status"
+              if [ "$status" != "healthy" ]; then
+                all_healthy=false
+              fi
+            done
+            echo "Attempt $i:$line"
+            if [ "$all_healthy" = "true" ]; then
+              echo "All services + gateway healthy"
               exit 0
             fi
             sleep 5
           done
-          echo "Gateway did not become healthy in time"
+          echo "Stack did not become fully healthy in time"
           exit 1
 
       - name: Run integration smoke test
