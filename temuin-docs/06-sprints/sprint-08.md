@@ -16,7 +16,7 @@ Tutup celah security yang disinggung Modul 15, finalisasi dokumen, siapkan demo 
 | BE-8.2 | Audit env vars: `JWT_SECRET`, `DATABASE_URL`, secret tidak masuk log atau response | High | 2h | BE-8.1 | done | feat/sprint-8-backend | Modul 15: secret hygiene. `grep JWT_SECRET` di output `docker logs` semua service → 0 hit |
 | BE-8.3 | Tutup bug final yang mempengaruhi demo | High | 2h | BE-8.2 | done | feat/sprint-8-backend | - |
 | BE-8.4 | Tambah security headers middleware: X-Content-Type-Options, X-Frame-Options, HSTS, CSP minimal | Medium | 2h | BE-8.1 | done | feat/sprint-8-backend | Modul 15: security hardening. Verifikasi via `curl -I https://temuin.pangeransilaen.net` |
-| BE-8.5 | Code cleanup: hapus dead code, TODO, print statements; ganti ke `logger` | Medium | 2h | BE-8.3 | todo | - | Modul 15: code quality. `grep -rn "print(" services/` → 0 hit selain debug intended |
+| BE-8.5 | Code cleanup: hapus dead code, TODO, print statements; ganti ke `logger` | Medium | 2h | BE-8.3 | done | feat/sprint-8-backend | Modul 15: code quality. `grep -rn "print(" services/` → 0 hit selain debug intended |
 | BE-8.6 | Final swagger cleanup + Tutup endpoint internal dari public docs | Medium | 2h | BE-8.5 | todo | - | Modul 15: API documentation finalization |
 
 ## Lead Frontend (@nicholasmnrng)
