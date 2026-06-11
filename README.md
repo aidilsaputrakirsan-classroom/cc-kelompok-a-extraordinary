@@ -188,7 +188,7 @@ Diagram tingkat tinggi yang menggambarkan interaksi antara pengguna, antarmuka w
 graph LR
     User((User)) --> Frontend["Client (React App)"]
     Frontend <==> API["Server (FastAPI)"]
-    API <==> DB[("Database (PostgreSQL)")]
+    API <==> DB[(Database PostgreSQL)]
 ```
 
 ### 1.1 Microservices Architecture (Current Stage)
