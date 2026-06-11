@@ -23,10 +23,10 @@ Tutup celah security yang disinggung Modul 15, finalisasi dokumen, siapkan demo 
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| FE-8.1 | Final UI polish: konsistensi spacing, copy bahasa Indonesia, loading state, empty state semua halaman | Medium | 3h | FE-7.3 | todo | - | Walkthrough screenshot 10 halaman utama |
-| FE-8.2 | Pastikan build production stabil + Lighthouse audit (performance ≥80, a11y ≥90, best practices ≥90) | High | 2h | FE-8.1 | todo | - | Modul 15: Lighthouse production. Simpan report screenshot |
-| FE-8.3 | Tutup bug final yang mempengaruhi demo | High | 2h | FE-8.2 | todo | - | - |
-| FE-8.4 | Audit XSS surface: tidak ada `dangerouslySetInnerHTML` tanpa sanitize. Code cleanup: hapus console.log + dead components | Medium | 2h | FE-8.3 | todo | - | Modul 15: code quality + security |
+| FE-8.1 | Final UI polish: konsistensi spacing, copy bahasa Indonesia, loading state, empty state semua halaman | Medium | 3h | FE-7.3 | done | feature/frontend/sprint-08-ui-polish | Walkthrough screenshot 10 halaman utama |
+| FE-8.2 | Pastikan build production stabil + Lighthouse audit (performance ≥80, a11y ≥90, best practices ≥90) | High | 2h | FE-8.1 | done | feature/frontend/sprint-08-ui-polish | Modul 15: Lighthouse production. Simpan report screenshot |
+| FE-8.3 | Tutup bug final yang mempengaruhi demo | High | 2h | FE-8.2 | done | feature/frontend/sprint-08-ui-polish | - |
+| FE-8.4 | Audit XSS surface: tidak ada `dangerouslySetInnerHTML` tanpa sanitize. Code cleanup: hapus console.log + dead components | Medium | 2h | FE-8.3 | done | feature/frontend/sprint-08-ui-polish | Modul 15: code quality + security |
 
 ## Lead DevOps (@PangeranSilaen)
 

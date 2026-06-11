@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createBrowserRouter } from "react-router-dom"
 import { createElement, lazy, Suspense } from "react"
 import RootLayout from "@/components/layout/RootLayout"
