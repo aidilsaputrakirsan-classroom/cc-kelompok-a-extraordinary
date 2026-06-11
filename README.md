@@ -206,7 +206,7 @@ graph TD
     EngaS <--> DB_Enga[(engagement_db logical)]
     
     %% Communication pattern (Sprint 7)
-    EngaS -.->|HTTP Client Call (Retry + CB)| ItemS
+    EngaS -. HTTP Client Call (Retry + CB) .-> ItemS
 ```
 
 ### 2. Backend Architecture (FastAPI Modular)
