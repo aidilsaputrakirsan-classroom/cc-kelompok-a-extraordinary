@@ -7,6 +7,12 @@ def test_health_check(client):
     assert response.status_code == 200
     body = response.json()
     assert body["status"] == "healthy"
+    
+    # Sprint 8 BE-8.4: Verify security headers
+    assert response.headers.get("X-Content-Type-Options") == "nosniff"
+    assert response.headers.get("X-Frame-Options") == "DENY"
+    assert "Strict-Transport-Security" in response.headers
+    assert "Content-Security-Policy" in response.headers
 
 
 def test_register_invalid_email_rejected(client):
