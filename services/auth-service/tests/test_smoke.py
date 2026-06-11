@@ -15,8 +15,9 @@ def test_register_invalid_email_rejected(client):
         "/auth/register",
         json={"email": "user@notitk.ac.id", "password": "Password123", "name": "Test User"},
     )
-    assert response.status_code == 403
-    assert "itk.ac.id" in response.json()["detail"].lower()
+    assert response.status_code in (403, 422)
+    detail_str = str(response.json()["detail"]).lower()
+    assert "itk.ac.id" in detail_str
 
 
 def test_register_subdomain_email_accepted(client):
@@ -57,3 +58,27 @@ def test_users_admins_requires_auth(client):
     """B-1 fix: /auth/users/admins butuh auth."""
     response = client.get("/auth/users/admins")
     assert response.status_code in (401, 403)
+
+
+def test_register_validation_rules(client):
+    """Sprint 8 BE-8.1: Test validators for password strength and name length."""
+    # Invalid password: short
+    res = client.post("/auth/register", json={"email": "val@itk.ac.id", "password": "abc", "name": "Valid Name"})
+    assert res.status_code == 422
+
+    # Invalid password: no numbers
+    res = client.post("/auth/register", json={"email": "val@itk.ac.id", "password": "abcdefgh", "name": "Valid Name"})
+    assert res.status_code == 422
+
+    # Invalid password: no letters
+    res = client.post("/auth/register", json={"email": "val@itk.ac.id", "password": "12345678", "name": "Valid Name"})
+    assert res.status_code == 422
+
+    # Invalid name: too short
+    res = client.post("/auth/register", json={"email": "val@itk.ac.id", "password": "Password123", "name": "A"})
+    assert res.status_code == 422
+
+    # Invalid name: too long
+    res = client.post("/auth/register", json={"email": "val@itk.ac.id", "password": "Password123", "name": "A" * 201})
+    assert res.status_code == 422
+

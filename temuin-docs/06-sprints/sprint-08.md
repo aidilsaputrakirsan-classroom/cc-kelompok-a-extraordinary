@@ -12,7 +12,7 @@ Tutup celah security yang disinggung Modul 15, finalisasi dokumen, siapkan demo 
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| BE-8.1 | Audit Pydantic schema: semua input pakai `field_validator` + length limit + regex email itk.ac.id | High | 3h | BE-7.3 | todo | - | Modul 15: OWASP Top 10 (A03 Injection). Password min 8 char + huruf + angka, name 2..200, title max 200, description max 2000 |
+| BE-8.1 | Audit Pydantic schema: semua input pakai `field_validator` + length limit + regex email itk.ac.id | High | 3h | BE-7.3 | done | feat/sprint-8-backend | Modul 15: OWASP Top 10 (A03 Injection). Password min 8 char + huruf + angka, name 2..200, title max 200, description max 2000 |
 | BE-8.2 | Audit env vars: `JWT_SECRET`, `DATABASE_URL`, secret tidak masuk log atau response | High | 2h | BE-8.1 | todo | - | Modul 15: secret hygiene. `grep JWT_SECRET` di output `docker logs` semua service → 0 hit |
 | BE-8.3 | Tutup bug final yang mempengaruhi demo | High | 2h | BE-8.2 | todo | - | - |
 | BE-8.4 | Tambah security headers middleware: X-Content-Type-Options, X-Frame-Options, HSTS, CSP minimal | Medium | 2h | BE-8.1 | todo | - | Modul 15: security hardening. Verifikasi via `curl -I https://temuin.pangeransilaen.net` |

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ImageCreate(BaseModel):
@@ -17,6 +17,22 @@ class ItemCreate(BaseModel):
     security_officer_id: str | None = None
     images: list[ImageCreate] = []
 
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, v: str) -> str:
+        if len(v.strip()) < 1:
+            raise ValueError("Title tidak boleh kosong")
+        if len(v) > 200:
+            raise ValueError("Title maksimal 200 karakter")
+        return v
+
+    @field_validator("description")
+    @classmethod
+    def validate_description(cls, v: str | None) -> str | None:
+        if v is not None and len(v) > 2000:
+            raise ValueError("Description maksimal 2000 karakter")
+        return v
+
 class ItemUpdate(BaseModel):
     title: str | None = None
     description: str | None = None
@@ -25,6 +41,23 @@ class ItemUpdate(BaseModel):
     location_id: str | None = None
     security_officer_id: str | None = None
     status: str | None = Field(None, pattern="^(open|in_claim|returned|closed)$")
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, v: str | None) -> str | None:
+        if v is not None:
+            if len(v.strip()) < 1:
+                raise ValueError("Title tidak boleh kosong")
+            if len(v) > 200:
+                raise ValueError("Title maksimal 200 karakter")
+        return v
+
+    @field_validator("description")
+    @classmethod
+    def validate_description(cls, v: str | None) -> str | None:
+        if v is not None and len(v) > 2000:
+            raise ValueError("Description maksimal 2000 karakter")
+        return v
 
 class ItemStatusUpdate(BaseModel):
     status: str = Field(..., pattern="^(open|in_claim|returned|closed)$")
