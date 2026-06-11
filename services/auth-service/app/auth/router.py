@@ -45,7 +45,7 @@ def update_me(update_data: UserUpdate, db: Session = Depends(get_db), current_us
     db.refresh(current_user)
     return current_user
 
-@router.get("/users/admins", response_model=list[UserResponse])
+@router.get("/users/admins", response_model=list[UserResponse], include_in_schema=False)
 def get_admins(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
@@ -59,7 +59,7 @@ def get_admins(
     admins = db.query(User).filter(User.role.in_(["admin", "superadmin"])).all()
     return admins
 
-@router.get("/users/{user_id}", response_model=UserResponse)
+@router.get("/users/{user_id}", response_model=UserResponse, include_in_schema=False)
 def get_user_by_id(
     user_id: str,
     db: Session = Depends(get_db),
