@@ -123,6 +123,15 @@ jobs:
             $COMPOSE pull
             echo "=== Restarting containers ==="
             $COMPOSE up -d
+            # Gateway config di-bind-mount ke nginx:alpine. `up -d` tidak
+            # me-recreate gateway saat hanya isi file config berubah (image &
+            # definisi service tetap), jadi nginx masih pegang config lama di
+            # memory. Reload eksplisit supaya perubahan gateway/nginx.conf
+            # (mis. upstream frontend:8080 di DO-8.1) benar-benar aktif.
+            # Zero-downtime; fallback force-recreate kalau exec gagal.
+            echo "=== Reloading gateway config ==="
+            docker exec temuin-gateway nginx -t && docker exec temuin-gateway nginx -s reload \
+              || $COMPOSE up -d --force-recreate gateway
             echo "=== Waiting for health checks (30s) ==="
             sleep 30
             echo "=== Service status ==="
@@ -139,11 +148,14 @@ jobs:
             HEALTH_AUTH=$(curl -fsS -o /dev/null -w "%{http_code}" https://temuin.pangeransilaen.net/api/auth/health || echo "fail")
             HEALTH_ITEM=$(curl -fsS -o /dev/null -w "%{http_code}" https://temuin.pangeransilaen.net/api/items/health || echo "fail")
             HEALTH_ENG=$(curl -fsS -o /dev/null -w "%{http_code}" https://temuin.pangeransilaen.net/api/engagement/health || echo "fail")
+            # Cek frontend root juga (SPA via gateway -> frontend). Tanpa ini
+            # CD bisa hijau walau frontend mati / gateway salah upstream port.
+            HEALTH_FE=$(curl -fsS -o /dev/null -w "%{http_code}" https://temuin.pangeransilaen.net/ || echo "fail")
             STATUS_JSON=$(curl -fsS https://temuin.pangeransilaen.net/api/status || echo "fail")
             STATUS_OK=$(printf '%s' "$STATUS_JSON" | python3 -c 'import json,sys; data=json.load(sys.stdin); services=data.get("services", []); sys.exit(0 if isinstance(services, list) and len(services) == 3 else 1)' && echo "200" || echo "fail")
-            echo "auth=$HEALTH_AUTH item=$HEALTH_ITEM engagement=$HEALTH_ENG status=$STATUS_OK"
-            if [ "$HEALTH_AUTH" = "200" ] && [ "$HEALTH_ITEM" = "200" ] && [ "$HEALTH_ENG" = "200" ] && [ "$STATUS_OK" = "200" ]; then
-              echo "All 3 services healthy and /api/status returns JSON services"
+            echo "auth=$HEALTH_AUTH item=$HEALTH_ITEM engagement=$HEALTH_ENG frontend=$HEALTH_FE status=$STATUS_OK"
+            if [ "$HEALTH_AUTH" = "200" ] && [ "$HEALTH_ITEM" = "200" ] && [ "$HEALTH_ENG" = "200" ] && [ "$HEALTH_FE" = "200" ] && [ "$STATUS_OK" = "200" ]; then
+              echo "All 3 services + frontend healthy and /api/status returns JSON services"
               exit 0
             fi
             if [ $i -eq 3 ]; then

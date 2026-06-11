@@ -160,7 +160,8 @@ services:
       # Dipertahankan untuk transisi zero-downtime: host nginx VPS lama
       # forward ke :3000 sampai DO-7.9 repoint ke gateway :8080. Local
       # runner (scripts/temuin.ps1) juga pakai :3000.
-      - "127.0.0.1:3000:80"
+      # Container listen 8080 (nginx-unprivileged / non-root, DO-8.1).
+      - "127.0.0.1:3000:8080"
     depends_on:
       - auth-service
       - item-service

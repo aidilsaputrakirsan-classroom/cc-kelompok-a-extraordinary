@@ -56,8 +56,8 @@ COPY . .
 # Make entrypoint executable
 RUN chmod +x /app/entrypoint.sh
 
-# Security: run as non-root user
-RUN adduser -D appuser && chown -R appuser:appuser /app
+# Security: run as non-root user (uid 1000, DEC-018 / DO-8.1)
+RUN adduser -D -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 8002
