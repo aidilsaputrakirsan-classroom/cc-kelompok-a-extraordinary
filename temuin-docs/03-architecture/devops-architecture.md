@@ -84,7 +84,7 @@ File `gateway/nginx.conf`:
 - `/api/items/*`, `/api/categories/*`, `/api/buildings/*`, `/api/locations/*`, `/api/security-officers/*` → `item-service:8002`
 - `/api/claims/*`, `/api/notifications/*`, `/api/audit-logs/*` → `engagement-service:8003`
 - `/api/status` → aggregator (lokal di gateway atau forward ke engagement-service)
-- `/` → `frontend:80`
+- `/` → `frontend:8080`
 
 ### Rate Limiting (DEC-023)
 - Zone `auth_zone` 5r/s burst 10 untuk `/api/auth/login` dan `/api/auth/register`

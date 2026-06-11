@@ -64,7 +64,8 @@ services:
     container_name: temuin-frontend
     restart: unless-stopped
     ports:
-      - "3000:80"
+      # Container nginx non-root listen 8080 (DO-8.1)
+      - "3000:8080"
     depends_on:
       backend:
         condition: service_healthy
