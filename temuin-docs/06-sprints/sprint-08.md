@@ -32,12 +32,12 @@ Tutup celah security yang disinggung Modul 15, finalisasi dokumen, siapkan demo 
 
 | ID | Task | Priority | Estimate | Depends On | Status | Branch/Ref | Notes |
 |----|------|----------|----------|------------|--------|------------|-------|
-| DO-8.1 | Image hardening: backend Dockerfile pakai `USER appuser` (uid 1000), frontend nginx `--user 101:101` (DEC-018) | High | 2h | DO-7.5 | todo | - | Modul 15: image security |
-| DO-8.2 | Audit `.env*` files: pastikan `.env`, `.env.production`, `.env.docker` di `.gitignore`. `git log --all --full-history -- .env*` tidak nemu real secret | High | 2h | DO-8.1 | todo | - | Modul 15: secret leak prevention |
-| DO-8.3 | Final deployment ke Tencent VPS dengan tag v1.0.0 + cleanup environment | High | 2h | DO-8.2, BE-8.6 | todo | - | Modul 15: production-ready release. Container running, /api/status all up |
-| DO-8.4 | Backup video demo 5 menit (rekam screen seluruh flow utama untuk safety net UAS) | Medium | 2h | DO-8.3 | todo | - | Modul 15: backup demo. Upload ke Google Drive, link di `docs/final-checklist.md` |
-| DO-8.5 | Git tag v1.0.0 + buat `docs/release-notes.md` (highlights, migration notes, known limitations) | Medium | 1h | DO-8.3 | todo | - | Modul 15: final release. Push tag ke remote |
-| DO-8.6 | Final verification checklist + verify deployment docs sinkron dengan reality | Medium | 1h | DO-8.5 | todo | - | Modul 15: operations guide validation |
+| DO-8.1 | Image hardening: backend Dockerfile pakai `USER appuser` (uid 1000), frontend nginx `--user 101:101` (DEC-018) | High | 2h | DO-7.5 | done | PR #122 | Backend 3 service uid 1000, frontend `nginxinc/nginx-unprivileged` uid 101 listen 8080. Port 80->8080 disinkronkan (gateway upstream + compose). Verified production: `docker exec id -u` = 1000/101 |
+| DO-8.2 | Audit `.env*` files: pastikan `.env`, `.env.production`, `.env.docker` di `.gitignore`. `git log --all --full-history -- .env*` tidak nemu real secret | High | 2h | DO-8.1 | done | PR #122 | `.gitignore` benar, `.env.docker` placeholder. Temuan: `SECRET_KEY` asli pernah ke-commit (Sprint 3, `5920a41`) tapi prod pakai secret beda (ter-rotate, aman). History rewrite ditunda (high-risk), dicatat di `docs/release-notes.md` |
+| DO-8.3 | Final deployment ke Tencent VPS dengan tag v1.0.0 + cleanup environment | High | 2h | DO-8.2, BE-8.6 | in_progress | PR #122 (CD) | Deploy via CD auto-deploy (merge #122) + verified: 6 container healthy non-root, `/api/status` 3 up, `/` 200. Disk cleanup 70%->55% (prune dangling+build cache). Tag v1.0.0 pending (lihat DO-8.5) |
+| DO-8.4 | Backup video demo 5 menit (rekam screen seluruh flow utama untuk safety net UAS) | Medium | 2h | DO-8.3 | in_progress | docs/devops/sprint-08-do | Skrip alur demo `docs/demo-script.md` siap. Rekaman video + upload Google Drive manual oleh user, link di `docs/final-checklist.md` |
+| DO-8.5 | Git tag v1.0.0 + buat `docs/release-notes.md` (highlights, migration notes, known limitations) | Medium | 1h | DO-8.3 | in_progress | PR #122 | `docs/release-notes.md` done (merged PR #122). Git tag v1.0.0 + push tag pending konfirmasi user |
+| DO-8.6 | Final verification checklist + verify deployment docs sinkron dengan reality | Medium | 1h | DO-8.5 | done | docs/devops/sprint-08-do | `devops-architecture.md` + `operations-guide.md` disinkronkan dgn reality: image hardening (uid 1000/101), security headers docs-aware CSP, port 8080, CD gateway reload, 6 container |
 
 ## Lead QA & Docs (@raniayudewi)
 

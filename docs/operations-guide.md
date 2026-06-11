@@ -96,7 +96,7 @@ Untuk memastikan penggunaan memori server tetap efisien dan tidak menyentuh bata
 ```bash
 make stats-micro
 ```
-Perintah ini akan mengeluarkan data konsumsi RAM dan CPU dari kelima kontainer (`temuin-db`, `temuin-auth`, `temuin-item`, `temuin-engagement`, dan `temuin-frontend`).
+Perintah ini akan mengeluarkan data konsumsi RAM dan CPU dari keenam kontainer (`temuin-db`, `temuin-auth`, `temuin-item`, `temuin-engagement`, `temuin-frontend`, dan `temuin-gateway`).
 
 ### 4.3 Log Rotation (Rotasi Berkas Log)
 Untuk mencegah disk server penuh akibat berkas log kontainer yang membengkak, Temuin telah mengonfigurasi rotasi log otomatis di `docker-compose.microservices.yml` menggunakan driver bawaan Docker:
