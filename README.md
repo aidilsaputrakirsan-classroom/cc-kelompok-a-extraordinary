@@ -187,8 +187,26 @@ Diagram tingkat tinggi yang menggambarkan interaksi antara pengguna, antarmuka w
 ```mermaid
 graph LR
     User((User)) --> Frontend["Client (React App)"]
-    Frontend <==> API["Server (FastAPI)"]
-    API <==> DB[("Database (PostgreSQL)")]
+    Frontend <--> API["Server (FastAPI)"]
+    API <--> DB[(Database PostgreSQL)]
+```
+
+### 1.1 Microservices Architecture (Current Stage)
+Arsitektur setelah dekomposisi sistem (Sprint 6+) menjadi 3 layanan mandiri (hybrid microservices) di belakang API Gateway Nginx.
+
+```mermaid
+graph TD
+    Client["Client Vite / React"] -->|HTTPS /api| Gateway["API Gateway Nginx"]
+    Gateway -->|Route auth Port 8001| AuthS["Auth Service FastAPI"]
+    Gateway -->|Route items Port 8002| ItemS["Item Service FastAPI"]
+    Gateway -->|Route claims Port 8003| EngaS["Engagement Service FastAPI"]
+    
+    AuthS <--> DB_Auth[(auth_db logical)]
+    ItemS <--> DB_Item[(item_db logical)]
+    EngaS <--> DB_Enga[(engagement_db logical)]
+    
+    %% Communication pattern (Sprint 7)
+    EngaS -.->|HTTP Client Call Retry and CB| ItemS
 ```
 
 ### 1.1 Microservices Architecture (Current Stage)
@@ -219,7 +237,7 @@ graph TD
         Router --> Valid["📋 Pydantic Validation"]
         Router --> AuthS["🔐 JWT Auth Service"]
         Router --> Logic["🧠 CRUD/Business Logic"]
-        Logic <--> Database[("🗄️ PostgreSQL")]
+        Logic <--> Database[(PostgreSQL DB)]
     end
 ```
 
@@ -233,7 +251,7 @@ graph TD
         Components --> State["🔐 Auth Context & State"]
         State --> Service["📡 API Service (Axios Wrapper)"]
     end
-    Service <==> Backend_API["🌐 Server API"]
+    Service <--> Backend_API["🌐 Server API"]
 ```
 
 ---
