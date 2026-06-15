@@ -271,9 +271,11 @@ Saat presentasi, kamu (DevOps) pegang **Slide 3 (Architecture Journey)** dan **S
 
 ---
 
-### 12.5 Demo "restart container → data tetap ada" (Komponen A, bobot 3 poin)
+### 12.5 Demo "restart container → data tetap ada" (Komponen A, bobot 3 poin) — DILAKUKAN DI LOCAL
 
-Ini salah satu item rubrik **Komponen A — Live Demo**: *"Data persistence: restart container → data tetap ada."* Penguji mau lihat: kamu matikan/mulai-ulang container, tetapi data (user, barang, klaim) **tidak hilang**. Kamu (DevOps) yang pegang bagian ini.
+Ini salah satu item rubrik **Komponen A — Live Demo**: *"Data persistence: restart container → data tetap ada."* Penguji mau lihat: kamu matikan/mulai-ulang container, tetapi data (user, barang, klaim) **tidak hilang**.
+
+> **Kenapa di local, bukan production?** Restart container database di production yang sedang dipakai berisiko — kalau container tidak balik `healthy` tepat waktu, seluruh demo bisa ikut tumbang. Jadi bagian ini kita demokan di **laptop (local stack)** supaya aman. Konsep yang dibuktikan sama persis (volume terpisah dari container). Catatan jujur: rubrik Komponen A berjudul "Aplikasi Production", jadi kalau penguji minta lihat di production, tawarkan alternatif aman: restart **hanya** container database (`docker restart temuin-db`) sementara container lain tetap jalan. Tapi default kita: local.
 
 **Kenapa data tetap ada — konsep wajib paham (sering ditanya):**
 
@@ -290,39 +292,44 @@ volumes:
 ```
 
 - `temuin_pgdata:/var/lib/postgresql/data` = isi folder data Postgres di-"tempel" ke volume `temuin_pgdata`. Jadi yang nyimpan data adalah volume, bukan container.
-- `external: true` = volume ini dibuat/dimiliki di luar compose, tidak ikut dihapus saat stack di-`down`. Container boleh mati/dibuat ulang, volume tetap utuh di disk server.
+- `external: true` = volume ini dibuat/dimiliki di luar compose, tidak ikut dihapus saat stack di-`down`. Container boleh mati/dibuat ulang, volume tetap utuh di disk laptop. (Di local, script `temuin.ps1` punya fungsi `Ensure-PostgresVolume` yang otomatis membuat volume ini kalau belum ada.)
 
 > Analogi: container itu seperti laptop, volume itu seperti hard disk eksternal. Matikan/ganti laptop (container), data di hard disk eksternal (volume) tetap ada.
 
-**Skrip demo siap baca (jalankan di server lewat SSH):**
+**Persiapan (sebelum demo):** pastikan stack local sudah jalan. Di PowerShell, dari folder repo:
+```powershell
+.\scripts\temuin.ps1 start
+```
+Lalu buka `http://localhost:3000`, register/login, dan buat 1-2 barang supaya ada data yang bisa ditunjukkan.
 
-1. **Sebelum restart — tunjukkan data ada.** Paling kuat lewat UI: buka `https://temuin.pangeransilaen.net`, login, tunjukkan ada barang/akun. Sambil itu kamu bilang:
-   > "Sekarang ada data ini: akun saya dan beberapa barang. Saya akan restart container database-nya, lalu kita lihat datanya masih ada atau tidak."
+**Skrip demo siap baca (jalankan di laptop, PowerShell):**
 
-2. **Restart container.** Pilihan paling singkat — restart cuma container database:
-   ```bash
+1. **Sebelum restart — tunjukkan data ada.** Buka `http://localhost:3000`, login, tunjukkan ada barang/akun. Sambil itu kamu bilang:
+   > "Ini stack Temuin yang jalan di laptop saya lewat Docker. Sekarang ada data ini: akun saya dan beberapa barang. Saya akan restart container-nya, lalu kita lihat datanya masih ada atau tidak."
+
+2. **Restart container.** Pilihan paling singkat & aman — restart cuma container database:
+   ```powershell
    docker restart temuin-db
    ```
    - `docker restart` = hentikan lalu jalankan ulang container (stop + start) tanpa menghapusnya. `temuin-db` = nama container database (lihat `container_name: temuin-db` di compose).
 
    Pilihan lebih dramatis — matikan SEMUA container lalu nyalakan lagi (volume tetap utuh karena `external`):
-   ```bash
-   cd /opt/temuin
-   ./scripts/temuin.sh restart
+   ```powershell
+   .\scripts\temuin.ps1 restart
    ```
-   Script ini menjalankan `docker compose ... down` (TANPA `-v`) lalu `up -d`. Container dibuat ulang dari nol, tapi karena volume `temuin_pgdata` external, data tidak ikut terhapus.
+   Script ini menjalankan `docker compose ... down` (TANPA `-v`) lalu `up -d`, dan otomatis menunggu semua container `healthy`. Container dibuat ulang dari nol, tapi karena volume `temuin_pgdata` external, data tidak ikut terhapus.
 
-3. **Tunggu sebentar** (~15-30 detik) sampai database & service sehat lagi. Cek cepat:
-   ```bash
-   docker compose -p temuin -f infra/docker-compose.microservices.yml ps
+3. **Tunggu sebentar** sampai database & service sehat lagi. Kalau pakai `docker restart temuin-db`, cek cepat:
+   ```powershell
+   .\scripts\temuin.ps1 status
    ```
-   Tunggu kolom status semua `healthy`/`running`.
+   Tunggu kolom status semua `healthy`/`running`. (Kalau pakai `.\scripts\temuin.ps1 restart`, script sudah menunggu otomatis sampai healthy.)
 
-4. **Sesudah restart — buktikan data masih ada.** Refresh browser, login lagi (atau refresh halaman barang). Data yang tadi masih lengkap. Bilang:
+4. **Sesudah restart — buktikan data masih ada.** Refresh browser (`http://localhost:3000`), login lagi (atau refresh halaman barang). Data yang tadi masih lengkap. Bilang:
    > "Container sudah dibuat ulang, tapi datanya masih utuh. Itu karena database menyimpan datanya di named volume `temuin_pgdata` yang kami set `external`, jadi terpisah dari siklus hidup container."
 
 **⚠️ JANGAN PERNAH lakukan ini saat demo:**
-- `./scripts/temuin.sh reset` — ini memakai `docker compose down -v`. Flag **`-v` = hapus volume**, artinya **SEMUA DATA TERHAPUS**. Ini kebalikan dari yang ingin kamu buktikan. Hafalkan: `restart` aman, `reset`/`-v` menghapus data.
+- `.\scripts\temuin.ps1 reset` — ini memakai `docker compose down -v` **lalu menghapus volume** `temuin_pgdata`. Flag **`-v` = hapus volume**, artinya **SEMUA DATA TERHAPUS**. Script memang minta ketik `yes` dulu, tapi jangan sampai salah ketik — ini kebalikan dari yang ingin kamu buktikan. Hafalkan: `restart` aman, `reset`/`-v` menghapus data.
 
 ---
 
