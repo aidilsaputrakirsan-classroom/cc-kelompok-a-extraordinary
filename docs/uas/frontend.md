@@ -173,6 +173,35 @@ Saat demo, Frontend + Backend pegang **Slide 5 (Live Demo)**. Kamu yang mengklik
 
 > "Sekarang sebagai pengguna lain, saya buka barang yang ditemukan tadi dan ajukan klaim dengan mengisi bukti kepemilikan. Setelah admin menyetujui, saya dapat notifikasi di halaman notifikasi — ini juga ditarik dari backend."
 
+### 7.6 Demo perubahan live (Komponen B CI/CD — bagian "lihat perubahannya")
+
+Ini menjawab pertanyaan "untuk lihat perubahannya gimana?". Rubrik Komponen B minta: *push perubahan kecil → pipeline jalan → hasil deploy terlihat di production URL.* DevOps memimpin pipeline-nya (lihat `docs/uas/devops.md` bagian 12.6); **kamu (Frontend) yang menyiapkan perubahan kecil dan menunjukkan hasil visualnya** di layar.
+
+**Perubahan kecil yang dipakai:** ubah satu baris teks tagline di halaman depan. File `frontend/src/pages/HomePage.jsx` baris 11:
+
+```jsx
+<p className="max-w-2xl text-lg text-muted-foreground sm:text-xl">
+  Platform resmi untuk melaporkan barang hilang dan mengumumkan penemuan barang di lingkungan Institut Teknologi Kalimantan.
+</p>
+```
+
+Cukup ubah teks di dalamnya, misalnya tambahkan sesuatu yang jelas terlihat seperti:
+
+```jsx
+  Platform resmi untuk melaporkan barang hilang dan menemukan barang di lingkungan Institut Teknologi Kalimantan — Demo UAS.
+```
+
+Kenapa baris ini? Karena (1) langsung terlihat di halaman depan tanpa perlu login, jadi gampang ditunjukkan; (2) cuma teks, tidak menyentuh logika apa pun, jadi aman tidak akan merusak apa-apa.
+
+**Cara melihat perubahannya — 2 tahap:**
+
+1. **Sebelum merge — lihat di lokal (opsional, cepat).** Kalau mau menunjukkan bahwa perubahannya benar, jalankan di laptop: `cd frontend` lalu `npm run dev`, buka `http://localhost:5173`. Tagline baru langsung muncul. Ini bukti perubahan benar sebelum masuk pipeline.
+
+2. **Sesudah pipeline hijau — lihat di production (ini yang dinilai).** Setelah DevOps merge ke master dan CD selesai (pipeline hijau, ~5-8 menit), **refresh** `https://temuin.pangeransilaen.net` di browser. Tagline di halaman depan sudah berubah. Narasi kamu:
+   > "Tadi kami push perubahan teks kecil ini. Pipeline sudah selesai, sekarang saya refresh halaman production — dan teksnya sudah berubah. Jadi perubahan dari kode benar-benar sampai ke server yang diakses publik."
+
+**Catatan teknis (kalau ditanya kenapa harus tunggu pipeline):** frontend kami bukan file statis yang di-upload manual. Saat CD jalan, frontend di-*build* ulang jadi image Docker baru (`pangeransilaen/temuin-frontend:prod`), lalu container di server diganti dengan image baru itu. Jadi perubahan baru terlihat **setelah** build + deploy selesai, bukan langsung saat push. Tips: minta penonton menekan **Ctrl+F5** (hard refresh) supaya tidak melihat versi lama dari cache browser.
+
 ---
 
 ## 8. Pertanyaan viva untuk Frontend (dosen tanya KAMU) + jawaban
@@ -201,6 +230,9 @@ Saat demo, Frontend + Backend pegang **Slide 5 (Live Demo)**. Kamu yang mengklik
 **"Apa itu halaman /status dan kenapa penting?"**
 > Halaman yang memanggil `/api/status` tiap 30 detik dan menampilkan kesehatan 3 microservice. Penting untuk memantau apakah semua service hidup, dan jadi bukti arsitektur microservices saat demo.
 
+**"Kalau kamu ubah satu teks lalu push, kenapa belum langsung berubah di production?"**
+> Karena frontend kami bukan file statis yang di-upload manual. Saat di-merge ke master, CI/CD membangun ulang frontend jadi image Docker baru, push ke Docker Hub, lalu container di server diganti dengan image baru itu. Jadi perubahan baru terlihat setelah pipeline build dan deploy selesai, sekitar beberapa menit, bukan langsung saat push.
+
 ---
 
 ## 9. Pemahaman proyek keseluruhan (Frontend juga wajib bisa)
@@ -222,6 +254,7 @@ Detail lengkap di `docs/uas/panduan-uas.md`. Minimal kamu hafal:
 - [ ] Bisa jelaskan alur login langkah demi langkah.
 - [ ] Paham beda ProtectedRoute vs AdminRoute.
 - [ ] Bisa jelaskan fungsi halaman `/status`.
+- [ ] Siapkan perubahan teks kecil di `HomePage.jsx` (tagline) untuk demo CI/CD live, dan bisa tunjukkan hasilnya di production setelah pipeline hijau.
 - [ ] Tahu frontend pakai Vitest, coverage >= 40%.
 - [ ] Hafal skrip demo bagian frontend.
 - [ ] Latihan jawab 8 pertanyaan viva di atas minimal sekali.

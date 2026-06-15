@@ -271,6 +271,99 @@ Saat presentasi, kamu (DevOps) pegang **Slide 3 (Architecture Journey)** dan **S
 
 ---
 
+### 12.5 Demo "restart container → data tetap ada" (Komponen A, bobot 3 poin)
+
+Ini salah satu item rubrik **Komponen A — Live Demo**: *"Data persistence: restart container → data tetap ada."* Penguji mau lihat: kamu matikan/mulai-ulang container, tetapi data (user, barang, klaim) **tidak hilang**. Kamu (DevOps) yang pegang bagian ini.
+
+**Kenapa data tetap ada — konsep wajib paham (sering ditanya):**
+
+Data PostgreSQL TIDAK disimpan di dalam container. Disimpan di **named volume** `temuin_pgdata` di luar container. Lihat di `infra/docker-compose.microservices.yml`:
+
+```yaml
+db:
+  volumes:
+    - temuin_pgdata:/var/lib/postgresql/data   # data Postgres ada di volume ini
+volumes:
+  temuin_pgdata:
+    name: temuin_pgdata
+    external: true                              # volume hidup mandiri, di luar lifecycle container
+```
+
+- `temuin_pgdata:/var/lib/postgresql/data` = isi folder data Postgres di-"tempel" ke volume `temuin_pgdata`. Jadi yang nyimpan data adalah volume, bukan container.
+- `external: true` = volume ini dibuat/dimiliki di luar compose, tidak ikut dihapus saat stack di-`down`. Container boleh mati/dibuat ulang, volume tetap utuh di disk server.
+
+> Analogi: container itu seperti laptop, volume itu seperti hard disk eksternal. Matikan/ganti laptop (container), data di hard disk eksternal (volume) tetap ada.
+
+**Skrip demo siap baca (jalankan di server lewat SSH):**
+
+1. **Sebelum restart — tunjukkan data ada.** Paling kuat lewat UI: buka `https://temuin.pangeransilaen.net`, login, tunjukkan ada barang/akun. Sambil itu kamu bilang:
+   > "Sekarang ada data ini: akun saya dan beberapa barang. Saya akan restart container database-nya, lalu kita lihat datanya masih ada atau tidak."
+
+2. **Restart container.** Pilihan paling singkat — restart cuma container database:
+   ```bash
+   docker restart temuin-db
+   ```
+   - `docker restart` = hentikan lalu jalankan ulang container (stop + start) tanpa menghapusnya. `temuin-db` = nama container database (lihat `container_name: temuin-db` di compose).
+
+   Pilihan lebih dramatis — matikan SEMUA container lalu nyalakan lagi (volume tetap utuh karena `external`):
+   ```bash
+   cd /opt/temuin
+   ./scripts/temuin.sh restart
+   ```
+   Script ini menjalankan `docker compose ... down` (TANPA `-v`) lalu `up -d`. Container dibuat ulang dari nol, tapi karena volume `temuin_pgdata` external, data tidak ikut terhapus.
+
+3. **Tunggu sebentar** (~15-30 detik) sampai database & service sehat lagi. Cek cepat:
+   ```bash
+   docker compose -p temuin -f infra/docker-compose.microservices.yml ps
+   ```
+   Tunggu kolom status semua `healthy`/`running`.
+
+4. **Sesudah restart — buktikan data masih ada.** Refresh browser, login lagi (atau refresh halaman barang). Data yang tadi masih lengkap. Bilang:
+   > "Container sudah dibuat ulang, tapi datanya masih utuh. Itu karena database menyimpan datanya di named volume `temuin_pgdata` yang kami set `external`, jadi terpisah dari siklus hidup container."
+
+**⚠️ JANGAN PERNAH lakukan ini saat demo:**
+- `./scripts/temuin.sh reset` — ini memakai `docker compose down -v`. Flag **`-v` = hapus volume**, artinya **SEMUA DATA TERHAPUS**. Ini kebalikan dari yang ingin kamu buktikan. Hafalkan: `restart` aman, `reset`/`-v` menghapus data.
+
+---
+
+### 12.6 Demo "push perubahan kecil → pipeline jalan → muncul di production" (Komponen B, bobot 5+6 poin)
+
+Item rubrik **Komponen B — CI/CD Pipeline**: *"Live demo: push perubahan kecil → pipeline otomatis berjalan"* (5 poin) dan *"Hasil deploy terlihat di production URL setelah pipeline selesai"* (6 poin). Ini bobot besar dan kamu (DevOps) yang memimpin, dibantu Frontend yang menunjukkan hasil visualnya.
+
+**Perubahan kecil yang aman dipakai:** ubah satu baris teks tagline di halaman depan, file `frontend/src/pages/HomePage.jsx` baris 11 (teks "Platform resmi untuk melaporkan barang hilang..."). Ini terlihat jelas di halaman depan, tidak menyentuh logika apa pun, jadi aman. (Detail langkah edit + cara lihat visualnya ada di `docs/uas/frontend.md` bagian "Demo perubahan live".)
+
+**Penting — kenapa tidak push langsung ke master:** branch `master` kami dilindungi (wajib PR + 1 approval, force push diblokir). Jadi alur jujurnya: **branch → push → CI jalan → PR → approve → merge ke master → CD deploy**. Justru ini nilai plus: kamu bisa tunjukkan branch protection bekerja.
+
+**Skrip demo siap baca (urutan + narasi):**
+
+1. **Buat perubahan kecil + push ke branch** (siapkan branch-nya sebelum hari-H, tinggal commit saat demo):
+   ```bash
+   git checkout -b demo/uas-tagline
+   # (Frontend mengubah 1 baris teks di HomePage.jsx)
+   git add frontend/src/pages/HomePage.jsx
+   git commit -m "demo: ubah tagline halaman depan untuk demo CI/CD"
+   git push -u origin demo/uas-tagline
+   ```
+   - `git checkout -b` = buat & pindah ke branch baru. `git push -u origin <branch>` = kirim branch ke GitHub sekaligus set tracking.
+
+2. **Buka PR dari branch itu.** Di GitHub klik "Compare & pull request". Begitu PR dibuat, **CI (`ci.yml`) otomatis jalan** — ini bagian "pipeline otomatis berjalan". Buka tab **Actions**, narasikan stage yang berjalan:
+   > "Begitu saya push dan buka PR, CI langsung jalan otomatis: checkout kode, lint, lalu test backend, test frontend, dan test tiap service. Inilah gerbang kualitas sebelum kode boleh masuk ke production."
+
+3. **Approve + merge.** Rekan tim memberi 1 approval (syarat branch protection), lalu **Squash and merge** ke `master`.
+   > "master kami dilindungi, jadi wajib lewat PR dan minimal satu approval. Setelah di-approve, kami squash-merge."
+
+4. **Merge ke master memicu CD (`cd.yml`).** Buka tab Actions lagi, tunjukkan workflow **CD** mulai. Narasikan tahapannya (sama persis dengan file):
+   > "Begitu ter-merge ke master, CD jalan otomatis: build empat image Docker (tiga service + frontend), push ke Docker Hub, lalu SSH ke VPS, `docker compose pull` dan `up -d`, reload gateway, dan health check ke domain production. Semua tanpa langkah manual."
+
+5. **Tunjukkan hasilnya di production URL.** Setelah CD hijau (perkiraan ~5-8 menit karena ada build image + deploy), buka/refresh `https://temuin.pangeransilaen.net`. Tagline sudah berubah. Ini bagian "hasil deploy terlihat di production URL".
+   > "Pipeline sudah hijau. Sekarang saya refresh production, dan teks yang tadi kita ubah sudah tampil. Jadi dari satu commit kecil, perubahan otomatis sampai ke server production."
+
+**Tips waktu (PENTING):** build + deploy makan beberapa menit. **Push & merge di awal sesi demo**, biarkan pipeline jalan di latar belakang sambil tim mendemokan fitur lain (register/login/CRUD/status/log/restart), lalu **kembali di akhir** untuk menunjukkan pipeline hijau + perubahan sudah live. Jangan menunggu diam menatap pipeline.
+
+**Cadangan kalau internet/waktu mepet:** tunjukkan run CD sebelumnya yang sudah hijau di tab Actions + screenshot diff tagline, dan jelaskan alurnya. Tapi usahakan tetap live karena rubrik menilai demonstrasi langsung.
+
+---
+
 ## 13. Pertanyaan viva untuk DevOps (dosen tanya KAMU) + jawaban
 
 **"Apa peran kamu di tim?"**
@@ -300,6 +393,12 @@ Saat presentasi, kamu (DevOps) pegang **Slide 3 (Architecture Journey)** dan **S
 **"Bagaimana kamu mengamankan secret?"**
 > Secret seperti SECRET_KEY dan kunci SSH disimpan di GitHub Secrets dan di file .env server dengan permission 600, tidak pernah di-commit. .gitignore dan .dockerignore mencegah file env ikut masuk repo atau image.
 
+**"Kalau container database di-restart, kenapa datanya tidak hilang?"**
+> Karena data Postgres tidak disimpan di dalam container, tapi di named volume `temuin_pgdata` yang kami set `external: true`. Volume itu hidup di disk server, terpisah dari siklus hidup container. Container boleh mati atau dibuat ulang, volume tetap utuh. Data baru hilang kalau kami sengaja `docker compose down -v` yang menghapus volume.
+
+**"Coba jelaskan apa yang terjadi saat kamu push perubahan kecil sampai muncul di production."**
+> Saya push ke branch dan buka PR, lalu CI otomatis jalan: lint, test backend, test frontend, test tiap service. Setelah di-approve dan di-squash-merge ke master, CD otomatis jalan: build empat image Docker, push ke Docker Hub, SSH ke VPS, `docker compose pull` dan `up -d`, reload gateway, lalu health check ke domain. Setelah pipeline hijau, perubahan langsung terlihat di production URL.
+
 **"Kalau VPS mati saat UAS, rencana kamu?"**
 > Kami punya fallback ke Render free tier untuk versi monolith, dan video backup demo. Untuk masalah container, saya bisa cek docker ps dan health, restart lewat scripts/temuin.sh, atau rollback ke stack monolith yang ada backupnya.
 
@@ -323,6 +422,8 @@ Walau fokusmu infra, dosen bisa tanya soal aplikasinya. Minimal:
 - [ ] Bisa jelaskan alur CI (5 job) dan CD (build-push + deploy).
 - [ ] Paham gotcha bind mount gateway (perlu `nginx -s reload`).
 - [ ] Bisa jelaskan rate limit, correlation ID, retry, circuit breaker.
+- [ ] Bisa demo restart container + jelaskan kenapa data tetap ada (volume `temuin_pgdata` external). HAFAL: `restart` aman, `reset`/`-v` menghapus data.
+- [ ] Siapkan branch `demo/uas-tagline` + 1 perubahan teks kecil untuk demo CI/CD live (push → PR → CI → merge → CD → muncul di production).
 - [ ] Cek `/status` hijau + pipeline GitHub hijau H-1.
 - [ ] Latihan jawab 9 pertanyaan viva di atas minimal sekali.
 
