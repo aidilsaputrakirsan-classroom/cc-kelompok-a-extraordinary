@@ -137,10 +137,12 @@ Database diakses pakai **SQLAlchemy ORM**. Tabel dibuat otomatis saat service ny
 Logika ini ada di `services/auth-service/app/auth/service.py`. Saat viva sering ditanya.
 
 **Saat register:**
-1. **Cek email ITK** (`validate_itk_email`): hanya `itk.ac.id` atau subdomain seperti `student.itk.ac.id` yang diterima. Email seperti `itk.ac.id.evil.com` ditolak (anti tipuan). Kalau bukan ITK -> error 403.
-2. **Cek password** (`validate_password`): minimal 8 karakter, harus ada huruf DAN angka.
-3. **Hash password** pakai bcrypt sebelum disimpan. Jadi yang tersimpan di database bukan password asli, tapi kode acak.
-4. Kalau email sudah ada -> error 409 ("Email sudah terdaftar").
+1. **Cek bentuk data di schema (Pydantic `field_validator`)** — ini jalan PALING DULU, sebelum logika bisnis. Di `auth/schemas.py`, `RegisterRequest` mengecek: email harus cocok pola domain `itk.ac.id` (termasuk subdomain seperti `student.itk.ac.id`), password minimal 8 karakter dengan huruf DAN angka, nama 2-200 karakter. Kalau gagal di sini -> **error 422** (bukan 403/400). Inilah yang sebenarnya kena saat orang daftar pakai Gmail atau password lemah.
+2. **Hash password** pakai bcrypt sebelum disimpan. Jadi yang tersimpan di database bukan password asli, tapi kode acak.
+3. Kalau email sudah terdaftar -> **error 409** ("Email sudah terdaftar").
+4. Kalau lolos, balikannya **kode 200** + token JWT. (Catatan: register di proyek kita balik 200, bukan 201, karena router tidak men-set status khusus.)
+
+> Penting buat viva: validasi email & password terjadi di **schema layer** (Pydantic), bukan service layer. Itu sebabnya register dengan email non-ITK balik **422**, bukan 403. Ada juga fungsi `validate_itk_email` di service layer yang balik 403, tapi untuk register praktis tidak terjangkau karena schema sudah menolak duluan.
 
 **Saat login:**
 1. Cari user berdasarkan email.

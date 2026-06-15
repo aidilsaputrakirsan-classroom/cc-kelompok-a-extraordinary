@@ -59,7 +59,7 @@ Screenshot bukti disimpan di folder `image/sprint-XX/` (contoh: `image/sprint-01
 ### 3.2 Dua laporan blackbox utama (hafalkan ini)
 
 **`docs/api-blackbox-testing.md`** — tes API lewat Swagger UI (halaman `http://localhost:8000/docs`). Kamu cek tiap endpoint balikannya benar:
-- `POST /auth/register` -> kode 201 (berhasil dibuat)
+- `POST /auth/register` -> kode 200 (berhasil, balikannya token)
 - `POST /auth/login` -> kode 200 (berhasil)
 - `GET /auth/me` -> kode 200 (dapat profil)
 - `PUT /auth/me` -> kode 200 (profil terupdate)
@@ -76,14 +76,15 @@ Saat tes API, kamu lihat angka "status code". Ini artinya:
 
 | Kode | Arti | Contoh |
 | --- | --- | --- |
-| 200 | OK, berhasil | Login sukses |
-| 201 | Created, data baru dibuat | Register sukses |
+| 200 | OK, berhasil | Login & register sukses (di proyek kita register balik 200, bukan 201) |
+| 201 | Created, data baru dibuat | (kode standar; di proyek kita tidak dipakai eksplisit) |
 | 204 | Berhasil, tidak ada isi balikan | Hapus barang sukses |
-| 400 | Bad Request, permintaan salah | Data tidak lengkap |
-| 401 | Unauthorized, belum login / token salah | Akses tanpa login |
-| 403 | Forbidden, dilarang | Email bukan ITK saat register |
+| 400 | Bad Request, permintaan salah | Barang `found` tanpa pilih petugas keamanan |
+| 401 | Unauthorized, belum login / token salah | Akses tanpa login, atau email/password login salah |
+| 403 | Forbidden, dilarang | Akses endpoint khusus admin padahal cuma user biasa |
 | 404 | Not Found, tidak ketemu | Buka barang yang tidak ada |
-| 422 | Data tidak valid bentuknya | Email format aneh |
+| 409 | Conflict, bentrok | Daftar pakai email yang sudah terdaftar |
+| 422 | Data tidak valid bentuknya | Register email bukan ITK, atau password lemah (divalidasi di schema) |
 
 Cara mudah ingat: **2xx = sukses, 4xx = salahnya pengguna, 5xx = salahnya server.**
 
@@ -142,13 +143,13 @@ Saat Frontend mengetik email yang salah, kamu bilang:
 > Blackbox: saya menguji dari luar tanpa melihat kode, fokus ke apakah hasilnya sesuai harapan pengguna. Whitebox: menguji dengan melihat kode bagian dalam, itu dilakukan Backend dan Frontend lewat unit test.
 
 **"Bagaimana kamu menguji fitur register?"**
-> Saya coba beberapa skenario: email ITK valid harus berhasil; email non-ITK harus ditolak dengan kode 403; password kurang dari 8 karakter atau tanpa angka ditolak; email yang sudah terdaftar ditolak dengan kode 409. Saya screenshot tiap hasil.
+> Saya coba beberapa skenario: email ITK valid harus berhasil (kode 200); email non-ITK harus ditolak dengan kode 422; password kurang dari 8 karakter atau tanpa angka juga ditolak dengan 422 (karena divalidasi di schema); email yang sudah terdaftar ditolak dengan kode 409. Saya screenshot tiap hasil.
 
 **"Bagaimana kamu memastikan aplikasi di production benar-benar jalan?"**
 > Saya lakukan smoke test ke `https://temuin.pangeransilaen.net`. Saya cek halaman `/status` menunjukkan 3 service `up`, dan tiga health endpoint balik 200. Lalu saya jalankan alur lengkap: register, login, lapor barang, klaim, admin approve.
 
 **"Apa arti kode 200, 401, 403, 422?"**
-> 200 berhasil; 401 belum login atau token salah; 403 dilarang misalnya email bukan ITK; 422 data tidak valid bentuknya misalnya format email aneh.
+> 200 berhasil; 401 belum login atau email/password salah; 403 dilarang misalnya user biasa mengakses endpoint admin; 422 data tidak valid bentuknya, misalnya register dengan email bukan ITK atau password lemah.
 
 **"Apa itu regression testing dan kenapa penting?"**
 > Menguji ulang fitur lama setelah ada perubahan, untuk memastikan fitur baru tidak merusak yang sudah jalan. Penting karena di proyek besar satu perubahan bisa diam-diam merusak bagian lain.
@@ -178,7 +179,7 @@ Kalau ditanya hal teknis dalam yang kamu tidak yakin, jawab jujur sambil arahkan
 
 - [ ] Sudah baca `docs/uas/panduan-uas.md`.
 - [ ] Bisa jelaskan beda blackbox vs whitebox.
-- [ ] Hafal arti kode 200, 201, 401, 403, 422.
+- [ ] Hafal arti kode 200, 401, 403, 409, 422 (ingat: register sukses = 200, register email non-ITK/password lemah = 422, email dobel = 409).
 - [ ] Bisa cerita isi laporan QA sprint (tabel ringkasan + bukti screenshot).
 - [ ] Bisa buka tab Actions GitHub dan baca status hijau/merah.
 - [ ] Hafal skrip slide judul & problem.
