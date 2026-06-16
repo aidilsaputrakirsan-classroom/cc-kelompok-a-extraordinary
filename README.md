@@ -191,23 +191,6 @@ graph LR
     API <--> DB[(Database PostgreSQL)]
 ```
 
-### 1.1 Microservices Architecture (Current Stage)
-Arsitektur setelah dekomposisi sistem (Sprint 6+) menjadi 3 layanan mandiri (hybrid microservices) di belakang API Gateway Nginx.
-
-```mermaid
-graph TD
-    Client["Client (Vite / React v19.x)"] -->| "HTTPS /api" | Gateway["API Gateway (Nginx v1.25)"]
-    Gateway -->| "Route: /api/auth/* (Port 8001)" | AuthS["Auth Service (FastAPI v0.111.x)"]
-    Gateway -->| "Route: /api/items/* (Port 8002)" | ItemS["Item Service (FastAPI v0.111.x)"]
-    Gateway -->| "Route: /api/claims/* (Port 8003)" | EngaS["Engagement Service (FastAPI v0.111.x)"]
-    
-    AuthS <--> DB_Auth[("PostgreSQL logical: auth_db")]
-    ItemS <--> DB_Item[("PostgreSQL logical: item_db")]
-    EngaS <--> DB_Enga[("PostgreSQL logical: engagement_db")]
-    
-    %% Communication pattern (Sprint 7)
-    EngaS -.->| "HTTP Client Call (Retry + CB)" | ItemS
-```
 
 ### 2. Backend Architecture (FastAPI Modular)
 Struktur internal backend yang memisahkan endpoint, validasi, keamanan, dan logika bisnis.
