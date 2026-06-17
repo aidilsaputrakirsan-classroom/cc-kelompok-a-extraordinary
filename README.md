@@ -1,4 +1,4 @@
-# 🔍 Temuin — Platform Lost & Found Institut Teknologi Kalimantan
+# 🔍 Temuin — Platform Lost & Found Institut Teknologi Kalimantan (DEMO)
 
 [![CI Pipeline](https://github.com/aidilsaputrakirsan-classroom/cc-kelompok-a-extraordinary/actions/workflows/ci.yml/badge.svg)](https://github.com/aidilsaputrakirsan-classroom/cc-kelompok-a-extraordinary/actions/workflows/ci.yml)
 
@@ -665,4 +665,3 @@ Kami adalah kelompok mahasiswa dari program studi **Sistem Informasi**, Institut
 - [`AGENTS.md`](./AGENTS.md) — Entry point untuk AI coding agent.
 
 ---
-
